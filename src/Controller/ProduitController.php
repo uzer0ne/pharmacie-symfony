@@ -45,8 +45,14 @@ final class ProduitController extends AbstractController
     }
 
     #[Route('/{idProduit}', name: 'app_produit_show', methods: ['GET'])]
-    public function show(Produit $produit): Response
+    public function show(ProduitRepository $produitRepository, int $idProduit): Response
     {
+            $produit = $produitRepository->find($idProduit);
+
+        if (!$produit) {
+            throw $this->createNotFoundException('Produit introuvable');
+        }
+
         return $this->render('produit/show.html.twig', [
             'produit' => $produit,
         ]);
@@ -73,7 +79,7 @@ final class ProduitController extends AbstractController
     #[Route('/{idProduit}', name: 'app_produit_delete', methods: ['POST'])]
     public function delete(Request $request, Produit $produit, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$produit->getIdProduit(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$produit->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($produit);
             $entityManager->flush();
         }

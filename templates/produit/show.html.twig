@@ -9,7 +9,7 @@
         <tbody>
             <tr>
                 <th>IdProduit</th>
-                <td>{{ produit.idProduit }}</td>
+                <td>{{ produit.id }}</td>
             </tr>
             <tr>
                 <th>Code_produit</th>
@@ -40,7 +40,7 @@
 
     <a href="{{ path('app_produit_index') }}">back to list</a>
 
-    <a href="{{ path('app_produit_edit', {'idProduit': produit.idProduit}) }}">edit</a>
+    <a href="{{ path('app_produit_edit', {'idProduit': produit.id}) }}">edit</a>
 
     {{ include('produit/_delete_form.html.twig') }}
 {% endblock %}
