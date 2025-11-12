@@ -1,11 +1,77 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Produit{% endblock %}
+{% block title %}Nouveau Produit - PharmaGest{% endblock %}
 
 {% block body %}
-    <h1>Create new Produit</h1>
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{{ path('app_home') }}" class="text-decoration-none">
+                <i class="bi bi-house-door"></i> Accueil
+            </a>
+        </li>
+        <li class="breadcrumb-item">
+            {# J'assume que la route pour l'index des produits est 'app_produit_index' #}
+            <a href="{{ path('app_produit_index') }}" class="text-decoration-none">
+                <i class="bi bi-box-seam"></i> Produits
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="bi bi-plus-square"></i> Nouveau Produit
+        </li>
+    </ol>
+</nav>
 
-    {{ include('produit/_form.html.twig') }}
+<!-- En-tête de page -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        {# Changement: text-primary -> text-success #}
+        <h1 class="h2 text-success">
+            <i class="bi bi-plus-square"></i> Nouveau Produit
+        </h1>
+        <p class="text-muted mb-0">Ajoutez un nouveau produit à votre inventaire</p>
+    </div>
+    <div>
+        <a href="{{ path('app_produit_index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Retour à la liste
+        </a>
+    </div>
+</div>
 
-    <a href="{{ path('app_produit_index') }}">back to list</a>
+<!-- Formulaire -->
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        {# Le formulaire est inclus depuis un fichier séparé, comme dans votre exemple #}
+        {{ include('produit/_form.html.twig') }}
+    </div>
+</div>
+
+<!-- Informations supplémentaires -->
+<div class="row mt-4">
+    <div class="col-12">
+        {# Changement: border-info -> border-success #}
+        <div class="card border-success">
+            {# Changement: bg-info -> bg-success #}
+            <div class="card-header bg-success text-white">
+                <h6 class="card-title mb-0">
+                    <i class="bi bi-info-circle"></i> Informations importantes
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        {# C'était déjà 'text-success', c'est parfait #}
+                        <h6><i class="bi bi-shield-check text-success"></i> Champs obligatoires</h6>
+                        <p class="small text-muted mb-0">Les champs marqués d'un astérisque (*) sont obligatoires pour créer un produit.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="bi bi-clipboard-data text-warning"></i> Après la création</h6>
+                        <p class="small text-muted mb-0">Vous pourrez ensuite gérer les stocks, les dates d'expiration et voir les ordonnances associées à ce produit.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -195,12 +195,12 @@
                         </td>
                         <td>
                             <div class="btn-group btn-group-sm">
-                                <a href="{{ path('app_produit_show', {'idProduit': produit.idProduit}) }}" 
+                                <a href="{{ path('app_produit_show', {'idProduit': produit.id}) }}" 
                                    class="btn btn-outline-info" 
                                    title="Voir les détails">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                <a href="{{ path('app_produit_edit', {'idProduit': produit.idProduit}) }}" 
+                                <a href="{{ path('app_produit_edit', {'idProduit': produit.id}) }}" 
                                    class="btn btn-outline-warning" 
                                    title="Modifier">
                                     <i class="bi bi-pencil"></i>
@@ -209,7 +209,7 @@
                                         class="btn btn-outline-success" 
                                         title="Ajouter au stock"
                                         data-bs-toggle="modal" 
-                                        data-bs-target="#ajouterStockModal{{ produit.idProduit }}">
+                                        data-bs-target="#ajouterStockModal{{ produit.id }}">
                                     <i class="bi bi-plus-lg"></i>
                                 </button>
                             </div>

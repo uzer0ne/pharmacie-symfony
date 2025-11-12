@@ -32,13 +32,13 @@ class ProduitType extends AbstractType
             ])
             ->add('nom_produit')
             ->add('prix_produit')
-            ->add('ordonnances', EntityType::class, [
+            /***->add('ordonnances', EntityType::class, [
                 'class' => Ordonnance::class,
                 'choice_label' => 'id',
                 'multiple' => true,
                 'expanded' => false,
                 'required' => false, //
-            ])
+            ])***/
             ->add('prix_achat', NumberType::class, [
                 'label' => 'Prix d\'achat HT',
                 'required' => false,
