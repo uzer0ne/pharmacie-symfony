@@ -1,0 +1,4 @@
+<form method="post" action="{{ path('app_patient_delete', {'idPatient': patient.idPatient}) }}">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ patient.idPatient) }}">
+    <button class="btn">Supprimer</button>
+</form>

@@ -1,0 +1,102 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle Ordonnance - PharmaGest{% endblock %}
+
+{% block body %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{{ path('app_home') }}" class="text-decoration-none">
+                <i class="bi bi-house-door"></i> Accueil
+            </a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{{ path('app_ordonnance_index') }}" class="text-decoration-none">
+                <i class="bi bi-file-text"></i> Ordonnances
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="bi bi-plus-circle"></i> Nouvelle Ordonnance
+        </li>
+    </ol>
+</nav>
+
+<!-- En-tête de page -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 text-primary">
+            <i class="bi bi-plus-circle"></i> Nouvelle Ordonnance
+        </h1>
+        <p class="text-muted mb-0">Créez une nouvelle ordonnance pour un patient</p>
+    </div>
+    <div>
+        <a href="{{ path('app_ordonnance_index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Retour à la liste
+        </a>
+    </div>
+</div>
+
+<!-- Formulaire -->
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        {{ include('ordonnance/_form.html.twig') }}
+    </div>
+</div>
+
+<!-- Informations supplémentaires -->
+<div class="row mt-4 justify-content-center">
+    <div class="col-lg-10">
+        <div class="card border-info">
+            <div class="card-header bg-info text-white">
+                <h6 class="card-title mb-0">
+                    <i class="bi bi-info-circle"></i> Guide de création
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="bi bi-shield-check text-success"></i> Champs obligatoires</h6>
+                        <p class="small text-muted mb-0">
+                            Les champs marqués d'un astérisque (*) sont obligatoires pour créer une ordonnance valide.
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="bi bi-clock text-warning"></i> Après la création</h6>
+                        <p class="small text-muted mb-0">
+                            Vous pourrez modifier les produits associés et ajouter des informations complémentaires ultérieurement.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Liens rapides -->
+<div class="row mt-3 justify-content-center">
+    <div class="col-lg-10">
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{{ path('app_patient_new') }}" class="btn btn-outline-info btn-sm">
+                <i class="bi bi-person-plus"></i> Nouveau Patient
+            </a>
+            <a href="{{ path('app_medecin_new') }}" class="btn btn-outline-success btn-sm">
+                <i class="bi bi-heart-pulse"></i> Nouveau Médecin
+            </a>
+            <a href="{{ path('app_produit_new') }}" class="btn btn-outline-warning btn-sm">
+                <i class="bi bi-capsule"></i> Nouveau Produit
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    border-radius: 10px;
+}
+.btn {
+    border-radius: 6px;
+}
+</style>
+{% endblock %}

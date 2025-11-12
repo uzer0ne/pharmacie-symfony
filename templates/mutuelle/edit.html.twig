@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier {{ mutuelle.nomMutuelle }} - PharmaGest{% endblock %}
+
+{% block body %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{{ path('app_home') }}" class="text-decoration-none">
+                <i class="bi bi-house-door"></i> Accueil
+            </a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{{ path('app_mutuelle_index') }}" class="text-decoration-none">
+                <i class="bi bi-shield-plus"></i> Mutuelles
+            </a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{{ path('app_mutuelle_show', {'id': mutuelle.id}) }}" class="text-decoration-none">
+                <i class="bi bi-shield-check"></i> {{ mutuelle.nomMutuelle }}
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="bi bi-pencil"></i> Modification
+        </li>
+    </ol>
+</nav>
+
+<!-- En-tête de page -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 text-info">
+            <i class="bi bi-pencil"></i> Modifier la Mutuelle
+        </h1>
+        <p class="text-muted mb-0">Mettez à jour les informations de {{ mutuelle.nomMutuelle }}</p>
+    </div>
+    <div>
+        <a href="{{ path('app_mutuelle_show', {'id': mutuelle.id}) }}" class="btn btn-outline-info me-2">
+            <i class="bi bi-eye"></i> Voir la fiche
+        </a>
+        <a href="{{ path('app_mutuelle_index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Retour à la liste
+        </a>
+    </div>
+</div>
+
+<!-- Formulaire -->
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        {{ include('mutuelle/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
+    </div>
+</div>
+{% endblock %}

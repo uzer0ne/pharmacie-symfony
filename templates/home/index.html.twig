@@ -1,0 +1,53 @@
+{# templates/home/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil - PharmaGest{% endblock %}
+
+{% block body %}
+<!-- Hero Section -->
+<div class="jumbotron bg-light p-5 rounded">
+    <h1 class="display-4">Bienvenue sur PharmaGest</h1>
+    <p class="lead">Système de gestion complet pour votre pharmacie</p>
+    <hr class="my-4">
+    <p>Gérez vos patients, stocks et ordonnances en toute simplicité.</p>
+    <a class="btn btn-primary btn-lg" href="{{ path('app_patients') }}">
+        <i class="bi bi-people"></i> Commencer avec les Patients
+    </a>
+</div>
+
+<!-- Cartes de fonctionnalités -->
+<div class="row mt-5">
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="bi bi-people fs-1 text-primary"></i>
+                <h5 class="card-title mt-2">Gestion Patients</h5>
+                <p class="card-text">Enregistrez et gérez vos patients</p>
+                <a href="{{ path('app_patients') }}" class="btn btn-outline-primary">Accéder</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="bi bi-capsule fs-1 text-success"></i>
+                <h5 class="card-title mt-2">Gestion Mutuelles</h5>
+                <p class="card-text">Suivez votre inventaire</p>
+                <a href="{{ path('app_mutuelle') }}" class="btn btn-outline-success">Accéder</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="bi bi-file-text fs-1 text-info"></i>
+                <h5 class="card-title mt-2">Ordonnances</h5>
+                <p class="card-text">Gérez les prescriptions</p>
+                <a href="{{ path('app_ordonnance_index') }}" class="btn btn-outline-info">Accéder</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

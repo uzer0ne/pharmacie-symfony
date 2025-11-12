@@ -1,0 +1,130 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier Ordonnance #{{ ordonnance.id }} - PharmaGest{% endblock %}
+
+{% block body %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{{ path('app_home') }}" class="text-decoration-none">
+                <i class="bi bi-house-door"></i> Accueil
+            </a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{{ path('app_ordonnance_index') }}" class="text-decoration-none">
+                <i class="bi bi-file-text"></i> Ordonnances
+            </a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{{ path('app_ordonnance_show', {'id': ordonnance.id}) }}" class="text-decoration-none">
+                <i class="bi bi-eye"></i> Ordonnance #{{ ordonnance.id }}
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="bi bi-pencil"></i> Modification
+        </li>
+    </ol>
+</nav>
+
+<!-- En-tête de page -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 text-primary">
+            <i class="bi bi-pencil"></i> Modifier l'Ordonnance
+        </h1>
+        <p class="text-muted mb-0">Mettez à jour les informations de l'ordonnance #{{ ordonnance.id }}</p>
+    </div>
+    <div class="btn-group">
+        <a href="{{ path('app_ordonnance_show', {'id': ordonnance.id}) }}" class="btn btn-outline-primary">
+            <i class="bi bi-eye"></i> Voir la fiche
+        </a>
+        <a href="{{ path('app_ordonnance_index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Retour à la liste
+        </a>
+    </div>
+</div>
+
+<!-- Formulaire -->
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        {{ include('ordonnance/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
+    </div>
+</div>
+
+<!-- Section suppression -->
+<div class="row mt-4 justify-content-center">
+    <div class="col-lg-10">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h6 class="card-title mb-0">
+                    <i class="bi bi-exclamation-triangle"></i> Zone de danger
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-danger">Supprimer cette ordonnance</h6>
+                        <p class="small text-muted mb-0">
+                            Cette action est irréversible. Toutes les données associées à cette ordonnance seront perdues.
+                        </p>
+                    </div>
+                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                        <i class="bi bi-trash"></i> Supprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de suppression -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger">
+                    <i class="bi bi-exclamation-triangle"></i> Confirmer la suppression
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer définitivement l'ordonnance <strong>#{{ ordonnance.id }}</strong> ?</p>
+                <div class="alert alert-warning small">
+                    <strong>Informations :</strong><br>
+                    - Patient : {{ ordonnance.patient ? ordonnance.patient.prenomPatient ~ ' ' ~ ordonnance.patient.nomPatient : 'Non défini' }}<br>
+                    - Date : {{ ordonnance.dateOrdonnance ? ordonnance.dateOrdonnance|date('d/m/Y') : 'Non définie' }}<br>
+                    - Produits : {{ ordonnance.produits|length }} produit(s) associé(s)
+                </div>
+                <p class="text-danger small">
+                    <i class="bi bi-info-circle"></i> 
+                    Cette action supprimera également tous les liens avec les produits prescrits.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Annuler
+                </button>
+                {{ include('ordonnance/_delete_form.html.twig') }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    border-radius: 10px;
+}
+.btn-group .btn {
+    border-radius: 6px;
+}
+.modal-content {
+    border-radius: 10px;
+}
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+</style>
+{% endblock %}

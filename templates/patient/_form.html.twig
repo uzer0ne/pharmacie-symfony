@@ -1,0 +1,154 @@
+{{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true}}) }}
+<div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-person-plus"></i> 
+            {{ button_label|default('Créer un nouveau Patient') }}
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <!-- Colonne Informations Personnelles -->
+            <div class="col-md-6">
+                <h6 class="text-primary mb-3 border-bottom pb-2">
+                    <i class="bi bi-info-circle"></i> Informations Personnelles
+                </h6>
+                
+                <!-- Nom -->
+                <div class="mb-3">
+                    {{ form_label(form.nom_patient, 'Nom *', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-person"></i>
+                        </span>
+                        {{ form_widget(form.nom_patient, {'attr': {
+                            'class': 'form-control',
+                            'placeholder': 'Entrez le nom du patient'
+                        }}) }}
+                    </div>
+                    {{ form_errors(form.nom_patient) }}
+                </div>
+
+                <!-- Prénom -->
+                <div class="mb-3">
+                    {{ form_label(form.prenom_patient, 'Prénom *', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-person-fill"></i>
+                        </span>
+                        {{ form_widget(form.prenom_patient, {'attr': {
+                            'class': 'form-control',
+                            'placeholder': 'Entrez le prénom du patient'
+                        }}) }}
+                    </div>
+                    {{ form_errors(form.prenom_patient) }}
+                </div>
+
+                <!-- Date de Naissance -->
+                <div class="mb-3">
+                    {{ form_label(form.date_naissance, 'Date de Naissance *', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-calendar-event"></i>
+                        </span>
+                        {{ form_widget(form.date_naissance, {'attr': {
+                            'class': 'form-control',
+                            'placeholder': 'JJ/MM/AAAA'
+                        }}) }}
+                    </div>
+                    {{ form_errors(form.date_naissance) }}
+                </div>
+            </div>
+
+            <!-- Colonne Contact et Mutuelles -->
+            <div class="col-md-6">
+                <h6 class="text-primary mb-3 border-bottom pb-2">
+                    <i class="bi bi-geo-alt"></i> Informations de Contact
+                </h6>
+
+                <!-- Adresse -->
+                <div class="mb-3">
+                    {{ form_label(form.adresse_patient, 'Adresse *', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-house-door"></i>
+                        </span>
+                        {{ form_widget(form.adresse_patient, {'attr': {
+                            'class': 'form-control',
+                            'placeholder': 'Adresse complète du patient',
+                            'rows': 3
+                        }}) }}
+                    </div>
+                    {{ form_errors(form.adresse_patient) }}
+                </div>
+
+                <!-- Section Mutuelles (OPTIONNELLE) -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-primary">Mutuelles (Optionnel)</label>
+                    
+                    <!-- Sélection de mutuelle existante -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Associer une mutuelle existante</label>
+                        {% if form.mutuelles is defined %}
+                            {{ form_widget(form.mutuelles, {'attr': {
+                                'class': 'form-select',
+                            }}) }}
+                        {% else %}
+                            <select class="form-select" disabled>
+                                <option>Aucune mutuelle disponible</option>
+                            </select>
+                        {% endif %}
+                        <div class="form-text">Optionnel - Sélectionnez une ou plusieurs mutuelles existantes</div>
+                    </div>
+
+                    <!-- Lien pour créer une nouvelle mutuelle -->
+                    <div class="text-center">
+                        <a href="{{ path('app_mutuelle_new') }}" 
+                           class="btn btn-outline-info btn-sm" 
+                           target="_blank">
+                            <i class="bi bi-plus-circle"></i> Créer une nouvelle mutuelle
+                        </a>
+                        <div class="form-text mt-1">
+                            La nouvelle mutuelle sera automatiquement disponible ici après création
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer du formulaire -->
+    <div class="card-footer bg-light">
+        <div class="d-flex justify-content-between align-items-center">
+            <a href="{{ path('app_patient_index') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Retour à la liste
+            </a>
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-check-circle"></i> 
+                {{ button_label|default('Créer le Patient') }}
+            </button>
+        </div>
+    </div>
+</div>
+{{ form_end(form) }}
+
+<style>
+.form-label {
+    color: #2c5aa0;
+}
+.input-group-text {
+    background-color: #f8f9fa;
+    border-right: none;
+}
+.form-control {
+    border-left: none;
+}
+.form-control:focus {
+    border-color: #2c5aa0;
+    box-shadow: 0 0 0 0.2rem rgba(44, 90, 160, 0.25);
+}
+.card {
+    border: none;
+    border-radius: 10px;
+}
+</style>

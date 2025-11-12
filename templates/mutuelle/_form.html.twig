@@ -1,0 +1,130 @@
+{{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true}}) }}
+<div class="card shadow-sm">
+    <div class="card-header bg-info text-white">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-shield-plus"></i> 
+            {{ button_label|default('Créer une nouvelle Mutuelle') }}
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <!-- Colonne Informations Mutuelle -->
+            <div class="col-md-6">
+                <h6 class="text-info mb-3 border-bottom pb-2">
+                    <i class="bi bi-building"></i> Informations Mutuelle
+                </h6>
+                
+                <!-- Nom -->
+                <div class="mb-3">
+                    {{ form_label(form.nom_mutuelle, 'Nom de la mutuelle *', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-building"></i>
+                        </span>
+                        {{ form_widget(form.nom_mutuelle, {'attr': {
+                            'class': 'form-control',
+                            'placeholder': 'Ex: MGEN, Harmonie, etc.'
+                        }}) }}
+                    </div>
+                    <div class="form-text">Le nom officiel de la mutuelle</div>
+                    {{ form_errors(form.nom_mutuelle) }}
+                </div>
+
+                <!-- Taux de Remboursement -->
+                <div class="mb-3">
+                    {{ form_label(form.taux_remboursement, 'Taux de remboursement *', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-percent"></i>
+                        </span>
+                        {{ form_widget(form.taux_remboursement, {'attr': {
+                            'class': 'form-control',
+                            'placeholder': 'Ex: 80.00',
+                            'step': '0.01',
+                            'min': '0',
+                            'max': '100'
+                        }}) }}
+                        <span class="input-group-text">%</span>
+                    </div>
+                    <div class="form-text">Taux de remboursement en pourcentage</div>
+                    {{ form_errors(form.taux_remboursement) }}
+                </div>
+            </div>
+
+            <!-- Colonne Contact -->
+            <div class="col-md-6">
+                <h6 class="text-info mb-3 border-bottom pb-2">
+                    <i class="bi bi-telephone"></i> Contact
+                </h6>
+
+                <!-- Contact -->
+                <div class="mb-3">
+                    {{ form_label(form.contact_mutuelle, 'Contact *', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-telephone-fill"></i>
+                        </span>
+                        {{ form_widget(form.contact_mutuelle, {'attr': {
+                            'class': 'form-control',
+                            'placeholder': 'Téléphone ou email de contact'
+                        }}) }}
+                    </div>
+                    <div class="form-text">Numéro de téléphone ou adresse email</div>
+                    {{ form_errors(form.contact_mutuelle) }}
+                </div>
+
+                <!-- Section Patients Associés (si elle existe) -->
+                {% if form.patients is defined %}
+                <div class="mb-3">
+                    {{ form_label(form.patients, 'Patients associés', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-people"></i>
+                        </span>
+                        {{ form_widget(form.patients, {'attr': {
+                            'class': 'form-select'
+                        }}) }}
+                    </div>
+                    <div class="form-text">Patients couverts par cette mutuelle</div>
+                    {{ form_errors(form.patients) }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer du formulaire -->
+    <div class="card-footer bg-light">
+        <div class="d-flex justify-content-between align-items-center">
+            <a href="{{ path('app_mutuelle_index') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Retour à la liste
+            </a>
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-check-circle"></i> 
+                {{ button_label|default('Créer la Mutuelle') }}
+            </button>
+        </div>
+    </div>
+</div>
+{{ form_end(form) }}
+
+<style>
+.form-label {
+    color: #0dcaf0;
+}
+.input-group-text {
+    background-color: #f8f9fa;
+    border-right: none;
+}
+.form-control {
+    border-left: none;
+}
+.form-control:focus {
+    border-color: #0dcaf0;
+    box-shadow: 0 0 0 0.2rem rgba(13, 202, 240, 0.25);
+}
+.card {
+    border: none;
+    border-radius: 10px;
+}
+</style>

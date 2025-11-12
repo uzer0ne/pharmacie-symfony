@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau Patient - PharmaGest{% endblock %}
+
+{% block body %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{{ path('app_home') }}" class="text-decoration-none">
+                <i class="bi bi-house-door"></i> Accueil
+            </a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{{ path('app_patient_index') }}" class="text-decoration-none">
+                <i class="bi bi-people"></i> Patients
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="bi bi-person-plus"></i> Nouveau Patient
+        </li>
+    </ol>
+</nav>
+
+<!-- En-tête de page -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 text-primary">
+            <i class="bi bi-person-plus"></i> Nouveau Patient
+        </h1>
+        <p class="text-muted mb-0">Ajoutez un nouveau patient à votre base de données</p>
+    </div>
+    <div>
+        <a href="{{ path('app_patient_index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Retour à la liste
+        </a>
+    </div>
+</div>
+
+<!-- Formulaire -->
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        {{ include('patient/_form.html.twig') }}
+    </div>
+</div>
+
+<!-- Informations supplémentaires -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-info">
+            <div class="card-header bg-info text-white">
+                <h6 class="card-title mb-0">
+                    <i class="bi bi-info-circle"></i> Informations importantes
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="bi bi-shield-check text-success"></i> Champs obligatoires</h6>
+                        <p class="small text-muted mb-0">Les champs marqués d'un astérisque (*) sont obligatoires pour créer un patient.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="bi bi-clock text-warning"></i> Après la création</h6>
+                        <p class="small text-muted mb-0">Vous pourrez ensuite associer des mutuelles et créer des ordonnances pour ce patient.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

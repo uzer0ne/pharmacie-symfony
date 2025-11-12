@@ -1,0 +1,359 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails Patient - {{ patient.prenomPatient }} {{ patient.nomPatient }}{% endblock %}
+
+{% block body %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{{ path('app_home') }}" class="text-decoration-none">
+                <i class="bi bi-house-door"></i> Accueil
+            </a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{{ path('app_patient_index') }}" class="text-decoration-none">
+                <i class="bi bi-people"></i> Patients
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="bi bi-person"></i> {{ patient.prenomPatient }} {{ patient.nomPatient }}
+        </li>
+    </ol>
+</nav>
+
+<!-- En-tête de page -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 text-primary">
+            <i class="bi bi-person-circle"></i> Détails du Patient
+        </h1>
+        <p class="text-muted mb-0">Informations complètes sur le patient</p>
+    </div>
+    <div class="btn-group">
+        <a href="{{ path('app_patient_index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Retour à la liste
+        </a>
+        <a href="{{ path('app_patient_edit', {'idPatient': patient.idPatient}) }}" class="btn btn-warning">
+            <i class="bi bi-pencil"></i> Modifier
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Carte des informations personnelles -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-info-circle"></i> Informations Personnelles
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-item mb-3">
+                            <label class="fw-bold text-muted small">ID Patient</label>
+                            <div class="fs-6">#{{ patient.idPatient }}</div>
+                        </div>
+                        <div class="info-item mb-3">
+                            <label class="fw-bold text-muted small">Nom</label>
+                            <div class="fs-5 text-dark">{{ patient.nomPatient }}</div>
+                        </div>
+                        <div class="info-item mb-3">
+                            <label class="fw-bold text-muted small">Prénom</label>
+                            <div class="fs-5 text-dark">{{ patient.prenomPatient }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item mb-3">
+                            <label class="fw-bold text-muted small">Date de Naissance</label>
+                            <div class="fs-6">
+                                {{ patient.dateNaissance ? patient.dateNaissance|date('d/m/Y') : 'Non renseignée' }}
+                                {% if patient.dateNaissance %}
+                                    <br>
+                                    <small class="text-muted">
+                                        (Âge: {{ date().diff(date(patient.dateNaissance)).y }} ans)
+                                    </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="info-item mb-3">
+                            <label class="fw-bold text-muted small">Adresse</label>
+                            <div class="fs-6">
+                                <i class="bi bi-geo-alt text-muted me-1"></i>
+                                {{ patient.adressePatient }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Carte des actions rapides -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-lightning"></i> Actions Rapides
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ path('app_patient_edit', {'idPatient': patient.idPatient}) }}" 
+                       class="btn btn-warning btn-sm">
+                        <i class="bi bi-pencil"></i> Modifier le patient
+                    </a>
+                    <a href="{{ path('app_ordonnance_new') }}" class="btn btn-success btn-sm">
+                        <i class="bi bi-file-text"></i> Nouvelle ordonnance
+                    </a>
+                    <a href="#" class="btn btn-primary btn-sm">
+                        <i class="bi bi-telephone"></i> Contacter
+                    </a>
+                    <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                        <i class="bi bi-trash"></i> Supprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Carte des statistiques -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-graph-up"></i> Statistiques
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="stat-item">
+                            <div class="h4 text-primary mb-1">{{ patient.ordonnances|length }}</div>
+                            <small class="text-muted">Ordonnances</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-item">
+                            <div class="h4 text-success mb-1">
+                                {% if patient.mutuelles|length > 0 %}
+                                    {{ patient.mutuelles|length }}
+                                {% else %}
+                                    0
+                                {% endif %}
+                            </div>
+                            <small class="text-muted">Mutuelles</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section Mutuelles -->
+{% if patient.mutuelles|length > 0 %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-shield-check"></i> Mutuelles Associées
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for mutuelle in patient.mutuelles %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card border-success">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="bi bi-shield-plus text-success"></i>
+                                    {{ mutuelle.nomMutuelle }}
+                                </h6>
+                                <p class="card-text mb-1">
+                                    <small class="text-muted">Taux remboursement:</small>
+                                    <br>
+                                    <span class="badge bg-success fs-6">{{ mutuelle.tauxRemboursement }}%</span>
+                                </p>
+                                <p class="card-text mb-1">
+                                    <small class="text-muted">Contact:</small>
+                                    <br>
+                                    {{ mutuelle.contactMutuelle }}
+                                </p>
+                                <a href="{{ path('app_mutuelle_show', {'id': mutuelle.id}) }}" 
+                                   class="btn btn-outline-success btn-sm mt-2">
+                                    Voir détails
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<!-- Message si aucune mutuelle -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm border-warning">
+            <div class="card-body text-center py-4">
+                <i class="bi bi-shield-slash display-4 text-warning mb-3"></i>
+                <h5 class="text-warning">Aucune mutuelle associée</h5>
+                <p class="text-muted">Ce patient n'est associé à aucune mutuelle pour le moment.</p>
+                <a href="#" class="btn btn-outline-warning">
+                    <i class="bi bi-shield-plus"></i> Associer une mutuelle
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Section Ordonnances (TOUJOURS AFFICHÉE) -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-file-text"></i> Ordonnances du Patient
+                    <span class="badge bg-light text-dark ms-2">{{ patient.ordonnances|length }}</span>
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if patient.ordonnances|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#ID</th>
+                                <th>Date</th>
+                                <th>Médecin</th>
+                                <th>Durée traitement</th>
+                                <th>Produits prescrits</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ordonnance in patient.ordonnances %}
+                            <tr>
+                                <td>
+                                    <strong>#{{ ordonnance.id }}</strong>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary">
+                                        {{ ordonnance.dateOrdonnance ? ordonnance.dateOrdonnance|date('d/m/Y') : 'N/A' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if ordonnance.medecin %}
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-heart-pulse me-2 text-muted"></i>
+                                            <div>
+                                                <div class="fw-bold">Dr. {{ ordonnance.medecin.prenomMedecin }} {{ ordonnance.medecin.nomMedecin }}</div>
+                                                <small class="text-muted">{{ ordonnance.medecin.contactMedecin }}</small>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted fst-italic">Non spécifié</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="fw-bold">{{ ordonnance.dureeTraitement }}</span>
+                                </td>
+                                <td>
+                                    {% if ordonnance.produits|length > 0 %}
+                                        <div class="produits-list">
+                                            {% for produit in ordonnance.produits %}
+                                                <span class="badge bg-success mb-1" 
+                                                      data-bs-toggle="tooltip" 
+                                                      title="{{ produit.nomProduit }} - {{ produit.dosageProduit }}">
+                                                    {{ produit.nomProduit }}
+                                                </span>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Aucun produit</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ path('app_ordonnance_show', {'id': ordonnance.id}) }}" 
+                                           class="btn btn-outline-info" 
+                                           title="Voir les détails">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{{ path('app_ordonnance_edit', {'id': ordonnance.id}) }}" 
+                                           class="btn btn-outline-warning" 
+                                           title="Modifier">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-file-text display-4 text-muted"></i>
+                    <h5 class="text-muted mt-3">Aucune ordonnance enregistrée</h5>
+                    <p class="text-muted">Ce patient n'a aucune ordonnance pour le moment.</p>
+                    <a href="{{ path('app_ordonnance_new') }}" class="btn btn-info">
+                        <i class="bi bi-plus-circle"></i> Créer une ordonnance
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmation de suppression -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger">
+                    <i class="bi bi-exclamation-triangle"></i> Confirmation de suppression
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer le patient <strong>{{ patient.prenomPatient }} {{ patient.nomPatient }}</strong> ?</p>
+                <p class="text-danger"><small>Cette action est irréversible.</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                {{ include('patient/_delete_form.html.twig') }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.info-item {
+    border-left: 3px solid #2c5aa0;
+    padding-left: 15px;
+}
+.card {
+    border: none;
+    border-radius: 10px;
+}
+.stat-item {
+    padding: 10px;
+}
+.btn {
+    border-radius: 6px;
+}
+.produits-list .badge {
+    font-size: 0.7rem;
+    margin-right: 2px;
+    margin-bottom: 2px;
+    display: inline-block;
+}
+</style>
+{% endblock %}

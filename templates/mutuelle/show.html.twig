@@ -1,0 +1,181 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails Mutuelle - {{ mutuelle.nomMutuelle }}{% endblock %}
+
+{% block body %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{{ path('app_home') }}" class="text-decoration-none">
+                <i class="bi bi-house-door"></i> Accueil
+            </a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{{ path('app_mutuelle_index') }}" class="text-decoration-none">
+                <i class="bi bi-shield-plus"></i> Mutuelles
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="bi bi-shield-check"></i> {{ mutuelle.nomMutuelle }}
+        </li>
+    </ol>
+</nav>
+
+<!-- En-tête de page -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 text-info">
+            <i class="bi bi-shield-check"></i> Détails de la Mutuelle
+        </h1>
+        <p class="text-muted mb-0">Informations complètes sur la mutuelle</p>
+    </div>
+    <div class="btn-group">
+        <a href="{{ path('app_mutuelle_index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Retour à la liste
+        </a>
+        <a href="{{ path('app_mutuelle_edit', {'id': mutuelle.id}) }}" class="btn btn-warning">
+            <i class="bi bi-pencil"></i> Modifier
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Carte des informations -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-info-circle"></i> Informations de la Mutuelle
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-item mb-3">
+                            <label class="fw-bold text-muted small">ID Mutuelle</label>
+                            <div class="fs-6">#{{ mutuelle.id }}</div>
+                        </div>
+                        <div class="info-item mb-3">
+                            <label class="fw-bold text-muted small">Nom</label>
+                            <div class="fs-5 text-dark">{{ mutuelle.nomMutuelle }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item mb-3">
+                            <label class="fw-bold text-muted small">Taux de Remboursement</label>
+                            <div class="fs-4 text-success">
+                                <strong>{{ mutuelle.tauxRemboursement }}%</strong>
+                            </div>
+                        </div>
+                        <div class="info-item mb-3">
+                            <label class="fw-bold text-muted small">Contact</label>
+                            <div class="fs-6">
+                                <i class="bi bi-telephone text-muted me-1"></i>
+                                {{ mutuelle.contactMutuelle }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Carte des statistiques -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-graph-up"></i> Statistiques
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="stat-item mb-3">
+                    <div class="h2 text-info mb-1">{{ mutuelle.patients|length }}</div>
+                    <small class="text-muted">Patients associés</small>
+                </div>
+                <div class="progress mb-2" style="height: 8px;">
+                    <div class="progress-bar bg-info" style="width: {{ mutuelle.tauxRemboursement }}%"></div>
+                </div>
+                <small class="text-muted">Taux de couverture</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section Patients Associés -->
+{% if mutuelle.patients|length > 0 %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-people"></i> Patients Associés ({{ mutuelle.patients|length }})
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nom</th>
+                                <th>Prénom</th>
+                                <th>Adresse</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for patient in mutuelle.patients %}
+                            <tr>
+                                <td>#{{ patient.idPatient }}</td>
+                                <td>{{ patient.nomPatient }}</td>
+                                <td>{{ patient.prenomPatient }}</td>
+                                <td>{{ patient.adressePatient }}</td>
+                                <td>
+                                    <a href="{{ path('app_patient_show', {'idPatient': patient.idPatient}) }}" 
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<!-- Message si aucun patient -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm border-warning">
+            <div class="card-body text-center py-4">
+                <i class="bi bi-people display-4 text-warning mb-3"></i>
+                <h5 class="text-warning">Aucun patient associé</h5>
+                <p class="text-muted">Aucun patient n'est actuellement couvert par cette mutuelle.</p>
+                <a href="{{ path('app_patient_index') }}" class="btn btn-outline-warning">
+                    <i class="bi bi-people"></i> Voir les patients
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<style>
+.info-item {
+    border-left: 3px solid #0dcaf0;
+    padding-left: 15px;
+}
+.card {
+    border: none;
+    border-radius: 10px;
+}
+.stat-item {
+    padding: 10px;
+}
+</style>
+{% endblock %}

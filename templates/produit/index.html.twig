@@ -1,0 +1,259 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Produits - PharmaGest{% endblock %}
+
+{% block body %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{{ path('app_home') }}" class="text-decoration-none">
+                <i class="bi bi-house-door"></i> Accueil
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="bi bi-capsule"></i> Produits
+        </li>
+    </ol>
+</nav>
+
+<!-- En-tête de page -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 text-primary">
+            <i class="bi bi-capsule"></i> Gestion des Produits
+        </h1>
+        <p class="text-muted mb-0">Gérez votre inventaire et vos stocks</p>
+    </div>
+    <div>
+        <a href="{{ path('app_home') }}" class="btn btn-outline-secondary me-2">
+            <i class="bi bi-arrow-left"></i> Retour à l'accueil
+        </a>
+        <a href="{{ path('app_produit_new') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Nouveau Produit
+        </a>
+    </div>
+</div>
+
+<!-- Cartes d'alertes -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-danger shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                            Ruptures de stock
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.rupture }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-exclamation-triangle fa-2x text-danger"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Stocks critiques
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.critique }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-exclamation-circle fa-2x text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Expiration proche
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.expiration }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-clock fa-2x text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Total produits
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ produits|length }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-capsule fa-2x text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tableau des produits -->
+<div class="card shadow-sm">
+    <div class="card-header bg-light">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-list-ul"></i> Inventaire des Produits
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if produits|length > 0 %}
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Statut</th>
+                        <th>Produit</th>
+                        <th>Code CIP</th>
+                        <th>Dosage</th>
+                        <th>Stock</th>
+                        <th>Prix</th>
+                        <th>Expiration</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for produit in produits %}
+                    <tr class="{% if produit.estEnRupture() %}table-danger{% elseif produit.estStockCritique() %}table-warning{% elseif produit.estStockAlerte() %}table-info{% endif %}">
+                        <td>
+                            <span class="badge bg-{{ produit.couleurStatutStock }}" 
+                                  data-bs-toggle="tooltip" 
+                                  title="{{ produit.messageStatutStock }}">
+                                <i class="bi {{ produit.iconeStatutStock }}"></i>
+                            </span>
+                            {% if produit.expireBientot(30) %}
+                                <span class="badge bg-danger mt-1" 
+                                      data-bs-toggle="tooltip" 
+                                      title="Expire dans {{ produit.joursAvantExpiration }} jours">
+                                    <i class="bi bi-clock"></i>
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <strong>{{ produit.nomProduit }}</strong>
+                            {% if not produit.actif %}
+                                <br><small class="text-muted">(Inactif)</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <code class="text-muted">{{ produit.codeCip ?? 'N/A' }}</code>
+                        </td>
+                        <td>{{ produit.dosageProduit }}</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                                    {% set pourcentageStock = min(100, (produit.stockActuel / produit.stockAlerte) * 100) %}
+                                    <div class="progress-bar bg-{{ produit.couleurStatutStock }}" 
+                                         style="width: {{ pourcentageStock }}%">
+                                    </div>
+                                </div>
+                                <span class="fw-bold">{{ produit.stockActuel }}</span>
+                            </div>
+                            <small class="text-muted">
+                                Seuil: {{ produit.stockMinimum }}/{{ produit.stockAlerte }}
+                            </small>
+                        </td>
+                        <td>
+                            <div class="fw-bold text-success">{{ produit.prixProduit }} €</div>
+                            {% if produit.prixAchat %}
+                                <small class="text-muted">
+                                    Marge: {{ produit.marge }} € ({{ produit.tauxMarge }}%)
+                                </small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="{% if produit.expireBientot(30) %}text-danger fw-bold{% endif %}">
+                                {{ produit.dateExpiration|date('d/m/Y') }}
+                            </span>
+                            {% if produit.expireBientot(30) %}
+                                <br>
+                                <small class="text-danger">
+                                    J-{{ produit.joursAvantExpiration }}
+                                </small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ path('app_produit_show', {'idProduit': produit.idProduit}) }}" 
+                                   class="btn btn-outline-info" 
+                                   title="Voir les détails">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ path('app_produit_edit', {'idProduit': produit.idProduit}) }}" 
+                                   class="btn btn-outline-warning" 
+                                   title="Modifier">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <button type="button" 
+                                        class="btn btn-outline-success" 
+                                        title="Ajouter au stock"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#ajouterStockModal{{ produit.idProduit }}">
+                                    <i class="bi bi-plus-lg"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-capsule display-1 text-muted"></i>
+            <h4 class="text-muted mt-3">Aucun produit enregistré</h4>
+            <p class="text-muted">Commencez par ajouter votre premier produit.</p>
+            <a href="{{ path('app_produit_new') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Ajouter un Produit
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Script pour les tooltips -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+
+<style>
+.progress {
+    min-width: 80px;
+}
+.table > tbody > tr.table-danger:hover > td {
+    background-color: #f8d7da !important;
+}
+.table > tbody > tr.table-warning:hover > td {
+    background-color: #fff3cd !important;
+}
+.table > tbody > tr.table-info:hover > td {
+    background-color: #d1ecf1 !important;
+}
+</style>
+{% endblock %}

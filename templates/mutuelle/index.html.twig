@@ -1,0 +1,119 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mutuelles - PharmaGest{% endblock %}
+
+{% block body %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{{ path('app_home') }}" class="text-decoration-none">
+                <i class="bi bi-house-door"></i> Accueil
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="bi bi-shield-plus"></i> Mutuelles
+        </li>
+    </ol>
+</nav>
+
+<!-- En-tête de page -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 text-info">
+            <i class="bi bi-shield-plus"></i> Gestion des Mutuelles
+        </h1>
+        <p class="text-muted mb-0">Gérez l'ensemble des mutuelles partenaires</p>
+    </div>
+    <div>
+        <a href="{{ path('app_home') }}" class="btn btn-outline-secondary me-2">
+            <i class="bi bi-arrow-left"></i> Retour à l'accueil
+        </a>
+        <a href="{{ path('app_mutuelle_new') }}" class="btn btn-info">
+            <i class="bi bi-plus-circle"></i> Nouvelle Mutuelle
+        </a>
+    </div>
+</div>
+
+<!-- Tableau des mutuelles -->
+<div class="card shadow-sm">
+    <div class="card-header bg-light">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-list-ul"></i> Liste des Mutuelles
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if mutuelles|length > 0 %}
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead class="table-info">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom</th>
+                        <th>Contact</th>
+                        <th>Taux Remboursement</th>
+                        <th>Patients</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for mutuelle in mutuelles %}
+                    <tr>
+                        <td><strong>#{{ mutuelle.id }}</strong></td>
+                        <td>
+                            <strong>{{ mutuelle.nomMutuelle }}</strong>
+                        </td>
+                        <td>
+                            <i class="bi bi-telephone text-muted me-1"></i>
+                            {{ mutuelle.contactMutuelle }}
+                        </td>
+                        <td>
+                            <span class="badge bg-success fs-6">
+                                {{ mutuelle.tauxRemboursement }}%
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-primary">
+                                {{ mutuelle.patients|length }} patient(s)
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ path('app_mutuelle_show', {'id': mutuelle.id}) }}" 
+                                   class="btn btn-outline-info" 
+                                   title="Voir les détails">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ path('app_mutuelle_edit', {'id': mutuelle.id}) }}" 
+                                   class="btn btn-outline-warning" 
+                                   title="Modifier">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                {{ include('mutuelle/_delete_form.html.twig') }}
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-shield-slash display-1 text-muted"></i>
+            <h4 class="text-muted mt-3">Aucune mutuelle enregistrée</h4>
+            <p class="text-muted">Commencez par ajouter votre première mutuelle partenaire.</p>
+            <a href="{{ path('app_mutuelle_new') }}" class="btn btn-info">
+                <i class="bi bi-plus-circle"></i> Ajouter une Mutuelle
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Bouton d'action -->
+<div class="mt-3">
+    <a href="{{ path('app_mutuelle_new') }}" class="btn btn-info">
+        <i class="bi bi-plus-circle"></i> Nouvelle Mutuelle
+    </a>
+</div>
+{% endblock %}
