@@ -35,10 +35,16 @@ class Patient
     #[ORM\InverseJoinColumn(name: 'Id_Mutuelle', referencedColumnName: 'Id_Mutuelle')]
     private Collection $mutuelles;
 
+    // ▼▼▼ AJOUTEZ CETTE PROPRIÉTÉ ▼▼▼
+    #[ORM\OneToMany(mappedBy: "patient", targetEntity: Vente::class)]
+    private Collection $ventes;
+
     public function __construct()
     {
         $this->mutuelles = new ArrayCollection();
         $this->ordonnances = new ArrayCollection();
+        $this->ventes = new ArrayCollection();
+
     }
    
 
@@ -123,6 +129,34 @@ class Patient
 
         return $this;
     }
+    /**
+     * @return Collection<int, Vente>
+     */
+    public function getVentes(): Collection
+    {
+        return $this->ventes;
+    }
 
+    public function addVente(Vente $vente): static
+    {
+        if (!$this->ventes->contains($vente)) {
+            $this->ventes->add($vente);
+            $vente->setPatient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVente(Vente $vente): static
+    {
+        if ($this->ventes->removeElement($vente)) {
+            // set the owning side to null (unless already changed)
+            if ($vente->getPatient() === $this) {
+                $vente->setPatient(null);
+            }
+        }
+
+        return $this;
+    }
 
 }

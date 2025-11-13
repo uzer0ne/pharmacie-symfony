@@ -56,7 +56,9 @@ class Produit
     // ⭐ CORRECTION : Collection au lieu de ?Ordonnance
     #[ORM\ManyToMany(targetEntity: Ordonnance::class, mappedBy: 'produits')]
     private Collection $ordonnances;
-    
+       // ▼▼▼ AJOUTEZ CETTE PROPRIÉTÉ ▼▼▼
+    #[ORM\OneToMany(mappedBy: "produit", targetEntity: LigneVente::class)]
+    private Collection $ligneVentes;
 
     public function __construct()
     {
@@ -65,6 +67,7 @@ class Produit
         $this->stock_minimum = 5;
         $this->stock_alerte = 10;
         $this->actif = true;
+        $this->ligneVentes = new ArrayCollection();
 
     }
 
@@ -335,6 +338,38 @@ class Produit
         $aujourdhui = new \DateTime();
         $difference = $this->date_expiration->diff($aujourdhui);
         return $difference->invert ? $difference->days : -$difference->days;
+    }
+    
+    // ▼▼▼ AJOUTEZ CES MÉTHODES ▼▼▼
+
+    /**
+     * @return Collection<int, LigneVente>
+     */
+    public function getLigneVentes(): Collection
+    {
+        return $this->ligneVentes;
+    }
+
+    public function addLigneVente(LigneVente $ligneVente): static
+    {
+        if (!$this->ligneVentes->contains($ligneVente)) {
+            $this->ligneVentes->add($ligneVente);
+            $ligneVente->setProduit($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLigneVente(LigneVente $ligneVente): static
+    {
+        if ($this->ligneVentes->removeElement($ligneVente)) {
+            // set the owning side to null (unless already changed)
+            if ($ligneVente->getProduit() === $this) {
+                $ligneVente->setProduit(null);
+            }
+        }
+
+        return $this;
     }
 
 

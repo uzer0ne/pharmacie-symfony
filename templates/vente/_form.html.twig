@@ -1,0 +1,192 @@
+{{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true}}) }}
+<div class="card shadow-sm">
+    <div class="card-header bg-success text-white">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-cart-plus"></i>
+            {{ button_label|default('Enregistrer la Vente') }}
+        </h5>
+    </div>
+    
+    <div class="card-body">
+        <div class="row">
+            <!-- Colonne Infos Vente -->
+            <div class="col-md-6">
+                <h6 class="text-success mb-3 border-bottom pb-2">
+                    <i class="bi bi-info-circle"></i> Informations Générales
+                </h6>
+                <div class="mb-3">
+                    {{ form_label(form.patient) }}
+                    {{ form_widget(form.patient, {'attr': {'class': 'form-select'}}) }}
+                    <div class="form-text">Optionnel. Laissez vide pour une vente libre.</div>
+                </div>
+                <div class="mb-3">
+                    {{ form_label(form.ordonnance) }}
+                    {{ form_widget(form.ordonnance, {'attr': {'class': 'form-select'}}) }}
+                    <div class="form-text">Optionnel. Liez une ordonnance à cette vente.</div>
+                </div>
+            </div>
+
+            <!-- Colonne Messages (pour les erreurs de stock, etc.) -->
+            <div class="col-md-6">
+                <h6 class="text-success mb-3 border-bottom pb-2">
+                    <i class="bi bi-exclamation-circle"></i> Notifications
+                </h6>
+                {# Affiche les erreurs non liées à un champ (ex: "Vente vide") #}
+                {{ form_errors(form) }}
+                {# Affiche les erreurs de la collection (ex: "Stock insuffisant") #}
+                {{ form_errors(form.ligneVentes) }}
+
+                <div class="alert alert-light" role="alert">
+                    <i class="bi bi-lightbulb"></i> Les erreurs de stock s'afficheront ici après avoir tenté d'enregistrer.
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Lignes de Vente (Collection) -->
+        <div class="card shadow-sm mb-4 mt-4">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0 text-success">
+                    <i class="bi bi-list-ul"></i> Produits de la Vente
+                </h5>
+            </div>
+            <div class="card-body">
+                
+                <div id="ligne-ventes-list"
+                     data-widget-tags-wrapper="div"
+                     data-widget-add-btn=".add-ligne-vente-btn">
+
+                    {% for ligneVenteForm in form.ligneVentes %}
+                        {# Affiche le formulaire imbriqué existant #}
+                        <div class="ligne-vente-item mb-3">
+                            {{ form_row(ligneVenteForm) }}
+                            <div class="text-end">
+                                <button type="button" class="btn btn-danger btn-sm remove-ligne-vente-btn mt-2">
+                                    <i class="bi bi-trash"></i> Supprimer ce produit
+                                </button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <button type="button" class="btn btn-success add-ligne-vente-btn">
+                    <i class="bi bi-plus-circle"></i> Ajouter un produit
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer du formulaire -->
+    <div class="card-footer bg-light text-end">
+        <a href="{{ path('app_vente_index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Annuler
+        </a>
+        <button type="submit" class="btn btn-success">
+            <i class="bi bi-check-circle"></i> 
+            {{ button_label|default('Enregistrer la Vente') }}
+        </button>
+    </div>
+</div>
+
+{# Le form_end() doit être appelé sans le rendu du reste #}
+{{ form_end(form, {'render_rest': false}) }}
+
+
+{# ⭐ ICI LA BONNE LOGIQUE : Le prototype est en dehors du <script> #}
+{# C'est juste un conteneur de données HTML caché #}
+<div id="ligne-vente-prototype-wrapper" 
+     class="d-none"
+     data-prototype="{{ 
+        form_widget(form.ligneVentes.vars.prototype)|e('html_attr') 
+     }}">
+</div>
+
+
+<!-- Section: JavaScript -->
+{% block javascripts %}
+{# ⭐ CORRECTION : Remplacer {{ parent() }} par {{ importmap('app') }} #}
+{{ importmap('app') }} {# On inclut l'importmap ici pour que le JS de Symfony fonctionne #}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // 1. Bouton "Ajouter"
+        const addLigneVenteButton = document.querySelector('.add-ligne-vente-btn');
+        const collectionHolder = document.querySelector('#ligne-ventes-list');
+        
+        // 2. Le prototype (lu depuis notre <div> cachée)
+        const prototypeWrapper = document.querySelector('#ligne-vente-prototype-wrapper');
+        const prototype = prototypeWrapper.dataset.prototype;
+
+        // 3. Un compteur pour les nouveaux items
+        // On compte combien d'items sont déjà là (pour l'édition)
+        collectionHolder.dataset.index = collectionHolder.querySelectorAll('.ligne-vente-item').length;
+
+        addLigneVenteButton.addEventListener('click', function() {
+            addLigneVente(collectionHolder, prototype);
+        });
+
+        // 4. Gestion des boutons "Supprimer" (délégation d'événement)
+        collectionHolder.addEventListener('click', function(e) {
+            // On vérifie si le clic vient d'un bouton supprimer
+            if (e.target && (e.target.matches('.remove-ligne-vente-btn') || e.target.closest('.remove-ligne-vente-btn'))) {
+                e.preventDefault();
+                // Trouve le parent .ligne-vente-item et le supprime
+                e.target.closest('.ligne-vente-item').remove();
+            }
+        });
+
+        // Fonction pour ajouter un nouveau formulaire
+        function addLigneVente(collectionHolder, prototype) {
+            // Récupère l'index
+            let index = collectionHolder.dataset.index;
+
+            // Remplace '__name__' dans le prototype par le bon index
+            let newFormHtml = prototype.replace(/__name__/g, index);
+
+            // Crée la nouvelle ligne de formulaire
+            let newFormRow = document.createElement('div');
+            newFormRow.classList.add('ligne-vente-item', 'mb-3');
+            newFormRow.innerHTML = newFormHtml;
+
+            // Ajoute le bouton de suppression DANS la nouvelle ligne
+            newFormRow.insertAdjacentHTML('beforeend', 
+                '<div class="text-end">' +
+                '<button type="button" class="btn btn-danger btn-sm remove-ligne-vente-btn mt-2">' +
+                '<i class="bi bi-trash"></i> Supprimer ce produit</button>' +
+                '</div>'
+            );
+            
+            collectionHolder.appendChild(newFormRow);
+
+            // Incrémente l'index pour le prochain ajout
+            collectionHolder.dataset.index++;
+        }
+
+        // 5. Gérer les boutons "Supprimer" qui existent déjà au chargement (page "edit")
+        // NOTE : Cette partie est maintenant gérée par la "délégation d'événement" (point 4)
+        // Elle n'est plus nécessaire. Je la laisse en commentaire pour info.
+        /*
+        const existingDeleteButtons = collectionHolder.querySelectorAll('.remove-ligne-vente-btn');
+        existingDeleteButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.target.closest('.ligne-vente-item').remove();
+            });
+        });
+        */
+
+    });
+</script>
+{% endblock %}
+
+<style>
+/* Style pour les champs imbriqués */
+.ligne-vente-item {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1.25rem;
+}
+.ligne-vente-item > div {
+    padding: 0; /* Annule le padding par défaut de form_row */
+}
+</style>

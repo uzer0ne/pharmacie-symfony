@@ -1,0 +1,131 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détail Vente n°{{ vente.id }} - PharmaGest{% endblock %}
+
+{% block body %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4 d-print-none">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{{ path('app_home') }}" class="text-decoration-none">
+                <i class="bi bi-house-door"></i> Accueil
+            </a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{{ path('app_vente_index') }}" class="text-decoration-none">
+                <i class="bi bi-receipt"></i> Ventes
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="bi bi-receipt-cutoff"></i> Reçu n°{{ vente.id }}
+        </li>
+    </ol>
+</nav>
+
+<!-- Fichier pour les messages flash (succès, erreur) -->
+{{ include('partials/_alertes.html.twig') }}
+
+<!-- En-tête de page -->
+<div class="d-flex justify-content-between align-items-center mb-4 d-print-none">
+    <div>
+        <h1 class="h2 text-success">
+            <i class="bi bi-receipt-cutoff"></i> Reçu de Vente n°{{ vente.id }}
+        </h1>
+        <p class="text-muted mb-0">Détail de la transaction du {{ vente.dateVente|date('d/m/Y à H:i') }}</p>
+    </div>
+    <div>
+        <a href="{{ path('app_vente_index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+        <button onclick="window.print()" class="btn btn-secondary">
+            <i class="bi bi-printer"></i> Imprimer
+        </button>
+        <a href="{{ path('app_vente_edit', {'id': vente.id}) }}" class="btn btn-warning">
+            <i class="bi bi-pencil-square"></i> Modifier
+        </a>
+    </div>
+</div>
+
+<!-- Reçu de vente -->
+<div class="card shadow-sm" id="recu-vente">
+    <div class="card-header bg-success text-white">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Vente n°{{ vente.id }}</h5>
+            <span class="fs-6">Date : {{ vente.dateVente|date('d/m/Y H:i') }}</span>
+        </div>
+    </div>
+    <div class="card-body p-4">
+        <!-- Informations Client -->
+        <div class="row mb-4 border-bottom pb-3">
+            <div class="col-md-6">
+                <h6 class="text-success"><i class="bi bi-person"></i> Client</h6>
+                {% if vente.patient %}
+                    <p class="mb-1"><strong>Nom :</strong> {{ vente.patient.prenomPatient }} {{ vente.patient.nomPatient }}</p>
+                    <p class="mb-0"><strong>ID Patient :</strong> {{ vente.patient.idPatient }}</p>
+                {% else %}
+                    <p class="mb-0 text-muted fst-italic">Vente libre (aucun patient)</p>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <h6 class="text-success"><i class="bi bi-file-medical"></i> Ordonnance</h6>
+                {% if vente.ordonnance %}
+                    <p class="mb-1"><strong>ID Ordonnance :</strong> {{ vente.ordonnance.id }}</p>
+                    <p class="mb-0"><strong>Prescrite le :</strong> {{ vente.ordonnance.dateOrdonnance|date('d/m/Y') }}</p>
+                {% else %}
+                    <p class="mb-0 text-muted fst-italic">Aucune ordonnance associée</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Lignes de Vente -->
+        <h6 class="text-success mb-3"><i class="bi bi-list-ul"></i> Produits vendus</h6>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead class="bg-light">
+                    <tr>
+                        <th scope="col">Produit</th>
+                        <th scope="col" class="text-end">Prix Unitaire</th>
+                        <th scope="col" class="text-center">Quantité</th>
+                        <th scope="col" class="text-end">Total Ligne</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ligne in vente.ligneVentes %}
+                        <tr>
+                            <td>
+                                <strong class="d-block">{{ ligne.produit.nomProduit }}</strong>
+                                <small class="text-muted">Code: {{ ligne.produit.codeProduit }}</small>
+                            </td>
+                            <td class="text-end">{{ ligne.prixUnitaireVente|number_format(2, ',', ' ') }} €</td>
+                            <td class="text-center">{{ ligne.quantite }}</td>
+                            <td class="text-end fw-bold">{{ (ligne.prixUnitaireVente * ligne.quantite)|number_format(2, ',', ' ') }} €</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center text-danger p-4">
+                                <i class="bi bi-exclamation-triangle"></i> Cette vente ne contient aucun produit.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Total -->
+        <div class="row mt-4">
+            <div class="col-md-6 offset-md-6">
+                <div class="card bg-light">
+                    <div class="card-body text-end p-3">
+                        <h4 class="mb-0">
+                            Montant Total
+                            <span class="d-block fs-2 text-success fw-bold">
+                                {{ vente.montantTotal|number_format(2, ',', ' ') }} €
+                            </span>
+                        </h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

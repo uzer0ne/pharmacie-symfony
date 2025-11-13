@@ -1,0 +1,24 @@
+{# templates/partials/_alertes.html.twig #}
+
+{# On boucle sur tous les messages flash (stock, succès, etc.) #}
+{% for label, messages in app.flashes %}
+    {% for message in messages %}
+        {# On utilise le 'label' comme type d'alerte (success, danger, warning) #}
+        <div class="alert alert-{{ label }} alert-dismissible fade show shadow-sm" role="alert">
+            
+            {% if label == 'success' %}
+                <i class="bi bi-check-circle-fill me-2"></i>
+            {% elseif label == 'danger' %}
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {% elseif label == 'warning' %}
+                <i class="bi bi-exclamation-circle-fill me-2"></i>
+            {% else %}
+                <i class="bi bi-info-circle-fill me-2"></i>
+            {% endif %}
+
+            {{ message|raw }} {# Le |raw est utile si vous mettez du HTML dans vos messages flash #}
+            
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endfor %}

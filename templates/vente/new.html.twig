@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle Vente - PharmaGest{% endblock %}
+
+{% block body %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{{ path('app_home') }}" class="text-decoration-none">
+                <i class="bi bi-house-door"></i> Accueil
+            </a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{{ path('app_vente_index') }}" class="text-decoration-none">
+                <i class="bi bi-receipt"></i> Ventes
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="bi bi-cart-plus"></i> Nouvelle Vente
+        </li>
+    </ol>
+</nav>
+
+<!-- Fichier pour les messages flash (succès, erreur) -->
+{{ include('partials/_alertes.html.twig') }}
+
+<!-- En-tête de page -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 text-success">
+            <i class="bi bi-cart-plus"></i> Nouvelle Vente (Point de Vente)
+        </h1>
+        <p class="text-muted mb-0">Créez une nouvelle transaction et gérez les stocks.</p>
+    </div>
+    <div>
+        <a href="{{ path('app_vente_index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Retour à l'historique
+        </a>
+    </div>
+</div>
+
+<!-- Formulaire -->
+<div class="row justify-content-center">
+    <div class="col-lg-12">
+        {# Ce fichier inclut le formulaire ET le javascript pour les lignes de vente #}
+        {{ include('vente/_form.html.twig') }}
+    </div>
+</div>
+{% endblock %}

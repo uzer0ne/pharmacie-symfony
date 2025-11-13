@@ -1,0 +1,92 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Historique des Ventes - PharmaGest{% endblock %}
+
+{% block body %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{{ path('app_home') }}" class="text-decoration-none">
+                <i class="bi bi-house-door"></i> Accueil
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="bi bi-receipt"></i> Ventes
+        </li>
+    </ol>
+</nav>
+
+<!-- Fichier pour les messages flash (succès, erreur) -->
+{{ include('partials/_alertes.html.twig') }}
+
+<!-- En-tête de page -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 text-success">
+            <i class="bi bi-receipt"></i> Gestion des Ventes
+        </h1>
+        <p class="text-muted mb-0">Historique de toutes les ventes enregistrées</p>
+    </div>
+    <div>
+        <a href="{{ path('app_vente_new') }}" class="btn btn-success">
+            <i class="bi bi-cart-plus"></i> Nouvelle Vente (POS)
+        </a>
+    </div>
+</div>
+
+<!-- Tableau des ventes -->
+<div class="card shadow-sm">
+    <div class="card-header bg-light">
+        <h5 class="card-title mb-0 text-success">
+            <i class="bi bi-list-ul"></i> Historique des Ventes
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0 align-middle">
+                <thead class="bg-light">
+                    <tr>
+                        <th scope="col">ID Vente</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Patient</th>
+                        <th scope="col">Montant Total</th>
+                        <th scope="col" class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vente in ventes %}
+                        <tr>
+                            <td class="fw-bold">#{{ vente.id }}</td>
+                            <td>{{ vente.dateVente ? vente.dateVente|date('d/m/Y H:i') : '' }}</td>
+                            <td>
+                                {% if vente.patient %}
+                                    <i class="bi bi-person"></i> {{ vente.patient.prenomPatient }} {{ vente.patient.nomPatient }}
+                                {% else %}
+                                    <span class="text-muted fst-italic">Vente libre</span>
+                                {% endif %}
+                            </td>
+                            <td class="fw-bold text-success">{{ vente.montantTotal|number_format(2, ',', ' ') }} €</td>
+                            <td class="text-end">
+                                <a href="{{ path('app_vente_show', {'id': vente.id}) }}" class="btn btn-outline-success btn-sm" title="Voir le reçu">
+                                    <i class="bi bi-eye"></i> Voir
+                                </a>
+                                <a href="{{ path('app_vente_edit', {'id': vente.id}) }}" class="btn btn-outline-warning btn-sm" title="Modifier">
+                                    <i class="bi bi-pencil"></i> Modifier
+                                </a>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted p-4">
+                                <i class="bi bi-x-circle d-block fs-3 mb-2"></i>
+                                Aucune vente trouvée.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

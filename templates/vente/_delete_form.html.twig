@@ -1,0 +1,30 @@
+<form method="post" action="{{ path('app_vente_delete', {'id': vente.id}) }}">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ vente.id) }}">
+    
+    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
+        <i class="bi bi-trash"></i> Supprimer la Vente n°{{ vente.id }}
+    </button>
+
+    <!-- Modal de Confirmation (pour éviter les `confirm()` JS) -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">
+                        <i class="bi bi-exclamation-triangle"></i> Confirmation de Suppression
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Êtes-vous absolument sûr de vouloir supprimer la Vente n°{{ vente.id }} ?
+                    <br><br>
+                    <strong>Cette action est irréversible et remettra les produits en stock.</strong>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-danger">Oui, Supprimer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

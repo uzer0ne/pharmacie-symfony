@@ -35,12 +35,15 @@ class Ordonnance
     #[ORM\ManyToOne(targetEntity: Medecin::class, inversedBy: 'ordonnances')]
     #[ORM\JoinColumn(name: "Id_Medecin", referencedColumnName: "Id_Medecin")]
     private ?Medecin $medecin = null;
+    #[ORM\OneToMany(mappedBy: "ordonnance", targetEntity: Vente::class)]
+    private Collection $ventes;
 
     public function __construct()
     {
         $this->produits = new ArrayCollection();
         $this->medecins = new ArrayCollection();
         $this->dateOrdonnance = new \DateTime();
+        $this->ventes = new ArrayCollection();
     }
 
 
@@ -120,6 +123,36 @@ class Ordonnance
             // ⭐ CORRECTION : Utiliser removeOrdonnance()
             $produit->removeOrdonnance($this);
         }
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Vente>
+     */
+    public function getVentes(): Collection
+    {
+        return $this->ventes;
+    }
+
+    public function addVente(Vente $vente): static
+    {
+        if (!$this->ventes->contains($vente)) {
+            $this->ventes->add($vente);
+            $vente->setOrdonnance($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVente(Vente $vente): static
+    {
+        if ($this->ventes->removeElement($vente)) {
+            // set the owning side to null (unless already changed)
+            if ($vente->getOrdonnance() === $this) {
+                $vente->setOrdonnance(null);
+            }
+        }
+
         return $this;
     }
 }
