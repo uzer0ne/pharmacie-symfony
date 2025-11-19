@@ -1,51 +1,73 @@
-{# templates/home/index.html.twig #}
 {% extends 'base.html.twig' %}
 
 {% block title %}Accueil - PharmaGest{% endblock %}
 
 {% block body %}
 <!-- Hero Section -->
-<div class="jumbotron bg-light p-5 rounded">
-    <h1 class="display-4">Bienvenue sur PharmaGest</h1>
-    <p class="lead">Système de gestion complet pour votre pharmacie</p>
+<div class="jumbotron bg-light p-5 rounded mb-5 shadow-sm">
+    <h1 class="display-4 text-primary fw-bold">Bienvenue sur PharmaGest</h1>
+    <p class="lead text-muted">Système de gestion complet pour votre pharmacie</p>
     <hr class="my-4">
-    <p>Gérez vos patients, stocks et ordonnances en toute simplicité.</p>
-    <a class="btn btn-primary btn-lg" href="{{ path('app_patients') }}">
-        <i class="bi bi-people"></i> Commencer avec les Patients
-    </a>
+    <p>Gérez vos patients, stocks, ordonnances et ventes en toute simplicité depuis une interface unique.</p>
+    <div class="d-flex gap-2">
+        <a class="btn btn-primary btn-lg" href="{{ path('app_patient_index') }}">
+            <i class="bi bi-people"></i> Gérer les Patients
+        </a>
+        <a class="btn btn-success btn-lg" href="{{ path('app_vente_new') }}">
+            <i class="bi bi-cart-plus"></i> Nouvelle Vente
+        </a>
+    </div>
 </div>
 
 <!-- Cartes de fonctionnalités -->
-<div class="row mt-5">
-    <div class="col-md-4 mb-4">
-        <div class="card">
+<div class="row">
+    <!-- Carte Patients -->
+    <div class="col-md-3 mb-4">
+        <div class="card h-100 shadow-sm border-primary border-top-0 border-end-0 border-bottom-0 border-3">
             <div class="card-body text-center">
-                <i class="bi bi-people fs-1 text-primary"></i>
-                <h5 class="card-title mt-2">Gestion Patients</h5>
-                <p class="card-text">Enregistrez et gérez vos patients</p>
-                <a href="{{ path('app_patients') }}" class="btn btn-outline-primary">Accéder</a>
+                <i class="bi bi-people fs-1 text-primary mb-3 d-block"></i>
+                <h5 class="card-title">Patients</h5>
+                <p class="card-text text-muted small">Enregistrez et suivez vos patients.</p>
+                <a href="{{ path('app_patient_index') }}" class="btn btn-outline-primary w-100 mt-2">Accéder</a>
             </div>
         </div>
     </div>
     
-    <div class="col-md-4 mb-4">
-        <div class="card">
+    <!-- Carte Mutuelles -->
+    <div class="col-md-3 mb-4">
+        <div class="card h-100 shadow-sm border-success border-top-0 border-end-0 border-bottom-0 border-3">
             <div class="card-body text-center">
-                <i class="bi bi-capsule fs-1 text-success"></i>
-                <h5 class="card-title mt-2">Gestion Mutuelles</h5>
-                <p class="card-text">Suivez votre inventaire</p>
-                <a href="{{ path('app_mutuelle') }}" class="btn btn-outline-success">Accéder</a>
+                <i class="bi bi-shield-check fs-1 text-success mb-3 d-block"></i>
+                <h5 class="card-title">Mutuelles</h5>
+                <p class="card-text text-muted small">Gérez les tiers-payants.</p>
+                <a href="{{ path('app_mutuelle_index') }}" class="btn btn-outline-success w-100 mt-2">Accéder</a>
             </div>
         </div>
     </div>
     
-    <div class="col-md-4 mb-4">
-        <div class="card">
+    <!-- Carte Ordonnances -->
+    <div class="col-md-3 mb-4">
+        <div class="card h-100 shadow-sm border-info border-top-0 border-end-0 border-bottom-0 border-3">
             <div class="card-body text-center">
-                <i class="bi bi-file-text fs-1 text-info"></i>
-                <h5 class="card-title mt-2">Ordonnances</h5>
-                <p class="card-text">Gérez les prescriptions</p>
-                <a href="{{ path('app_ordonnance_index') }}" class="btn btn-outline-info">Accéder</a>
+                <i class="bi bi-file-text fs-1 text-info mb-3 d-block"></i>
+                <h5 class="card-title">Ordonnances</h5>
+                <p class="card-text text-muted small">Historique des prescriptions.</p>
+                {# J'ai supposé que la route s'appelle app_ordonnance_index, vérifiez vos routes #}
+                <a href="#" class="btn btn-outline-info w-100 mt-2">Accéder</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ⭐ NOUVELLE CARTE : Ventes / Caisse -->
+    <div class="col-md-3 mb-4">
+        <div class="card h-100 shadow-sm border-warning border-top-0 border-end-0 border-bottom-0 border-3">
+            <div class="card-body text-center">
+                <i class="bi bi-receipt fs-1 text-warning mb-3 d-block"></i>
+                <h5 class="card-title">Caisse & Ventes</h5>
+                <p class="card-text text-muted small">Encaissez et gérez les stocks.</p>
+                <a href="{{ path('app_vente_index') }}" class="btn btn-outline-warning w-100 mt-2">
+                    <i class="bi bi-cart"></i> Accéder
+                </a>
             </div>
         </div>
     </div>
