@@ -17,11 +17,11 @@ class VenteType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('date_vente', DateType::class, [
-                'widget' => 'single_text',
-                'label' => 'Date de la Vente',
-                'attr' => ['class' => 'form-control'],
-            ])
+            //->add('date_vente', DateType::class, [
+              //  'widget' => 'single_text',
+                //'label' => 'Date de la Vente',
+                //'attr' => ['class' => 'form-control'],
+            //])
             // ->add('montant_total') // Le montant sera calculé dans le contrôleur
 
             ->add('patient', EntityType::class, [
