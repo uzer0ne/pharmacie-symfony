@@ -15,6 +15,8 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/produit')]
 final class ProduitController extends AbstractController
 {
+    // ... (index et new ne changent pas) ...
+
     #[Route('/', name: 'app_produit_index', methods: ['GET'])]
     public function index(ProduitRepository $produitRepository, AlerteStockService $alerteStockService): Response
     {
@@ -44,10 +46,11 @@ final class ProduitController extends AbstractController
         ]);
     }
 
+    // Cette méthode était déjà correcte, on la garde telle quelle
     #[Route('/{idProduit}', name: 'app_produit_show', methods: ['GET'])]
     public function show(ProduitRepository $produitRepository, int $idProduit): Response
     {
-            $produit = $produitRepository->find($idProduit);
+        $produit = $produitRepository->find($idProduit);
 
         if (!$produit) {
             throw $this->createNotFoundException('Produit introuvable');
@@ -58,9 +61,18 @@ final class ProduitController extends AbstractController
         ]);
     }
 
+    // ⭐ CORRECTION EDIT : On passe par le Repository et l'ID (comme pour show)
     #[Route('/{idProduit}/edit', name: 'app_produit_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Produit $produit, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, int $idProduit, ProduitRepository $produitRepository, EntityManagerInterface $entityManager): Response
     {
+        // 1. On récupère le produit manuellement
+        $produit = $produitRepository->find($idProduit);
+        
+        if (!$produit) {
+            throw $this->createNotFoundException('Produit introuvable');
+        }
+
+        // 2. Le reste du code est identique
         $form = $this->createForm(ProduitType::class, $produit);
         $form->handleRequest($request);
 
@@ -76,12 +88,20 @@ final class ProduitController extends AbstractController
         ]);
     }
 
+    // ⭐ CORRECTION DELETE : On passe aussi par le Repository et l'ID
     #[Route('/{idProduit}', name: 'app_produit_delete', methods: ['POST'])]
-    public function delete(Request $request, Produit $produit, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, int $idProduit, ProduitRepository $produitRepository, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$produit->getId(), $request->getPayload()->getString('_token'))) {
-            $entityManager->remove($produit);
-            $entityManager->flush();
+        // 1. On récupère le produit manuellement
+        $produit = $produitRepository->find($idProduit);
+
+        if ($produit) {
+            // Note: getId() est la méthode standard, assurez-vous qu'elle existe dans votre entité Produit
+            // ou utilisez getIdProduit() si c'est le seul getter disponible.
+            if ($this->isCsrfTokenValid('delete'.$produit->getId(), $request->getPayload()->getString('_token'))) {
+                $entityManager->remove($produit);
+                $entityManager->flush();
+            }
         }
 
         return $this->redirectToRoute('app_produit_index', [], Response::HTTP_SEE_OTHER);
