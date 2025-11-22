@@ -1,0 +1,168 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Réapprovisionnement - PharmaGest{% endblock %}
+
+{% block body %}
+<!-- 1. NAVIGATION (Visible uniquement à l'écran) -->
+<div class="d-print-none">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('app_home') }}" class="text-decoration-none text-dark"><i class="bi bi-house-door"></i> Accueil</a></li>
+            <li class="breadcrumb-item active" aria-current="page"><i class="bi bi-clipboard-data"></i> Réapprovisionnement</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 text-danger">
+                <i class="bi bi-exclamation-triangle"></i> Alertes de Stock
+            </h1>
+            <p class="text-muted mb-0">Liste des produits à commander d'urgence.</p>
+        </div>
+        <div>
+            <button onclick="window.print()" class="btn btn-primary btn-lg shadow-sm">
+                <i class="bi bi-printer"></i> Imprimer le Bon de Commande
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 2. ZONE D'IMPRESSION (C'est ce bloc qui sera isolé) -->
+<div id="section-a-imprimer">
+    
+    <!-- En-tête spécifique pour l'impression (Caché à l'écran) -->
+    <div class="d-none d-print-block mb-4">
+        <div class="row border-bottom pb-3 align-items-end">
+            <div class="col-6">
+                <h2 class="fw-bold text-uppercase mb-0">PharmaGest</h2>
+                <p class="small text-muted mb-0">123 Rue de la Santé, 75000 Paris</p>
+                <p class="small text-muted">Tél : 01 23 45 67 89</p>
+            </div>
+            <div class="col-6 text-end">
+                <h3 class="fw-bold mb-1">BON DE COMMANDE</h3>
+                <p class="mb-0">Date : {{ "now"|date("d/m/Y") }}</p>
+                <p class="small">Réf : CMD-{{ "now"|date("Ymd") }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Le Tableau -->
+    <div class="card shadow-sm border-danger border-top-0 border-end-0 border-bottom-0 border-3 print-no-border">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 d-print-none">
+            <h5 class="mb-0 text-danger fw-bold">
+                <i class="bi bi-cart-check"></i> Proposition de Commande
+            </h5>
+            <span class="text-muted">Généré automatiquement</span>
+        </div>
+        
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped mb-0 align-middle table-bordered-print">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 15%">Code / Réf</th>
+                            <th style="width: 40%">Désignation Produit</th>
+                            <th class="text-center" style="width: 10%">Stock</th>
+                            <th class="text-center" style="width: 10%">Seuil</th>
+                            <th class="text-center fw-bold table-active" style="width: 15%">QTÉ À COMMANDER</th>
+                            <th class="text-end d-print-none">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for produit in produits %}
+                            {# Formule de calcul : Remonter au seuil d'alerte + 50% #}
+                            {% set suggestion = ((produit.stockAlerte * 1.5) - produit.stockActuel)|round(0, 'ceil') %}
+                            
+                            <tr>
+                                <td class="fw-bold text-muted">{{ produit.codeProduit }}</td>
+                                <td>
+                                    <span class="fw-bold d-block text-dark">{{ produit.nomProduit }}</span>
+                                    <small class="text-muted">{{ produit.dosageProduit }}</small>
+                                </td>
+                                <td class="text-center text-danger fw-bold">
+                                    {{ produit.stockActuel }}
+                                </td>
+                                <td class="text-center text-muted small">
+                                    {{ produit.stockMinimum }}
+                                </td>
+                                <td class="text-center fw-bold fs-5 bg-light border-start border-end">
+                                    {{ suggestion > 0 ? suggestion : '5' }}
+                                </td>
+                                <td class="text-end d-print-none">
+                                    <a href="{{ path('app_produit_edit', {'idProduit': produit.id}) }}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center p-5">
+                                    <i class="bi bi-check-circle text-success fs-1 mb-3 d-block"></i>
+                                    <h4 class="text-success">Stock Optimal</h4>
+                                    <p class="text-muted">Aucun produit ne nécessite de réapprovisionnement.</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Pied de page du tableau (Signature) -->
+        <div class="d-none d-print-block mt-5 pt-5">
+            <div class="row">
+                <div class="col-6"></div>
+                <div class="col-6 text-center border-top border-dark pt-2">
+                    <p class="mb-5">Signature et Cachet du Pharmacien</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* CSS SPÉCIFIQUE POUR L'IMPRESSION */
+@media print {
+    /* 1. On cache TOUT le corps de la page par défaut */
+    body * {
+        visibility: hidden;
+    }
+
+    /* 2. On rend visible UNIQUEMENT notre bloc d'impression */
+    #section-a-imprimer, #section-a-imprimer * {
+        visibility: visible;
+    }
+
+    /* 3. On repositionne ce bloc tout en haut à gauche de la feuille */
+    #section-a-imprimer {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* 4. Ajustements esthétiques pour le papier */
+    .d-print-none { display: none !important; }
+    .d-print-block { display: block !important; }
+    
+    /* Enlève les ombres et bordures inutiles des cartes */
+    .card, .shadow-sm { 
+        box-shadow: none !important; 
+        border: none !important; 
+    }
+    
+    /* Ajoute des bordures noires au tableau pour la lisibilité */
+    .table-bordered-print th, .table-bordered-print td {
+        border: 1px solid #000 !important;
+    }
+    
+    /* Force l'impression des fonds de couleur (gris, etc.) */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}
+</style>
+{% endblock %}
