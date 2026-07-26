@@ -13,6 +13,7 @@
         "doctrine/doctrine-migrations-bundle": "^3.5",
         "doctrine/migrations": "^3.9",
         "doctrine/orm": "^3.5",
+        "knplabs/knp-paginator-bundle": "*",
         "phpdocumentor/reflection-docblock": "^5.6",
         "phpstan/phpdoc-parser": "^2.3",
         "symfony/asset": "7.3.*",
@@ -101,6 +102,7 @@
     },
     "require-dev": {
         "doctrine/doctrine-fixtures-bundle": "^4.2",
+        "fakerphp/faker": "^1.24",
         "phpunit/phpunit": "^12.4",
         "symfony/browser-kit": "7.3.*",
         "symfony/css-selector": "7.3.*",

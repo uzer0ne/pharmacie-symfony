@@ -26,7 +26,9 @@ class ProduitType extends AbstractType
                 'label' => 'Code CIP',
                 'required' => false,
                 'attr' => [
-                    'placeholder' => 'Ex: 3400936676324'
+                    'placeholder' => 'Scannez le code-barre ici...',
+                    'autofocus' => true, // Le curseur se mettra ici automatiquement à l'ouverture de la page
+                    'class' => 'form-control fw-bold' // On le met en gras pour bien le voir
                 ],
                 'help' => 'Code Identifiant de Présentation'
             ])

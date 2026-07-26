@@ -6,6 +6,7 @@ use App\Entity\Mutuelle;
 use App\Form\MutuelleType;
 use App\Repository\MutuelleRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,10 +16,20 @@ use Symfony\Component\Routing\Attribute\Route;
 class MutuelleController extends AbstractController
 {
     #[Route(name: 'app_mutuelle_index', methods: ['GET'])]
-    public function index(MutuelleRepository $mutuelleRepository): Response
+    public function index(MutuelleRepository $mutuelleRepository, PaginatorInterface $paginator, Request $request): Response
     {
+        $query = $mutuelleRepository->createQueryBuilder('m')
+            ->orderBy('m.nom_mutuelle', 'ASC')
+            ->getQuery();
+
+        $mutuelles = $paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1),
+            15
+        );
+
         return $this->render('mutuelle/index.html.twig', [
-            'mutuelles' => $mutuelleRepository->findAll(),
+            'mutuelles' => $mutuelles,
         ]);
     }
 

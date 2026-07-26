@@ -1,0 +1,128 @@
+{# templates/partials/_topbar.html.twig #}
+<header class="topbar d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center">
+        {# Bouton Hamburger (Mobile) #}
+        <button class="btn btn-light d-md-none me-3" type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#sidebarMenu"
+                aria-controls="sidebarMenu"
+                aria-expanded="false"
+                aria-label="Ouvrir le menu de navigation">
+            <i class="bi bi-list"></i>
+        </button>
+        
+        {# Breadcrumb dynamique enrichi #}
+        <nav aria-label="fil d'ariane" class="d-none d-md-block">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                    <a href="{{ path('app_home') }}" class="text-decoration-none text-muted">
+                        <i class="bi bi-house-door"></i>
+                    </a>
+                </li>
+                
+                {% set route = app.request.get('_route') %}
+                
+                {% if route starts with 'app_vente' %}
+                    <li class="breadcrumb-item"><a href="{{ path('app_vente_index') }}" class="text-decoration-none text-muted">Ventes</a></li>
+                    {% if route == 'app_vente_new' %}<li class="breadcrumb-item active">Nouvelle vente</li>
+                    {% elseif route == 'app_vente_show' %}<li class="breadcrumb-item active">Détails</li>
+                    {% elseif route == 'app_vente_edit' %}<li class="breadcrumb-item active">Modification</li>
+                    {% endif %}
+                    
+                {% elseif route starts with 'app_produit' %}
+                    <li class="breadcrumb-item"><a href="{{ path('app_produit_index') }}" class="text-decoration-none text-muted">Produits</a></li>
+                    {% if route == 'app_produit_new' %}<li class="breadcrumb-item active">Nouveau</li>
+                    {% elseif route == 'app_produit_show' or route == 'app_produit_edit' %}
+                        <li class="breadcrumb-item active">{{ app.request.attributes.get('nomProduit', 'Détail') }}</li>
+                    {% endif %}
+                    
+                {% elseif route starts with 'app_patient' %}
+                    <li class="breadcrumb-item"><a href="{{ path('app_patient_index') }}" class="text-decoration-none text-muted">Patients</a></li>
+                    {% if route == 'app_patient_new' %}<li class="breadcrumb-item active">Nouveau</li>
+                    {% elseif route == 'app_patient_show' %}<li class="breadcrumb-item active">Fiche patient</li>
+                    {% elseif route == 'app_patient_edit' %}<li class="breadcrumb-item active">Modification</li>
+                    {% endif %}
+                    
+                {% elseif route starts with 'app_medecin' %}
+                    <li class="breadcrumb-item"><a href="{{ path('app_medecin_index') }}" class="text-decoration-none text-muted">Médecins</a></li>
+                    {% if route == 'app_medecin_new' %}<li class="breadcrumb-item active">Nouveau</li>
+                    {% elseif route == 'app_medecin_show' %}<li class="breadcrumb-item active">Fiche médecin</li>
+                    {% elseif route == 'app_medecin_edit' %}<li class="breadcrumb-item active">Modification</li>
+                    {% endif %}
+                    
+                {% elseif route starts with 'app_mutuelle' %}
+                    <li class="breadcrumb-item"><a href="{{ path('app_mutuelle_index') }}" class="text-decoration-none text-muted">Mutuelles</a></li>
+                    {% if route == 'app_mutuelle_new' %}<li class="breadcrumb-item active">Nouvelle</li>
+                    {% elseif route == 'app_mutuelle_show' %}<li class="breadcrumb-item active">Détails</li>
+                    {% elseif route == 'app_mutuelle_edit' %}<li class="breadcrumb-item active">Modification</li>
+                    {% endif %}
+                    
+                {% elseif route starts with 'app_ordonnance' %}
+                    <li class="breadcrumb-item"><a href="{{ path('app_ordonnance_index') }}" class="text-decoration-none text-muted">Ordonnances</a></li>
+                    {% if route == 'app_ordonnance_new' %}<li class="breadcrumb-item active">Nouvelle</li>
+                    {% elseif route == 'app_ordonnance_show' %}<li class="breadcrumb-item active">Détails</li>
+                    {% elseif route == 'app_ordonnance_edit' %}<li class="breadcrumb-item active">Modification</li>
+                    {% endif %}
+                    
+                {% elseif route starts with 'app_stock' %}
+                    <li class="breadcrumb-item active">Alertes Stock</li>
+                    
+                {% elseif route == 'app_home' %}
+                    <li class="breadcrumb-item active">Tableau de Bord</li>
+                {% endif %}
+            </ol>
+        </nav>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+        {# Notification stock critique (badge cliquable) #}
+        {# Ce bloc est volontairement léger — le count vient du HomeController via session ou global #}
+
+        {# Dropdown Utilisateur amélioré #}
+        {% if app.user %}
+        <div class="dropdown">
+            <button class="btn d-flex align-items-center gap-2 border-0 bg-transparent py-1 px-2 rounded-lg"
+                    type="button"
+                    id="userDropdown"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                {# Avatar initiale #}
+                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold"
+                     style="width: 34px; height: 34px; font-size: 0.85rem;">
+                    {{ app.user.userIdentifier|slice(0, 1)|upper }}
+                </div>
+                <div class="d-none d-sm-block text-start lh-sm">
+                    <div class="fw-semibold text-dark" style="font-size: 0.85rem;">{{ app.user.userIdentifier }}</div>
+                    {# Badge de rôle lisible #}
+                    {% if 'ROLE_ADMIN' in app.user.roles %}
+                        <span class="badge badge-role-admin" style="font-size: 0.65rem;">Administrateur</span>
+                    {% elseif 'ROLE_PHARMACIEN' in app.user.roles %}
+                        <span class="badge badge-role-pharma" style="font-size: 0.65rem;">Pharmacien</span>
+                    {% else %}
+                        <span class="badge badge-role-user" style="font-size: 0.65rem;">Utilisateur</span>
+                    {% endif %}
+                </div>
+                <i class="bi bi-chevron-down text-muted ms-1" style="font-size: 0.7rem;"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-1" aria-labelledby="userDropdown" style="min-width: 200px;">
+                <li class="px-3 py-2">
+                    <div class="fw-semibold text-dark">{{ app.user.userIdentifier }}</div>
+                    {% if 'ROLE_ADMIN' in app.user.roles %}
+                        <small class="text-muted">Accès complet (Admin)</small>
+                    {% elseif 'ROLE_PHARMACIEN' in app.user.roles %}
+                        <small class="text-muted">Pharmacien référent</small>
+                    {% else %}
+                        <small class="text-muted">Utilisateur standard</small>
+                    {% endif %}
+                </li>
+                <li><hr class="dropdown-divider my-1"></li>
+                <li>
+                    <a class="dropdown-item py-2 text-danger" href="{{ path('app_logout') }}">
+                        <i class="bi bi-box-arrow-left me-2"></i> Se déconnecter
+                    </a>
+                </li>
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</header>

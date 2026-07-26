@@ -1,0 +1,40 @@
+{#
+  templates/partials/_empty_state.html.twig
+
+  Paramètres attendus :
+    - icon      : nom de l'icône Bootstrap (ex: "people", "file-medical")
+    - title     : titre de l'état vide
+    - subtitle  : texte descriptif (optionnel)
+    - action    : { label: "...", path: "...", icon: "..." } (optionnel)
+    - color     : classe de couleur Bootstrap (défaut: "primary")
+#}
+
+{% set color = color|default('primary') %}
+
+<div class="text-center py-5 px-3">
+    {# Cercle d'illustration avec icône #}
+    <div class="mx-auto mb-4 position-relative" style="width: 120px; height: 120px;">
+        <svg viewBox="0 0 120 120" class="w-100 h-100" aria-hidden="true">
+            {# Cercle extérieur (très doux) #}
+            <circle cx="60" cy="60" r="58" fill="currentColor" class="text-{{ color }} opacity-10" stroke="none"/>
+            {# Cercle intermédiaire #}
+            <circle cx="60" cy="60" r="44" fill="currentColor" class="text-{{ color }} opacity-25" stroke="none"/>
+        </svg>
+        <div class="position-absolute top-50 start-50 translate-middle text-{{ color }}">
+            <i class="bi bi-{{ icon }} fs-1"></i>
+        </div>
+    </div>
+
+    <h5 class="fw-bold text-dark mb-2">{{ title }}</h5>
+    {% if subtitle is defined and subtitle %}
+        <p class="text-muted mb-4" style="max-width: 320px; margin-left: auto; margin-right: auto;">{{ subtitle }}</p>
+    {% else %}
+        <div class="mb-4"></div>
+    {% endif %}
+
+    {% if action is defined and action %}
+        <a href="{{ path(action.path) }}" class="btn btn-{{ color }} shadow-sm px-4">
+            <i class="bi bi-{{ action.icon|default('plus-lg') }} me-2"></i>{{ action.label }}
+        </a>
+    {% endif %}
+</div>

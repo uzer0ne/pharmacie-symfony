@@ -1,11 +1,27 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Medecin{% endblock %}
+{% block title %}Nouveau Médecin - PharmaGest{% endblock %}
 
 {% block body %}
-    <h1>Create new Medecin</h1>
+<!-- En-tête de page -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 page-title">
+            <i class="bi bi-person-plus text-primary me-2"></i> Nouveau Médecin
+        </h1>
+        <p class="page-subtitle mb-0">Ajoutez un nouveau médecin prescripteur</p>
+    </div>
+    <div>
+        <a href="{{ path('app_medecin_index') }}" class="btn btn-outline-secondary shadow-sm">
+            <i class="bi bi-arrow-left me-1"></i> Retour
+        </a>
+    </div>
+</div>
 
-    {{ include('medecin/_form.html.twig') }}
-
-    <a href="{{ path('app_medecin_index') }}">back to list</a>
+<!-- Formulaire -->
+<div class="row">
+    <div class="col-12">
+        {{ include('medecin/_form.html.twig') }}
+    </div>
+</div>
 {% endblock %}

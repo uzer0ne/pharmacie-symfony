@@ -6,23 +6,34 @@ use App\Entity\Vente;
 use App\Entity\LigneVente;
 use App\Form\VenteType;
 use App\Repository\VenteRepository;
-use App\Repository\ProduitRepository; // Important: nous avons besoin de ce Repository
+use App\Repository\ProduitRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\Common\Collections\ArrayCollection; // Nécessaire pour la logique d'édition
+use Doctrine\Common\Collections\ArrayCollection;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Form\FormError; // Pour afficher les erreurs de stock
+use Symfony\Component\Form\FormError;
 
 #[Route('/vente')]
 final class VenteController extends AbstractController
 {
     #[Route(name: 'app_vente_index', methods: ['GET'])]
-    public function index(VenteRepository $venteRepository): Response
+    public function index(VenteRepository $venteRepository, PaginatorInterface $paginator, Request $request): Response
     {
+        $query = $venteRepository->createQueryBuilder('v')
+            ->orderBy('v.date_vente', 'DESC')
+            ->getQuery();
+
+        $ventes = $paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1),
+            15
+        );
+
         return $this->render('vente/index.html.twig', [
-            'ventes' => $venteRepository->findBy([], ['date_vente' => 'DESC']), // Tri par date
+            'ventes' => $ventes,
         ]);
     }
 
@@ -103,10 +114,16 @@ final class VenteController extends AbstractController
     public function edit(Request $request, Vente $vente, EntityManagerInterface $entityManager): Response
     {
         // --- Logique d'édition (gestion des stocks complexe) ---
-        // 1. On "photographie" l'état des lignes *avant* de soumettre le formulaire
-        $originalLigneVentes = new ArrayCollection();
+        // 1. On sauvegarde l'état des stocks/produits AVANT la modification du formulaire
+        // On utilise un tableau associatif [id_ligne => ['produit_id' => int, 'quantite' => int]]
+        $originalData = [];
         foreach ($vente->getLigneVentes() as $ligne) {
-            $originalLigneVentes->add($ligne);
+            if ($ligne->getId()) {
+                $originalData[$ligne->getId()] = [
+                    'produit' => $ligne->getProduit(),
+                    'quantite' => $ligne->getQuantite()
+                ];
+            }
         }
 
         $form = $this->createForm(VenteType::class, $vente);
@@ -115,49 +132,49 @@ final class VenteController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             
             try {
-                // 2. On regarde les lignes qui ont été *supprimées*
-                foreach ($originalLigneVentes as $ligne) {
-                    if (false === $vente->getLigneVentes()->contains($ligne)) {
-                        // Cette ligne a été supprimée du formulaire
-                        // On doit *remettre* le stock
-                        $produit = $ligne->getProduit();
-                        $produit->setStockActuel($produit->getStockActuel() + $ligne->getQuantite());
-                        
-                        $entityManager->remove($ligne); // On la supprime de la BDD
+                // STRATÉGIE FIABLE : 
+                // 1. Pour les lignes existantes : On remet TOUT l'ancien stock (comme si on annulait la ligne).
+                // 2. Ensuite, on recalcule le retrait de stock pour la nouvelle version de la ligne.
+                // Cela gère automatiquement les changements de quantité ET les changements de produit.
+
+                // A. Traitement des suppressions (Lignes qui ne sont plus dans le formulaire)
+                foreach ($originalData as $id => $data) {
+                    // On cherche si cette ligne existe encore dans la collection soumise
+                    $exists = $vente->getLigneVentes()->exists(fn($key, $l) => $l->getId() === $id);
+                    
+                    if (!$exists) {
+                        // La ligne a été supprimée : on remet le stock
+                        $oldProduit = $data['produit'];
+                        $oldProduit->setStockActuel($oldProduit->getStockActuel() + $data['quantite']);
+                        // Note: Doctrine gère le remove() via orphanRemoval=true dans l'entité Vente
                     }
                 }
 
-                // 3. On regarde les lignes *mises à jour* ou *ajoutées*
+                // B. Traitement des ajouts et modifications
                 foreach ($vente->getLigneVentes() as $ligneVente) {
-                    $produit = $ligneVente->getProduit();
-                    $quantiteDemandee = $ligneVente->getQuantite();
+                    $nouveauProduit = $ligneVente->getProduit();
+                    $nouvelleQuantite = $ligneVente->getQuantite();
                     
-                    $originalLigne = $originalLigneVentes->filter(
-                        fn(LigneVente $l) => $l->getId() === $ligneVente->getId() && $l->getId() !== null
-                    )->first();
-
-                    if ($originalLigne) {
-                        // C'est une ligne *existante* qu'on a modifiée
-                        $quantiteOriginale = $originalLigne->getQuantite();
-                        $diff = $quantiteDemandee - $quantiteOriginale; // Ex: 5 - 3 = 2 (on retire 2 du stock)
-                                                                        // Ex: 2 - 5 = -3 (on remet 3 au stock)
-
-                        if ($diff > 0 && $produit->getStockActuel() < $diff) {
-                            // On demande plus que ce qu'on avait, et le stock n'est pas suffisant
-                            throw new \Exception("Stock insuffisant pour '{$produit->getNomProduit()}'. Stock restant: {$produit->getStockActuel()}, Besoin de: {$diff} en plus.");
-                        }
-                        // Met à jour le stock (le signe +/- est géré par la variable $diff)
-                        $produit->setStockActuel($produit->getStockActuel() - $diff);
-
-                    } else {
-                        // C'est une *nouvelle* ligne (ajoutée pendant l'édition)
-                        if ($produit->getStockActuel() < $quantiteDemandee) {
-                            throw new \Exception("Stock insuffisant pour le nouveau produit '{$produit->getNomProduit()}'. Demandé: {$quantiteDemandee}, Disponible: {$produit->getStockActuel()}");
-                        }
-                        // On bloque le prix et on décrémente le stock
-                        $ligneVente->setPrixUnitaireVente($produit->getPrixProduit());
-                        $produit->setStockActuel($produit->getStockActuel() - $quantiteDemandee);
+                    // Si c'est une ligne existante, on commence par "rembourser" l'ancien stock
+                    if ($ligneVente->getId() && isset($originalData[$ligneVente->getId()])) {
+                        $oldData = $originalData[$ligneVente->getId()];
+                        $oldProduit = $oldData['produit'];
+                        $oldProduit->setStockActuel($oldProduit->getStockActuel() + $oldData['quantite']);
                     }
+
+                    // Maintenant, on vérifie si on a assez de stock pour la NOUVELLE demande
+                    // (Note: si le produit n'a pas changé, le stock a été incrémenté juste au-dessus, donc on revérifie le total)
+                    if ($nouveauProduit->getStockActuel() < $nouvelleQuantite) {
+                         throw new \Exception("Stock insuffisant pour '{$nouveauProduit->getNomProduit()}'. Demandé: {$nouvelleQuantite}, En stock: {$nouveauProduit->getStockActuel()}");
+                    }
+
+                    // On déduit le stock
+                    $nouveauProduit->setStockActuel($nouveauProduit->getStockActuel() - $nouvelleQuantite);
+                    
+                    // On met à jour le prix unitaire (au cas où le produit a changé ou le prix a évolué)
+                    // Dans une vraie pharmacie, on voudrait peut-être garder l'ancien prix si c'est juste une correction de qté,
+                    // mais ici on réactualise au prix catalogue actuel.
+                    $ligneVente->setPrixUnitaireVente($nouveauProduit->getPrixProduit());
                 }
 
                 // 4. Recalculer le total

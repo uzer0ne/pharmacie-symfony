@@ -1,13 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{% block title %}Welcome!{% endblock %}</title>
+        <title>{% block title %}PharmaGest - SaaS{% endblock %}</title>
+        
+        {# Bootstrap 5 CSS #}
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+        {# Bootstrap Icons #}
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+        
         {% block stylesheets %}
+            {# Fichier CSS global mis à jour #}
+            <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
         {% endblock %}
 
         {% block javascripts %}
@@ -15,7 +20,41 @@
         {% endblock %}
     </head>
     <body>
-        {% block body %}{% endblock %}
+        <div class="container-fluid p-0">
+            <div class="row g-0">
+                
+                {# ── Sidebar (Navigation Gauche) ── #}
+                {{ include('partials/_sidebar.html.twig') }}
+
+                {# ── Contenu Principal (Droite) ── #}
+                <div class="col-md-9 ms-sm-auto col-lg-10 p-0 bg-light">
+                    
+                    {# Topbar (Breadcrumbs & User Menu) #}
+                    {{ include('partials/_topbar.html.twig') }}
+
+                    {# Conteneur dynamique (Injecté par les autres vues) #}
+                    <main class="main-content">
+                        {% block body %}{% endblock %}
+                    </main>
+
+                    {# Footer applicatif #}
+                    <footer class="border-top bg-white px-4 py-3 d-flex justify-content-between align-items-center" style="font-size: 0.8rem; color: #94a3b8;">
+                        <span>
+                            <i class="bi bi-capsule-pill text-primary me-1"></i>
+                            <strong class="text-dark">PharmaGest</strong> &copy; {{ "now"|date("Y") }}
+                        </span>
+                        <span>
+                            v1.0 &nbsp;·&nbsp; Symfony {{ constant('Symfony\\Component\\HttpKernel\\Kernel::VERSION') }}
+                        </span>
+                    </footer>
+                </div>
+                
+            </div>
+        </div>
+
+        {# ── Toasts Hotwire (Alertes) ── #}
+        {{ include('partials/_toasts.html.twig') }}
+
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     </body>
 </html>

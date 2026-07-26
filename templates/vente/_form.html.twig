@@ -1,95 +1,98 @@
 {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true}}) }}
-<div class="card shadow-sm">
-    <div class="card-header bg-success text-white">
-        <h5 class="card-title mb-0">
-            <i class="bi bi-cart-plus"></i>
-            {{ button_label|default('Enregistrer la Vente') }}
-        </h5>
-    </div>
-    
-    <div class="card-body">
-        <div class="row">
-            <!-- Colonne Infos Vente -->
-            <div class="col-md-6">
-                <h6 class="text-success mb-3 border-bottom pb-2">
-                    <i class="bi bi-info-circle"></i> Informations Générales
-                </h6>
-                <div class="mb-3">
-                    {{ form_label(form.patient) }}
-                    {{ form_widget(form.patient, {'attr': {'class': 'form-select'}}) }}
-                    <div class="form-text">Optionnel. Laissez vide pour une vente libre.</div>
-                </div>
-                <div class="mb-3">
-                    {{ form_label(form.ordonnance) }}
-                    {{ form_widget(form.ordonnance, {'attr': {'class': 'form-select'}}) }}
-                    <div class="form-text">Optionnel. Liez une ordonnance à cette vente.</div>
-                </div>
-            </div>
 
-            <!-- Colonne Messages -->
-            <div class="col-md-6">
-                <h6 class="text-success mb-3 border-bottom pb-2">
-                    <i class="bi bi-exclamation-circle"></i> Notifications
-                </h6>
-                {{ form_errors(form) }}
-                {{ form_errors(form.ligneVentes) }}
-
-                <div class="alert alert-light" role="alert">
-                    <i class="bi bi-lightbulb"></i> Les erreurs de stock s'afficheront ici après validation.
-                </div>
-            </div>
-        </div>
-
-        <!-- Section: Lignes de Vente (Collection) -->
-        <div class="card shadow-sm mb-4 mt-4">
-            <div class="card-header bg-light">
-                <h5 class="card-title mb-0 text-success">
-                    <i class="bi bi-list-ul"></i> Produits de la Vente
+<div class="row g-4">
+    <!-- Section principale: POS & Scanner -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0 text-dark fw-bold">
+                    <i class="bi bi-cart text-primary me-2"></i> Produits du Panier
                 </h5>
+                <div class="input-group" style="width: 250px;">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-upc-scan text-muted"></i></span>
+                    <input type="text" id="scanner-input" class="form-control border-start-0 bg-light" placeholder="Scanner CIP..." autocomplete="off">
+                </div>
             </div>
-            <div class="card-body">
-                
-                <div id="ligne-ventes-list">
+            <div class="card-body p-4 bg-light bg-opacity-50">
+                <div id="ligne-ventes-list" class="collection-ligne-ventes" data-index="{{ form.ligneVentes|length }}">
                     {% for ligneVenteForm in form.ligneVentes %}
-                        <div class="ligne-vente-item mb-3 p-3 border rounded bg-light">
-                            {{ form_row(ligneVenteForm) }}
-                            <div class="text-end">
-                                <button type="button" class="btn btn-danger btn-sm remove-btn"><i class="bi bi-trash"></i> Supprimer</button>
+                        <div class="ligne-vente-item bg-white p-3 mb-3 border rounded shadow-sm position-relative">
+                            <div class="row align-items-center">
+                                <div class="col-md-5">
+                                    {{ form_row(ligneVenteForm.produit) }}
+                                </div>
+                                <div class="col-md-3">
+                                    {{ form_row(ligneVenteForm.quantite) }}
+                                </div>
+                                <div class="col-md-3">
+                                    {{ form_row(ligneVenteForm.prixUnitaireVente) }}
+                                </div>
+                                <div class="col-md-1 text-end">
+                                    <button type="button" class="btn btn-outline-danger btn-sm border-0 remove-btn mt-3" title="Retirer">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     {% endfor %}
                 </div>
 
-                {# IMPORTANT : type="button" empêche ce bouton de soumettre le formulaire #}
-                <button type="button" class="btn btn-success add-ligne-vente-btn">
-                    <i class="bi bi-plus-circle"></i> Ajouter un produit
+                <div class="text-center mt-4">
+                    <button type="button" class="btn btn-light fw-bold text-primary px-4 add-ligne-vente-btn border">
+                        <i class="bi bi-plus-lg me-1"></i> Ajouter un produit manuellement
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section latérale: Client & Résumé -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
+                <h5 class="card-title mb-0 text-dark fw-bold">
+                    <i class="bi bi-person text-primary me-2"></i> Client & Ordonnance
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="mb-4">
+                    {{ form_label(form.patient, 'Sélectionner un patient', {'label_attr': {'class': 'fw-medium mb-2'}}) }}
+                    {{ form_widget(form.patient, {'attr': {'class': 'form-select form-select-lg'}}) }}
+                    <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Laissez vide pour une vente libre</small>
+                </div>
+                
+                <div class="mb-2">
+                    {{ form_label(form.ordonnance, 'Ordonnance rattachée', {'label_attr': {'class': 'fw-medium mb-2'}}) }}
+                    {{ form_widget(form.ordonnance, {'attr': {'class': 'form-select'}}) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="card bg-primary text-white border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h6 class="text-white-50 text-uppercase fw-bold mb-3">Résumé de la commande</h6>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <span class="fs-5">Montant Total</span>
+                    <span class="fs-2 fw-bold text-white">0,00 €</span>
+                </div>
+                
+                {{ form_errors(form) }}
+                {{ form_errors(form.ligneVentes) }}
+                
+                <button type="submit" class="btn btn-light w-100 py-3 fw-bold fs-5 text-primary">
+                    <i class="bi bi-check-circle-fill me-2"></i> {{ button_label|default('Encaisser') }}
                 </button>
             </div>
         </div>
     </div>
-    
-    <div class="card-footer bg-light text-end">
-        <a href="{{ path('app_vente_index') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Annuler
-        </a>
-        <button type="submit" class="btn btn-success">
-            <i class="bi bi-check-circle"></i> 
-            {{ button_label|default('Enregistrer la Vente') }}
-        </button>
-    </div>
 </div>
 
-{# ⭐ CORRECTION : On affiche manuellement le token CSRF car render_rest est à false #}
 {{ form_row(form._token) }}
 {{ form_end(form, {'render_rest': false}) }}
 
 {# Prototype caché #}
-<div id="ligne-vente-prototype-wrapper" 
-     class="d-none"
-     data-prototype="{{ form_widget(form.ligneVentes.vars.prototype)|e('html_attr') }}">
-</div>
+<div id="ligne-vente-prototype-wrapper" class="d-none" data-prototype="{{ form_widget(form.ligneVentes.vars.prototype)|e('html_attr') }}"></div>
 
-{# SCRIPT JS - Plus de {{ importmap }} ni de {% block %} #}
 <script>
     function initVenteForm() {
         const addBtn = document.querySelector('.add-ligne-vente-btn');
@@ -98,12 +101,10 @@
 
         if (!addBtn || !list || !prototypeWrapper) return;
 
-        // Initialise l'index
         if (!list.dataset.index) {
             list.dataset.index = list.querySelectorAll('.ligne-vente-item').length;
         }
 
-        // On remplace le bouton par un clone pour nettoyer les anciens événements (si Turbo)
         const newBtn = addBtn.cloneNode(true);
         addBtn.parentNode.replaceChild(newBtn, addBtn);
 
@@ -117,18 +118,28 @@
             newForm = newForm.replace(/__name__/g, index);
 
             const newItem = document.createElement('div');
-            newItem.classList.add('ligne-vente-item', 'mb-3', 'p-3', 'border', 'rounded', 'bg-light');
+            newItem.classList.add('ligne-vente-item', 'bg-white', 'p-3', 'mb-3', 'border', 'rounded', 'shadow-sm', 'position-relative');
             
-            newItem.innerHTML = newForm + 
-                '<div class="text-end">' +
-                '<button type="button" class="btn btn-danger btn-sm remove-btn mt-2"><i class="bi bi-trash"></i> Supprimer</button>' +
-                '</div>';
+            newItem.innerHTML = `
+                <div class="row align-items-center">
+                    <div class="col-md-5">${newForm.replace(/<div[^>]*>.*?<label[^>]*>.*?<\/label>.*?<select/s, '<select').replace(/<\/div>$/s, '')}</div>
+                    <div class="col-md-1 text-end">
+                        <button type="button" class="btn btn-outline-danger btn-sm border-0 remove-btn" title="Retirer"><i class="bi bi-x-lg"></i></button>
+                    </div>
+                </div>
+            `;
+            // Simplified wrapper since symfony generates divs. We just inject the whole newForm and a delete button.
+            newItem.innerHTML = `
+                <div class="d-flex align-items-end gap-3 w-100">
+                    <div class="flex-grow-1">${newForm}</div>
+                    <button type="button" class="btn btn-outline-danger border-0 remove-btn mb-3" title="Retirer"><i class="bi bi-trash"></i></button>
+                </div>
+            `;
 
             list.appendChild(newItem);
             list.dataset.index = index + 1;
         });
 
-        // Gestion suppression
         list.addEventListener('click', function(e) {
             if (e.target && (e.target.matches('.remove-btn') || e.target.closest('.remove-btn'))) {
                 e.preventDefault();
@@ -137,7 +148,6 @@
         });
     }
 
-    // Supporte le chargement classique ET Turbo
     document.addEventListener('DOMContentLoaded', initVenteForm);
     document.addEventListener('turbo:load', initVenteForm);
 </script>

@@ -6,6 +6,8 @@ use App\Entity\Medecin;
 use App\Form\MedecinType;
 use App\Repository\MedecinRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,10 +17,20 @@ use Symfony\Component\Routing\Attribute\Route;
 final class MedecinController extends AbstractController
 {
     #[Route(name: 'app_medecin_index', methods: ['GET'])]
-    public function index(MedecinRepository $medecinRepository): Response
+    public function index(MedecinRepository $medecinRepository, PaginatorInterface $paginator, Request $request): Response
     {
+        $query = $medecinRepository->createQueryBuilder('m')
+            ->orderBy('m.nom_medecin', 'ASC')
+            ->getQuery();
+
+        $medecins = $paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1),
+            15
+        );
+
         return $this->render('medecin/index.html.twig', [
-            'medecins' => $medecinRepository->findAll(),
+            'medecins' => $medecins,
         ]);
     }
 
@@ -43,7 +55,7 @@ final class MedecinController extends AbstractController
     }
 
     #[Route('/{idMedecin}', name: 'app_medecin_show', methods: ['GET'])]
-    public function show(Medecin $medecin): Response
+    public function show(#[MapEntity(mapping: ['idMedecin' => 'idMedecin'])] Medecin $medecin): Response
     {
         return $this->render('medecin/show.html.twig', [
             'medecin' => $medecin,
@@ -51,7 +63,7 @@ final class MedecinController extends AbstractController
     }
 
     #[Route('/{idMedecin}/edit', name: 'app_medecin_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Medecin $medecin, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, #[MapEntity(mapping: ['idMedecin' => 'idMedecin'])] Medecin $medecin, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(MedecinType::class, $medecin);
         $form->handleRequest($request);
@@ -69,7 +81,7 @@ final class MedecinController extends AbstractController
     }
 
     #[Route('/{idMedecin}', name: 'app_medecin_delete', methods: ['POST'])]
-    public function delete(Request $request, Medecin $medecin, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, #[MapEntity(mapping: ['idMedecin' => 'idMedecin'])] Medecin $medecin, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$medecin->getIdMedecin(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($medecin);

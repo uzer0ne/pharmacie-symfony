@@ -1,296 +1,212 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Détails Patient - {{ patient.prenomPatient }} {{ patient.nomPatient }}{% endblock %}
+{% block title %}Dossier Patient - {{ patient.prenomPatient }} {{ patient.nomPatient }}{% endblock %}
 
 {% block body %}
-<!-- Breadcrumb -->
-<nav aria-label="breadcrumb" class="mb-4">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item">
-            <a href="{{ path('app_home') }}" class="text-decoration-none">
-                <i class="bi bi-house-door"></i> Accueil
-            </a>
-        </li>
-        <li class="breadcrumb-item">
-            <a href="{{ path('app_patient_index') }}" class="text-decoration-none">
-                <i class="bi bi-people"></i> Patients
-            </a>
-        </li>
-        <li class="breadcrumb-item active" aria-current="page">
-            <i class="bi bi-person"></i> {{ patient.prenomPatient }} {{ patient.nomPatient }}
-        </li>
-    </ol>
-</nav>
-
 <!-- En-tête de page -->
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="h2 text-primary">
-            <i class="bi bi-person-circle"></i> Détails du Patient
-        </h1>
-        <p class="text-muted mb-0">Informations complètes sur le patient</p>
+    <div class="d-flex align-items-center">
+        <div class="bg-primary text-white rounded-circle p-3 me-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 64px; height: 64px;">
+            <span class="fs-3 fw-bold">{{ patient.prenomPatient|first|upper }}{{ patient.nomPatient|first|upper }}</span>
+        </div>
+        <div>
+            <h1 class="h2 page-title mb-1">
+                {{ patient.prenomPatient }} {{ patient.nomPatient }}
+            </h1>
+            <p class="page-subtitle mb-0">Dossier médical patient #{{ patient.idPatient }}</p>
+        </div>
     </div>
-    <div class="btn-group">
-        <a href="{{ path('app_patient_index') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Retour à la liste
+    <div class="d-flex gap-2">
+        <a href="{{ path('app_patient_index') }}" class="btn btn-outline-secondary shadow-sm">
+            <i class="bi bi-arrow-left me-1"></i> Retour
         </a>
-        <a href="{{ path('app_patient_edit', {'idPatient': patient.idPatient}) }}" class="btn btn-warning">
-            <i class="bi bi-pencil"></i> Modifier
+        <a href="{{ path('app_patient_edit', {'idPatient': patient.idPatient}) }}" class="btn btn-warning shadow-sm">
+            <i class="bi bi-pencil-square me-1"></i> Modifier
         </a>
+        {{ include('patient/_delete_form.html.twig') }}
     </div>
 </div>
 
-<div class="row">
-    <!-- Carte des informations personnelles -->
+<div class="row g-4">
+    <!-- Colonne Principale: Infos et Mutuelles -->
     <div class="col-lg-8">
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="card-title mb-0">
-                    <i class="bi bi-info-circle"></i> Informations Personnelles
+        
+        <!-- Informations Personnelles -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
+                <h5 class="card-title mb-0 text-dark fw-bold">
+                    <i class="bi bi-info-circle text-primary me-2"></i> Informations Personnelles
                 </h5>
             </div>
-            <div class="card-body">
-                <div class="row">
+            <div class="card-body p-4">
+                <div class="row g-4">
                     <div class="col-md-6">
-                        <div class="info-item mb-3">
-                            <label class="fw-bold text-muted small">ID Patient</label>
-                            <div class="fs-6">#{{ patient.idPatient }}</div>
-                        </div>
-                        <div class="info-item mb-3">
-                            <label class="fw-bold text-muted small">Nom</label>
-                            <div class="fs-5 text-dark">{{ patient.nomPatient }}</div>
-                        </div>
-                        <div class="info-item mb-3">
-                            <label class="fw-bold text-muted small">Prénom</label>
-                            <div class="fs-5 text-dark">{{ patient.prenomPatient }}</div>
+                        <div class="d-flex flex-column gap-3">
+                            <div>
+                                <small class="text-muted fw-bold text-uppercase d-block mb-1">Nom complet</small>
+                                <div class="fs-5 text-dark fw-medium">{{ patient.prenomPatient }} {{ patient.nomPatient }}</div>
+                            </div>
+                            <div>
+                                <small class="text-muted fw-bold text-uppercase d-block mb-1">Date de naissance</small>
+                                <div class="fs-6 text-dark">
+                                    {{ patient.dateNaissance ? patient.dateNaissance|date('d/m/Y') : 'Non renseignée' }}
+                                    {% if patient.dateNaissance %}
+                                        <span class="badge bg-light text-dark border ms-2">{{ date().diff(date(patient.dateNaissance)).y }} ans</span>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="info-item mb-3">
-                            <label class="fw-bold text-muted small">Date de Naissance</label>
-                            <div class="fs-6">
-                                {{ patient.dateNaissance ? patient.dateNaissance|date('d/m/Y') : 'Non renseignée' }}
-                                {% if patient.dateNaissance %}
-                                    <br>
-                                    <small class="text-muted">
-                                        (Âge: {{ date().diff(date(patient.dateNaissance)).y }} ans)
-                                    </small>
-                                {% endif %}
+                        <div class="d-flex flex-column gap-3">
+                            <div>
+                                <small class="text-muted fw-bold text-uppercase d-block mb-1">Adresse postale</small>
+                                <div class="fs-6 text-dark">
+                                    <i class="bi bi-geo-alt text-muted me-2"></i>{{ patient.adressePatient }}
+                                </div>
                             </div>
-                        </div>
-                        <div class="info-item mb-3">
-                            <label class="fw-bold text-muted small">Adresse</label>
-                            <div class="fs-6">
-                                <i class="bi bi-geo-alt text-muted me-1"></i>
-                                {{ patient.adressePatient }}
+                            <div>
+                                <small class="text-muted fw-bold text-uppercase d-block mb-1">Identifiant</small>
+                                <div class="fs-6 text-dark font-monospace text-muted">ID-{{ '%06d'|format(patient.idPatient|default(0)) }}</div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Section Mutuelles -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0 text-dark fw-bold">
+                    <i class="bi bi-shield-check text-info me-2"></i> Couverture Santé
+                </h5>
+                <a href="{{ path('app_mutuelle_index') }}" class="btn btn-sm btn-outline-info">Gérer les mutuelles</a>
+            </div>
+            <div class="card-body p-4">
+                {% if patient.mutuelles|length > 0 %}
+                    <div class="row g-3">
+                        {% for mutuelle in patient.mutuelles %}
+                        <div class="col-md-6">
+                            <div class="card border border-info border-opacity-25 bg-info bg-opacity-10 h-100">
+                                <div class="card-body p-3">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="card-title fw-bold text-dark mb-0">
+                                            <i class="bi bi-shield-plus text-info me-2"></i>{{ mutuelle.nomMutuelle }}
+                                        </h6>
+                                        <span class="badge bg-info">{{ mutuelle.tauxRemboursement }}%</span>
+                                    </div>
+                                    <p class="card-text small text-muted mb-0">
+                                        <i class="bi bi-telephone me-1"></i> {{ mutuelle.contactMutuelle }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-shield-slash display-4 text-muted opacity-25 d-block mb-3"></i>
+                        <h6 class="text-muted">Aucune mutuelle associée</h6>
+                        <p class="text-muted small">Ce patient n'a pas de couverture santé enregistrée.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
     </div>
 
-    <!-- Carte des actions rapides -->
+    <!-- Colonne Latérale: Statistiques et Actions -->
     <div class="col-lg-4">
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-info text-white">
-                <h5 class="card-title mb-0">
-                    <i class="bi bi-lightning"></i> Actions Rapides
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="d-grid gap-2">
-                    <a href="{{ path('app_patient_edit', {'idPatient': patient.idPatient}) }}" 
-                       class="btn btn-warning btn-sm">
-                        <i class="bi bi-pencil"></i> Modifier le patient
-                    </a>
-                    <a href="{{ path('app_ordonnance_new') }}" class="btn btn-success btn-sm">
-                        <i class="bi bi-file-text"></i> Nouvelle ordonnance
-                    </a>
-                    <a href="#" class="btn btn-primary btn-sm">
-                        <i class="bi bi-telephone"></i> Contacter
-                    </a>
-                    <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                        <i class="bi bi-trash"></i> Supprimer
-                    </button>
-                </div>
-            </div>
-        </div>
-
         <!-- Carte des statistiques -->
-        <div class="card shadow-sm">
-            <div class="card-header bg-secondary text-white">
-                <h5 class="card-title mb-0">
-                    <i class="bi bi-graph-up"></i> Statistiques
-                </h5>
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body p-4">
+                <h6 class="text-uppercase text-muted fw-bold mb-4">Aperçu du dossier</h6>
+                
+                <div class="d-flex align-items-center mb-4">
+                    <div class="bg-success bg-opacity-10 text-success rounded-3 p-3 me-3">
+                        <i class="bi bi-file-medical fs-3"></i>
+                    </div>
+                    <div>
+                        <div class="fs-3 fw-bold text-dark lh-1">{{ patient.ordonnances|length }}</div>
+                        <small class="text-muted text-uppercase fw-medium">Ordonnances</small>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center">
+                    <div class="bg-info bg-opacity-10 text-info rounded-3 p-3 me-3">
+                        <i class="bi bi-shield-check fs-3"></i>
+                    </div>
+                    <div>
+                        <div class="fs-3 fw-bold text-dark lh-1">{{ patient.mutuelles|length }}</div>
+                        <small class="text-muted text-uppercase fw-medium">Mutuelles</small>
+                    </div>
+                </div>
             </div>
-            <div class="card-body text-center">
-                <div class="row">
-                    <div class="col-6">
-                        <div class="stat-item">
-                            <div class="h4 text-primary mb-1">{{ patient.ordonnances|length }}</div>
-                            <small class="text-muted">Ordonnances</small>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="stat-item">
-                            <div class="h4 text-success mb-1">
-                                {% if patient.mutuelles|length > 0 %}
-                                    {{ patient.mutuelles|length }}
-                                {% else %}
-                                    0
-                                {% endif %}
-                            </div>
-                            <small class="text-muted">Mutuelles</small>
-                        </div>
-                    </div>
+            <div class="card-footer bg-light border-0 p-3">
+                <div class="d-grid">
+                    <a href="{{ path('app_ordonnance_new') }}" class="btn btn-success shadow-sm">
+                        <i class="bi bi-plus-lg me-2"></i>Nouvelle ordonnance
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Section Mutuelles -->
-{% if patient.mutuelles|length > 0 %}
+<!-- Section Ordonnances -->
 <div class="row">
     <div class="col-12">
-        <div class="card shadow-sm">
-            <div class="card-header bg-success text-white">
-                <h5 class="card-title mb-0">
-                    <i class="bi bi-shield-check"></i> Mutuelles Associées
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0 text-dark fw-bold">
+                    <i class="bi bi-file-medical text-success me-2"></i> Historique des Ordonnances
                 </h5>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    {% for mutuelle in patient.mutuelles %}
-                    <div class="col-md-4 mb-3">
-                        <div class="card border-success">
-                            <div class="card-body">
-                                <h6 class="card-title">
-                                    <i class="bi bi-shield-plus text-success"></i>
-                                    {{ mutuelle.nomMutuelle }}
-                                </h6>
-                                <p class="card-text mb-1">
-                                    <small class="text-muted">Taux remboursement:</small>
-                                    <br>
-                                    <span class="badge bg-success fs-6">{{ mutuelle.tauxRemboursement }}%</span>
-                                </p>
-                                <p class="card-text mb-1">
-                                    <small class="text-muted">Contact:</small>
-                                    <br>
-                                    {{ mutuelle.contactMutuelle }}
-                                </p>
-                                <a href="{{ path('app_mutuelle_show', {'id': mutuelle.id}) }}" 
-                                   class="btn btn-outline-success btn-sm mt-2">
-                                    Voir détails
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% else %}
-<!-- Message si aucune mutuelle -->
-<div class="row">
-    <div class="col-12">
-        <div class="card shadow-sm border-warning">
-            <div class="card-body text-center py-4">
-                <i class="bi bi-shield-slash display-4 text-warning mb-3"></i>
-                <h5 class="text-warning">Aucune mutuelle associée</h5>
-                <p class="text-muted">Ce patient n'est associé à aucune mutuelle pour le moment.</p>
-                <a href="#" class="btn btn-outline-warning">
-                    <i class="bi bi-shield-plus"></i> Associer une mutuelle
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
-
-<!-- Section Ordonnances (TOUJOURS AFFICHÉE) -->
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="card shadow-sm">
-            <div class="card-header bg-info text-white">
-                <h5 class="card-title mb-0">
-                    <i class="bi bi-file-text"></i> Ordonnances du Patient
-                    <span class="badge bg-light text-dark ms-2">{{ patient.ordonnances|length }}</span>
-                </h5>
-            </div>
-            <div class="card-body">
+            <div class="card-body p-0">
                 {% if patient.ordonnances|length > 0 %}
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>#ID</th>
-                                <th>Date</th>
-                                <th>Médecin</th>
-                                <th>Durée traitement</th>
-                                <th>Produits prescrits</th>
-                                <th>Actions</th>
+                                <th class="ps-4 border-0">N° Ord.</th>
+                                <th class="border-0">Date</th>
+                                <th class="border-0">Médecin Prescripteur</th>
+                                <th class="border-0">Durée</th>
+                                <th class="border-0">Produits</th>
+                                <th class="border-0 text-center pe-4">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for ordonnance in patient.ordonnances %}
                             <tr>
+                                <td class="ps-4 fw-bold text-dark">#{{ ordonnance.id }}</td>
                                 <td>
-                                    <strong>#{{ ordonnance.id }}</strong>
-                                </td>
-                                <td>
-                                    <span class="badge bg-primary">
-                                        {{ ordonnance.dateOrdonnance ? ordonnance.dateOrdonnance|date('d/m/Y') : 'N/A' }}
+                                    <span class="badge bg-light text-dark border">
+                                        <i class="bi bi-calendar3 me-1"></i>{{ ordonnance.dateOrdonnance ? ordonnance.dateOrdonnance|date('d/m/Y') : 'N/A' }}
                                     </span>
                                 </td>
                                 <td>
                                     {% if ordonnance.medecin %}
-                                        <div class="d-flex align-items-center">
-                                            <i class="bi bi-heart-pulse me-2 text-muted"></i>
-                                            <div>
-                                                <div class="fw-bold">Dr. {{ ordonnance.medecin.prenomMedecin }} {{ ordonnance.medecin.nomMedecin }}</div>
-                                                <small class="text-muted">{{ ordonnance.medecin.contactMedecin }}</small>
-                                            </div>
-                                        </div>
+                                        <div class="fw-medium text-dark">Dr. {{ ordonnance.medecin.prenomMedecin }} {{ ordonnance.medecin.nomMedecin }}</div>
                                     {% else %}
                                         <span class="text-muted fst-italic">Non spécifié</span>
                                     {% endif %}
                                 </td>
+                                <td>{{ ordonnance.dureeTraitement }}</td>
                                 <td>
-                                    <span class="fw-bold">{{ ordonnance.dureeTraitement }}</span>
-                                </td>
-                                <td>
-                                    {% if ordonnance.produits|length > 0 %}
-                                        <div class="produits-list">
-                                            {% for produit in ordonnance.produits %}
-                                                <span class="badge bg-success mb-1" 
-                                                      data-bs-toggle="tooltip" 
-                                                      title="{{ produit.nomProduit }} - {{ produit.dosageProduit }}">
-                                                    {{ produit.nomProduit }}
-                                                </span>
-                                            {% endfor %}
-                                        </div>
-                                    {% else %}
-                                        <span class="badge bg-secondary">Aucun produit</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <div class="btn-group btn-group-sm">
-                                        <a href="{{ path('app_ordonnance_show', {'id': ordonnance.id}) }}" 
-                                           class="btn btn-outline-info" 
-                                           title="Voir les détails">
-                                            <i class="bi bi-eye"></i>
-                                        </a>
-                                        <a href="{{ path('app_ordonnance_edit', {'id': ordonnance.id}) }}" 
-                                           class="btn btn-outline-warning" 
-                                           title="Modifier">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        {% for produit in ordonnance.produits %}
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary border" title="{{ produit.dosageProduit }}">
+                                                {{ produit.nomProduit }}
+                                            </span>
+                                        {% endfor %}
                                     </div>
+                                </td>
+                                <td class="text-center pe-4">
+                                    <a href="{{ path('app_ordonnance_show', {'id': ordonnance.id}) }}" class="btn btn-sm btn-light border" title="Voir">
+                                        <i class="bi bi-eye text-primary"></i>
+                                    </a>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -298,62 +214,14 @@
                     </table>
                 </div>
                 {% else %}
-                <div class="text-center py-4">
-                    <i class="bi bi-file-text display-4 text-muted"></i>
-                    <h5 class="text-muted mt-3">Aucune ordonnance enregistrée</h5>
-                    <p class="text-muted">Ce patient n'a aucune ordonnance pour le moment.</p>
-                    <a href="{{ path('app_ordonnance_new') }}" class="btn btn-info">
-                        <i class="bi bi-plus-circle"></i> Créer une ordonnance
-                    </a>
+                <div class="text-center py-5">
+                    <i class="bi bi-file-medical display-4 text-muted opacity-25 d-block mb-3"></i>
+                    <h5 class="text-muted">Aucune ordonnance</h5>
+                    <p class="text-muted small">L'historique médical de ce patient est vide.</p>
                 </div>
                 {% endif %}
             </div>
         </div>
     </div>
 </div>
-
-<!-- Modal de confirmation de suppression -->
-<div class="modal fade" id="deleteModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title text-danger">
-                    <i class="bi bi-exclamation-triangle"></i> Confirmation de suppression
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Êtes-vous sûr de vouloir supprimer le patient <strong>{{ patient.prenomPatient }} {{ patient.nomPatient }}</strong> ?</p>
-                <p class="text-danger"><small>Cette action est irréversible.</small></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                {{ include('patient/_delete_form.html.twig') }}
-            </div>
-        </div>
-    </div>
-</div>
-
-<style>
-.info-item {
-    border-left: 3px solid #2c5aa0;
-    padding-left: 15px;
-}
-.card {
-    border: none;
-    border-radius: 10px;
-}
-.stat-item {
-    padding: 10px;
-}
-.btn {
-    border-radius: 6px;
-}
-.produits-list .badge {
-    font-size: 0.7rem;
-    margin-right: 2px;
-    margin-bottom: 2px;
-    display: inline-block;
-}
-</style>
 {% endblock %}

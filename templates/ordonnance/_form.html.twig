@@ -1,179 +1,93 @@
 {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true}}) }}
-<div class="card shadow-sm">
-    <div class="card-header bg-primary text-white">
-        <h5 class="card-title mb-0">
-            <i class="bi bi-file-text"></i> 
-            {{ button_label|default('Créer une nouvelle Ordonnance') }}
-        </h5>
-    </div>
-    <div class="card-body">
-        <div class="row">
-            <!-- Colonne Informations de base -->
-            <div class="col-md-6">
-                <h6 class="text-primary mb-3 border-bottom pb-2">
-                    <i class="bi bi-info-circle"></i> Informations de l'Ordonnance
-                </h6>
-                
-                <!-- Date de l'ordonnance -->
-                <div class="mb-3">
-                    {{ form_label(form.date_ordonnance, 'Date de prescription *', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="bi bi-calendar-event"></i>
-                        </span>
-                        {{ form_widget(form.date_ordonnance, {'attr': {
-                            'class': 'form-control',
-                            'placeholder': 'Sélectionnez une date'
-                        }}) }}
-                    </div>
-                    <div class="form-text">Date à laquelle l'ordonnance a été établie</div>
-                    {{ form_errors(form.date_ordonnance) }}
-                </div>
 
-                <!-- Durée du traitement -->
-                <div class="mb-3">
-                    {{ form_label(form.duree_traitement, 'Durée du traitement *', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="bi bi-clock"></i>
-                        </span>
-                        {{ form_widget(form.duree_traitement, {'attr': {
-                            'class': 'form-control',
-                            'placeholder': 'Ex: 7 jours, 1 mois, etc.'
-                        }}) }}
-                    </div>
-                    <div class="form-text">Durée ou consignes particulières du traitement</div>
-                    {{ form_errors(form.duree_traitement) }}
-                </div>
+<div class="row g-4">
+    <!-- Colonne Principale -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
+                <h5 class="card-title mb-0 text-dark fw-bold">
+                    <i class="bi bi-file-medical text-primary me-2"></i> Informations de l'Ordonnance
+                </h5>
             </div>
-
-            <!-- Colonne Relations -->
-            <div class="col-md-6">
-                <h6 class="text-primary mb-3 border-bottom pb-2">
-                    <i class="bi bi-link-45deg"></i> Relations
-                </h6>
-
-                <!-- Patient -->
-                <div class="mb-3">
-                    {{ form_label(form.patient, 'Patient *', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="bi bi-person"></i>
-                        </span>
-                        {{ form_widget(form.patient, {'attr': {
-                            'class': 'form-select'
-                        }}) }}
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            {{ form_widget(form.date_ordonnance, {'attr': {'class': 'form-control', 'placeholder': 'Date de prescription'}}) }}
+                            {{ form_label(form.date_ordonnance, 'Date de prescription *') }}
+                            {{ form_errors(form.date_ordonnance) }}
+                        </div>
                     </div>
-                    <div class="form-text">Sélectionnez le patient concerné</div>
-                    {{ form_errors(form.patient) }}
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            {{ form_widget(form.duree_traitement, {'attr': {'class': 'form-control fw-bold text-dark', 'placeholder': 'Durée (ex: 7 jours)'}}) }}
+                            {{ form_label(form.duree_traitement, 'Durée du traitement *') }}
+                            {{ form_errors(form.duree_traitement) }}
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Médecin -->
+                <hr class="my-4">
+                
+                <h6 class="text-dark fw-bold mb-3"><i class="bi bi-capsule text-primary me-2"></i>Produits Prescrits</h6>
                 <div class="mb-3">
-                    {{ form_label(form.medecin, 'Médecin prescripteur', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="bi bi-heart-pulse"></i>
-                        </span>
-                        {{ form_widget(form.medecin, {'attr': {
-                            'class': 'form-select'
-                        }}) }}
-                    </div>
-                    <div class="form-text">Optionnel - Sélectionnez le médecin prescripteur</div>
-                    {{ form_errors(form.medecin) }}
-                </div>
-
-                <!-- Produits -->
-                <div class="mb-3">
-                    {{ form_label(form.produits, 'Produits prescrits', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="bi bi-capsule"></i>
-                        </span>
-                        {{ form_widget(form.produits, {'attr': {
-                            'class': 'form-select'
-                        }}) }}
-                    </div>
-                    <div class="form-text">Optionnel - Sélectionnez les produits prescrits (Ctrl+clic pour multiple)</div>
+                    {{ form_widget(form.produits, {'attr': {'class': 'form-select', 'size': 6}}) }}
+                    <div class="form-text mt-2"><i class="bi bi-info-circle me-1"></i>Maintenez Ctrl (ou Cmd) pour sélectionner plusieurs produits.</div>
                     {{ form_errors(form.produits) }}
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Section Aide -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="alert alert-info">
-                    <h6 class="alert-heading">
-                        <i class="bi bi-lightbulb"></i> Informations importantes
-                    </h6>
-                    <ul class="mb-0 small">
-                        <li>Les champs marqués d'un astérisque (*) sont obligatoires</li>
-                        <li>Vous pourrez modifier les produits associés ultérieurement</li>
-                        <li>Assurez-vous que le patient et les produits existent dans le système</li>
-                    </ul>
+    <!-- Colonne Latérale -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
+                <h5 class="card-title mb-0 text-dark fw-bold">
+                    <i class="bi bi-link-45deg text-primary me-2"></i> Relations
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="mb-4">
+                    {{ form_label(form.patient, 'Patient *', {'label_attr': {'class': 'fw-medium mb-2 text-dark'}}) }}
+                    {{ form_widget(form.patient, {'attr': {'class': 'form-select'}}) }}
+                    {{ form_errors(form.patient) }}
+                </div>
+
+                <div class="mb-4">
+                    {{ form_label(form.medecin, 'Médecin prescripteur', {'label_attr': {'class': 'fw-medium mb-2 text-dark'}}) }}
+                    {{ form_widget(form.medecin, {'attr': {'class': 'form-select'}}) }}
+                    {{ form_errors(form.medecin) }}
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- Footer du formulaire -->
-    <div class="card-footer bg-light">
-        <div class="d-flex justify-content-between align-items-center">
-            <a href="{{ path('app_ordonnance_index') }}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left"></i> Retour à la liste
-            </a>
-            <div class="btn-group">
-                <button type="reset" class="btn btn-outline-warning">
-                    <i class="bi bi-arrow-clockwise"></i> Réinitialiser
-                </button>
-                <button type="submit" class="btn btn-success">
-                    <i class="bi bi-check-circle"></i> 
-                    {{ button_label|default('Créer l\'Ordonnance') }}
-                </button>
-            </div>
-        </div>
-    </div>
 </div>
+
+<div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+    <a href="{{ path('app_ordonnance_index') }}" class="btn btn-light text-muted fw-bold px-4 py-2">
+        Annuler
+    </a>
+    <button type="submit" class="btn btn-primary fw-bold px-5 py-2 shadow-sm">
+        {{ button_label|default('Enregistrer l\'Ordonnance') }}
+    </button>
+</div>
+
 {{ form_end(form) }}
 
 <style>
-.form-label {
-    color: #2c5aa0;
+/* Surcharge locale pour les floating labels avec validation Symfony */
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+    color: var(--color-primary);
+    transform: scale(.85) translateY(-.5rem) translateX(.15rem);
 }
-.input-group-text {
-    background-color: #f8f9fa;
-    border-right: none;
+.form-floating > .form-control {
+    border-radius: 0.5rem;
+    border: 1px solid #e2e8f0;
 }
-.form-control, .form-select {
-    border-left: none;
-}
-.form-control:focus, .form-select:focus {
-    border-color: #2c5aa0;
-    box-shadow: 0 0 0 0.2rem rgba(44, 90, 160, 0.25);
-}
-.card {
-    border: none;
-    border-radius: 10px;
-}
-.alert {
-    border-radius: 8px;
-    border: none;
+.form-floating > .form-control:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 0.25rem rgba(16, 185, 129, 0.15); /* Vert émeraude */
 }
 </style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Amélioration de l'UX pour les sélecteurs multiples
-    const produitsSelect = document.querySelector('select[name*="[produits]"]');
-    if (produitsSelect && produitsSelect.multiple) {
-        produitsSelect.size = Math.min(produitsSelect.options.length, 6);
-    }
-    
-    // Focus sur le premier champ
-    const firstInput = document.querySelector('input[type="text"], input[type="date"], select');
-    if (firstInput) {
-        firstInput.focus();
-    }
-});
-</script>

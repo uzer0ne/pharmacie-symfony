@@ -3,69 +3,65 @@
 {% block title %}Réapprovisionnement - PharmaGest{% endblock %}
 
 {% block body %}
-<!-- 1. NAVIGATION (Visible uniquement à l'écran) -->
+<!-- NAVIGATION (Visible uniquement à l'écran) -->
 <div class="d-print-none">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ path('app_home') }}" class="text-decoration-none text-dark"><i class="bi bi-house-door"></i> Accueil</a></li>
-            <li class="breadcrumb-item active" aria-current="page"><i class="bi bi-clipboard-data"></i> Réapprovisionnement</li>
-        </ol>
-    </nav>
-
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="h2 text-danger">
-                <i class="bi bi-exclamation-triangle"></i> Alertes de Stock
+            <h1 class="h2 page-title text-danger">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> Alertes de Stock
             </h1>
-            <p class="text-muted mb-0">Liste des produits à commander d'urgence.</p>
+            <p class="page-subtitle mb-0">Liste des produits à commander d'urgence.</p>
         </div>
         <div>
-            <button onclick="window.print()" class="btn btn-primary btn-lg shadow-sm">
-                <i class="bi bi-printer"></i> Imprimer le Bon de Commande
+            <button onclick="window.print()" class="btn btn-primary shadow-sm fw-bold">
+                <i class="bi bi-printer me-2"></i> Imprimer le Bon de Commande
             </button>
         </div>
     </div>
 </div>
 
-<!-- 2. ZONE D'IMPRESSION (C'est ce bloc qui sera isolé) -->
+<!-- ZONE D'IMPRESSION -->
 <div id="section-a-imprimer">
     
     <!-- En-tête spécifique pour l'impression (Caché à l'écran) -->
     <div class="d-none d-print-block mb-4">
-        <div class="row border-bottom pb-3 align-items-end">
+        <div class="row border-bottom pb-4 mb-4 align-items-end">
             <div class="col-6">
-                <h2 class="fw-bold text-uppercase mb-0">PharmaGest</h2>
-                <p class="small text-muted mb-0">123 Rue de la Santé, 75000 Paris</p>
-                <p class="small text-muted">Tél : 01 23 45 67 89</p>
+                <h2 class="fw-bold text-uppercase mb-2 text-dark" style="letter-spacing: 1px;">PharmaGest</h2>
+                <p class="small text-muted mb-1"><i class="bi bi-geo-alt me-1"></i>123 Rue de la Santé, 75000 Paris</p>
+                <p class="small text-muted mb-0"><i class="bi bi-telephone me-1"></i>01 23 45 67 89</p>
             </div>
             <div class="col-6 text-end">
-                <h3 class="fw-bold mb-1">BON DE COMMANDE</h3>
-                <p class="mb-0">Date : {{ "now"|date("d/m/Y") }}</p>
-                <p class="small">Réf : CMD-{{ "now"|date("Ymd") }}</p>
+                <h3 class="fw-bold mb-2 text-primary border-bottom d-inline-block pb-2">BON DE COMMANDE</h3>
+                <p class="mb-1 fw-medium text-dark">Date : {{ "now"|date("d/m/Y") }}</p>
+                <p class="small text-muted mb-0 font-monospace">Réf : CMD-{{ "now"|date("Ymd") }}</p>
             </div>
         </div>
     </div>
 
     <!-- Le Tableau -->
-    <div class="card shadow-sm border-danger border-top-0 border-end-0 border-bottom-0 border-3 print-no-border">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 d-print-none">
-            <h5 class="mb-0 text-danger fw-bold">
-                <i class="bi bi-cart-check"></i> Proposition de Commande
+    <div class="card shadow-sm border-0 border-top border-danger border-4 print-no-border">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center py-4 d-print-none border-bottom">
+            <h5 class="mb-0 text-dark fw-bold">
+                <i class="bi bi-cart-check text-primary me-2"></i> Proposition de Commande
             </h5>
-            <span class="text-muted">Généré automatiquement</span>
+            <span class="badge bg-light text-muted border border-secondary border-opacity-25 rounded-pill px-3 py-2">
+                <i class="bi bi-robot me-1"></i> Généré automatiquement
+            </span>
         </div>
         
         <div class="card-body p-0">
+            {% if produits|length > 0 %}
             <div class="table-responsive">
-                <table class="table table-hover table-striped mb-0 align-middle table-bordered-print">
+                <table class="table table-hover align-middle mb-0 table-bordered-print">
                     <thead class="table-light">
                         <tr>
-                            <th style="width: 15%">Code / Réf</th>
-                            <th style="width: 40%">Désignation Produit</th>
-                            <th class="text-center" style="width: 10%">Stock</th>
-                            <th class="text-center" style="width: 10%">Seuil</th>
-                            <th class="text-center fw-bold table-active" style="width: 15%">QTÉ À COMMANDER</th>
-                            <th class="text-end d-print-none">Action</th>
+                            <th class="ps-4 border-0" style="width: 15%">Code / Réf</th>
+                            <th class="border-0" style="width: 35%">Désignation Produit</th>
+                            <th class="text-center border-0" style="width: 10%">Stock</th>
+                            <th class="text-center border-0" style="width: 10%">Seuil</th>
+                            <th class="text-center fw-bold table-active border-0" style="width: 15%">QTÉ À COMMANDER</th>
+                            <th class="text-end pe-4 border-0 d-print-none">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -74,46 +70,61 @@
                             {% set suggestion = ((produit.stockAlerte * 1.5) - produit.stockActuel)|round(0, 'ceil') %}
                             
                             <tr>
-                                <td class="fw-bold text-muted">{{ produit.codeProduit }}</td>
+                                <td class="ps-4">
+                                    <span class="font-monospace text-muted small bg-light px-2 py-1 rounded border">{{ produit.codeProduit }}</span>
+                                </td>
                                 <td>
-                                    <span class="fw-bold d-block text-dark">{{ produit.nomProduit }}</span>
-                                    <small class="text-muted">{{ produit.dosageProduit }}</small>
+                                    <div class="fw-bold text-dark fs-6">{{ produit.nomProduit }}</div>
+                                    <small class="text-muted d-block mt-1">{{ produit.dosageProduit }}</small>
                                 </td>
-                                <td class="text-center text-danger fw-bold">
-                                    {{ produit.stockActuel }}
+                                <td class="text-center">
+                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 fs-6 px-3 py-2 rounded-pill">
+                                        {{ produit.stockActuel }}
+                                    </span>
                                 </td>
-                                <td class="text-center text-muted small">
+                                <td class="text-center text-muted fw-medium">
                                     {{ produit.stockMinimum }}
                                 </td>
-                                <td class="text-center fw-bold fs-5 bg-light border-start border-end">
-                                    {{ suggestion > 0 ? suggestion : '5' }}
+                                <td class="text-center">
+                                    <div class="bg-primary bg-opacity-10 text-primary fw-bold fs-5 px-3 py-2 rounded border border-primary border-opacity-25 d-inline-block" style="min-width: 60px;">
+                                        {{ suggestion > 0 ? suggestion : '5' }}
+                                    </div>
                                 </td>
-                                <td class="text-end d-print-none">
-                                    <a href="{{ path('app_produit_edit', {'idProduit': produit.id}) }}" class="btn btn-sm btn-outline-secondary">
+                                <td class="text-end pe-4 d-print-none">
+                                    <a href="{{ path('app_produit_edit', {'idProduit': produit.id}) }}" class="btn btn-sm btn-outline-warning shadow-sm" title="Modifier le produit">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                </td>
-                            </tr>
-                        {% else %}
-                            <tr>
-                                <td colspan="6" class="text-center p-5">
-                                    <i class="bi bi-check-circle text-success fs-1 mb-3 d-block"></i>
-                                    <h4 class="text-success">Stock Optimal</h4>
-                                    <p class="text-muted">Aucun produit ne nécessite de réapprovisionnement.</p>
                                 </td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
+            {% else %}
+                <div class="text-center py-5 d-print-none">
+                    <div class="bg-success bg-opacity-10 text-success rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
+                        <i class="bi bi-check-lg fs-1"></i>
+                    </div>
+                    <h4 class="text-dark fw-bold">Stock Optimal</h4>
+                    <p class="text-muted fs-5">Aucun produit ne nécessite de réapprovisionnement pour le moment.</p>
+                    <a href="{{ path('app_produit_index') }}" class="btn btn-outline-primary mt-3">
+                        Voir le catalogue
+                    </a>
+                </div>
+                <div class="d-none d-print-block text-center py-5">
+                    <h3>Aucune commande nécessaire ce jour.</h3>
+                </div>
+            {% endif %}
         </div>
         
         <!-- Pied de page du tableau (Signature) -->
-        <div class="d-none d-print-block mt-5 pt-5">
+        <div class="d-none d-print-block mt-5 pt-5 pb-5">
             <div class="row">
-                <div class="col-6"></div>
-                <div class="col-6 text-center border-top border-dark pt-2">
-                    <p class="mb-5">Signature et Cachet du Pharmacien</p>
+                <div class="col-7"></div>
+                <div class="col-5 text-center">
+                    <div class="border-top border-dark border-2 pt-3 mt-4">
+                        <p class="fw-bold text-uppercase mb-5 pb-5">Signature et Cachet du Pharmacien</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -123,17 +134,11 @@
 <style>
 /* CSS SPÉCIFIQUE POUR L'IMPRESSION */
 @media print {
-    /* 1. On cache TOUT le corps de la page par défaut */
-    body * {
-        visibility: hidden;
-    }
+    body { background-color: #fff !important; }
+    body * { visibility: hidden; }
 
-    /* 2. On rend visible UNIQUEMENT notre bloc d'impression */
-    #section-a-imprimer, #section-a-imprimer * {
-        visibility: visible;
-    }
-
-    /* 3. On repositionne ce bloc tout en haut à gauche de la feuille */
+    #section-a-imprimer, #section-a-imprimer * { visibility: visible; }
+    
     #section-a-imprimer {
         position: absolute;
         left: 0;
@@ -143,22 +148,26 @@
         padding: 0;
     }
 
-    /* 4. Ajustements esthétiques pour le papier */
     .d-print-none { display: none !important; }
     .d-print-block { display: block !important; }
     
-    /* Enlève les ombres et bordures inutiles des cartes */
     .card, .shadow-sm { 
         box-shadow: none !important; 
         border: none !important; 
     }
     
-    /* Ajoute des bordures noires au tableau pour la lisibilité */
+    /* On force des bordures nettes pour l'impression du tableau */
+    .table-bordered-print { border-collapse: collapse !important; width: 100% !important; }
     .table-bordered-print th, .table-bordered-print td {
-        border: 1px solid #000 !important;
+        border: 1px solid #475569 !important;
+        padding: 12px !important;
+    }
+    .table-bordered-print th {
+        background-color: #f8fafc !important;
+        color: #0f172a !important;
     }
     
-    /* Force l'impression des fonds de couleur (gris, etc.) */
+    /* On force les couleurs de fond (ex: cellules grisées) */
     * {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;

@@ -11,6 +11,7 @@ use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\TextType; // Nécessaire pour le champ scan
 
 class VenteType extends AbstractType
 {
@@ -23,6 +24,20 @@ class VenteType extends AbstractType
                 //'attr' => ['class' => 'form-control'],
             //])
             // ->add('montant_total') // Le montant sera calculé dans le contrôleur
+
+            // ⭐ CHAMP SCANNER (Non lié à la base de données)
+            ->add('scan_cip', TextType::class, [
+                'mapped' => false, // Ce champ n'est pas dans l'entité Vente
+                'required' => false,
+                'label' => 'Scanner un produit (Code CIP)',
+                'attr' => [
+                    'placeholder' => 'Cliquez ici et scannez...',
+                    'class' => 'form-control mb-3',
+                    'id' => 'scanner-input', // ID pour le JavaScript
+                    'autofocus' => true, // Le curseur se mettra ici automatiquement
+                    'inputmode' => 'numeric', // ⭐ Affiche le pavé numérique sur mobile
+                ],
+            ])
 
             ->add('patient', EntityType::class, [
                 'class' => Patient::class,

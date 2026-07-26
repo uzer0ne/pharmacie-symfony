@@ -1,4 +1,11 @@
-<form method="post" action="{{ path('app_patient_delete', {'idPatient': patient.idPatient}) }}">
+<form method="post" action="{{ path('app_patient_delete', {'idPatient': patient.idPatient}) }}"
+      class="d-inline-block"
+      data-controller="modal-form"
+      data-action="submit->modal-form#confirm"
+      data-modal-form-title-value="Supprimer le Patient"
+      data-modal-form-text-value="Êtes-vous absolument sûr de vouloir supprimer {{ patient.prenomPatient }} {{ patient.nomPatient }} ? Toutes ses données (dont les ordonnances) seront perdues définitivement.">
     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ patient.idPatient) }}">
-    <button class="btn">Supprimer</button>
+    <button class="btn btn-danger shadow-sm">
+        <i class="bi bi-trash me-1"></i> Supprimer
+    </button>
 </form>

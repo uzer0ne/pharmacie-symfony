@@ -1,13 +1,22 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Produit{% endblock %}
+{% block title %}Modifier Produit - {{ produit.nomProduit }}{% endblock %}
 
 {% block body %}
-    <h1>Edit Produit</h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 page-title">
+            <i class="bi bi-pencil-square text-warning me-2"></i> Modifier Produit
+        </h1>
+        <p class="page-subtitle mb-0">Mise à jour des informations de {{ produit.nomProduit }}</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ path('app_produit_index') }}" class="btn btn-outline-secondary shadow-sm">
+            <i class="bi bi-arrow-left me-1"></i> Retour
+        </a>
+        {{ include('produit/_delete_form.html.twig') }}
+    </div>
+</div>
 
-    {{ include('produit/_form.html.twig', {'button_label': 'Update'}) }}
-
-    <a href="{{ path('app_produit_index') }}">back to list</a>
-
-    {{ include('produit/_delete_form.html.twig') }}
+{{ include('produit/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
 {% endblock %}

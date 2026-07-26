@@ -3,48 +3,97 @@
 {% block title %}Nouvelle Vente - PharmaGest{% endblock %}
 
 {% block body %}
-<!-- Breadcrumb -->
-<nav aria-label="breadcrumb" class="mb-4">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item">
-            <a href="{{ path('app_home') }}" class="text-decoration-none">
-                <i class="bi bi-house-door"></i> Accueil
-            </a>
-        </li>
-        <li class="breadcrumb-item">
-            <a href="{{ path('app_vente_index') }}" class="text-decoration-none">
-                <i class="bi bi-receipt"></i> Ventes
-            </a>
-        </li>
-        <li class="breadcrumb-item active" aria-current="page">
-            <i class="bi bi-cart-plus"></i> Nouvelle Vente
-        </li>
-    </ol>
-</nav>
-
-<!-- Fichier pour les messages flash (succès, erreur) -->
-{{ include('partials/_alertes.html.twig') }}
-
-<!-- En-tête de page -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h1 class="h2 text-success">
-            <i class="bi bi-cart-plus"></i> Nouvelle Vente (Point de Vente)
+        <h1 class="h2 page-title">
+            <i class="bi bi-cart-plus text-primary me-2"></i> Nouvelle Vente
         </h1>
-        <p class="text-muted mb-0">Créez une nouvelle transaction et gérez les stocks.</p>
+        <p class="page-subtitle mb-0">Point de Vente (POS) / Caisse</p>
     </div>
     <div>
-        <a href="{{ path('app_vente_index') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Retour à l'historique
+        <a href="{{ path('app_vente_index') }}" class="btn btn-outline-secondary shadow-sm">
+            <i class="bi bi-arrow-left me-1"></i> Historique
         </a>
     </div>
 </div>
 
-<!-- Formulaire -->
-<div class="row justify-content-center">
-    <div class="col-lg-12">
-        {# Ce fichier inclut le formulaire ET le javascript pour les lignes de vente #}
+<div class="row">
+    <div class="col-12">
         {{ include('vente/_form.html.twig') }}
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Si l'utilisateur avait un champ #scanner-input dans son formulaire
+    const scannerInput = document.getElementById('scanner-input');
+    const collectionHolder = document.querySelector('#ligne-ventes-list') || document.querySelector('.collection-ligne-ventes');
+    
+    if (scannerInput) {
+        scannerInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault(); 
+                traiterScan(this.value);
+                this.value = ''; 
+            }
+        });
+    }
+
+    function traiterScan(cip) {
+        if (!cip) return;
+        fetch('/produit/api/search/' + cip)
+            .then(response => {
+                if (!response.ok) throw new Error('Produit introuvable');
+                return response.json();
+            })
+            .then(data => {
+                ajouterLigneProduit(data);
+            })
+            .catch(error => {
+                // Remplacé l'alert par un affichage plus propre si possible, ou on garde le log
+                console.error(error);
+                alert("Erreur : Ce code CIP n'existe pas en base.");
+            });
+    }
+
+    function ajouterLigneProduit(produitData) {
+        if (!collectionHolder) return;
+        let produitExistant = false;
+        
+        const selects = collectionHolder.querySelectorAll('select.produit-select, select[id$="_produit"]');
+
+        selects.forEach(function(select) {
+            if (select.value == produitData.id) {
+                produitExistant = true;
+                const parentBlock = select.closest('.ligne-vente-item'); 
+                if (parentBlock) {
+                    const inputQuantite = parentBlock.querySelector('input[type="number"], .quantite-input');
+                    if (inputQuantite) {
+                        inputQuantite.value = parseInt(inputQuantite.value || 0) + 1; 
+                    }
+                }
+            }
+        });
+
+        if (produitExistant) return; 
+
+        // S'il n'y est pas, on simule un clic sur le bouton d'ajout
+        const addBtn = document.querySelector('.add-ligne-vente-btn');
+        if (addBtn) {
+            addBtn.click();
+            // On récupère le dernier élément ajouté
+            setTimeout(() => {
+                const items = collectionHolder.querySelectorAll('.ligne-vente-item');
+                const lastItem = items[items.length - 1];
+                if (lastItem) {
+                    const select = lastItem.querySelector('select');
+                    if (select) {
+                        select.value = produitData.id;
+                    }
+                }
+            }, 50);
+        }
+    }
+});
+</script>
 {% endblock %}

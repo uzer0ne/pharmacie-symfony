@@ -3,109 +3,82 @@
 {% block title %}Produits - PharmaGest{% endblock %}
 
 {% block body %}
-<!-- Breadcrumb -->
-<nav aria-label="breadcrumb" class="mb-4">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item">
-            <a href="{{ path('app_home') }}" class="text-decoration-none">
-                <i class="bi bi-house-door"></i> Accueil
-            </a>
-        </li>
-        <li class="breadcrumb-item active" aria-current="page">
-            <i class="bi bi-capsule"></i> Produits
-        </li>
-    </ol>
-</nav>
-
 <!-- En-tête de page -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h1 class="h2 text-primary">
-            <i class="bi bi-capsule"></i> Gestion des Produits
+        <h1 class="h2 page-title">
+            <i class="bi bi-box-seam text-primary me-2"></i> Gestion des Produits
         </h1>
-        <p class="text-muted mb-0">Gérez votre inventaire et vos stocks</p>
+        <p class="page-subtitle mb-0">Gérez votre inventaire et vos stocks</p>
     </div>
     <div>
-        <a href="{{ path('app_home') }}" class="btn btn-outline-secondary me-2">
-            <i class="bi bi-arrow-left"></i> Retour à l'accueil
-        </a>
-        <a href="{{ path('app_produit_new') }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Nouveau Produit
+        <a href="{{ path('app_produit_new') }}" class="btn btn-primary shadow-sm">
+            <i class="bi bi-plus-circle me-1"></i> Nouveau Produit
         </a>
     </div>
 </div>
 
 <!-- Cartes d'alertes -->
-<div class="row mb-4">
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-danger shadow h-100 py-2">
+<div class="row mb-4 g-3">
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 border-start border-danger border-4 h-100">
             <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-0">
-                            <a href="{{ path('app_stock_reapprovisionnement') }}" class="btn btn-outline-danger">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-xs fw-bold text-danger text-uppercase mb-1">
                             Ruptures de stock
-                            </a>
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.rupture }}</div>
+                        <div class="h3 mb-0 fw-bold text-dark">{{ stats.rupture }}</div>
                     </div>
-                    <div class="col-auto">
-                        <i class="bi bi-exclamation-triangle fa-2x text-danger"></i>
-                    </div>
+                    <i class="bi bi-exclamation-triangle fs-1 text-danger opacity-75"></i>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-warning shadow h-100 py-2">
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 border-start border-warning border-4 h-100">
             <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-xs fw-bold text-warning text-uppercase mb-1">
                             Stocks critiques
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.critique }}</div>
+                        <div class="h3 mb-0 fw-bold text-dark">{{ stats.critique }}</div>
                     </div>
-                    <div class="col-auto">
-                        <i class="bi bi-exclamation-circle fa-2x text-warning"></i>
-                    </div>
+                    <i class="bi bi-exclamation-circle fs-1 text-warning opacity-75"></i>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-info shadow h-100 py-2">
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 border-start border-info border-4 h-100">
             <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-xs fw-bold text-info text-uppercase mb-1">
                             Expiration proche
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.expiration }}</div>
+                        <div class="h3 mb-0 fw-bold text-dark">{{ stats.expiration }}</div>
                     </div>
-                    <div class="col-auto">
-                        <i class="bi bi-clock fa-2x text-info"></i>
-                    </div>
+                    <i class="bi bi-clock fs-1 text-info opacity-75"></i>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-success shadow h-100 py-2">
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 border-start border-success border-4 h-100">
             <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-xs fw-bold text-success text-uppercase mb-1">
                             Total produits
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ produits|length }}</div>
+                        <div class="h3 mb-0 fw-bold text-dark">{{ produits|length }}</div>
                     </div>
-                    <div class="col-auto">
-                        <i class="bi bi-capsule fa-2x text-success"></i>
-                    </div>
+                    <i class="bi bi-capsule fs-1 text-success opacity-75"></i>
                 </div>
             </div>
         </div>
@@ -113,33 +86,28 @@
 </div>
 
 <!-- Tableau des produits -->
-<div class="card shadow-sm">
-    <div class="card-header bg-light">
-        <h5 class="card-title mb-0">
-            <i class="bi bi-list-ul"></i> Inventaire des Produits
-        </h5>
-    </div>
-    <div class="card-body">
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
         {% if produits|length > 0 %}
         <div class="table-responsive">
-            <table class="table table-hover table-striped">
-                <thead class="table-primary">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
                     <tr>
-                        <th>Statut</th>
-                        <th>Produit</th>
-                        <th>Code CIP</th>
-                        <th>Dosage</th>
-                        <th>Stock</th>
-                        <th>Prix</th>
-                        <th>Expiration</th>
-                        <th>Actions</th>
+                        <th class="ps-4 border-0">Statut</th>
+                        <th class="border-0">Produit</th>
+                        <th class="border-0">Code CIP</th>
+                        <th class="border-0">Dosage</th>
+                        <th class="border-0" style="min-width: 150px;">Stock</th>
+                        <th class="border-0 text-end">Prix</th>
+                        <th class="border-0">Expiration</th>
+                        <th class="border-0 text-center pe-4">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                 {% for produit in produits %}
-                    <tr class="{% if produit.estEnRupture() %}table-danger{% elseif produit.estStockCritique() %}table-warning{% elseif produit.estStockAlerte() %}table-info{% endif %}">
-                        <td>
-                            <span class="badge bg-{{ produit.couleurStatutStock }}" 
+                    <tr class="{% if produit.estEnRupture() %}table-danger-subtle{% elseif produit.estStockCritique() %}table-warning-subtle{% endif %}">
+                        <td class="ps-4">
+                            <span class="badge bg-{{ produit.couleurStatutStock }} bg-opacity-75" 
                                   data-bs-toggle="tooltip" 
                                   title="{{ produit.messageStatutStock }}">
                                 <i class="bi {{ produit.iconeStatutStock }}"></i>
@@ -153,67 +121,65 @@
                             {% endif %}
                         </td>
                         <td>
-                            <strong>{{ produit.nomProduit }}</strong>
+                            <div class="fw-bold text-dark">{{ produit.nomProduit }}</div>
                             {% if not produit.actif %}
-                                <br><small class="text-muted">(Inactif)</small>
+                                <span class="badge bg-secondary">Inactif</span>
                             {% endif %}
                         </td>
                         <td>
-                            <code class="text-muted">{{ produit.codeCip ?? 'N/A' }}</code>
+                            <span class="font-monospace text-muted">{{ produit.codeCip ?? 'N/A' }}</span>
                         </td>
-                        <td>{{ produit.dosageProduit }}</td>
+                        <td class="text-muted">{{ produit.dosageProduit }}</td>
                         <td>
                             <div class="d-flex align-items-center">
-                                <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                                <div class="progress flex-grow-1 me-2" style="height: 6px;">
                                     {% set pourcentageStock = min(100, (produit.stockActuel / produit.stockAlerte) * 100) %}
                                     <div class="progress-bar bg-{{ produit.couleurStatutStock }}" 
                                          style="width: {{ pourcentageStock }}%">
                                     </div>
                                 </div>
-                                <span class="fw-bold">{{ produit.stockActuel }}</span>
+                                <span class="fw-bold fs-6">{{ produit.stockActuel }}</span>
                             </div>
-                            <small class="text-muted">
-                                Seuil: {{ produit.stockMinimum }}/{{ produit.stockAlerte }}
+                            <small class="text-muted" style="font-size: 0.75rem;">
+                                Min: {{ produit.stockMinimum }} | Alerte: {{ produit.stockAlerte }}
                             </small>
                         </td>
-                        <td>
-                            <div class="fw-bold text-success">{{ produit.prixProduit }} €</div>
+                        <td class="text-end">
+                            <div class="fw-bold">{{ produit.prixProduit|number_format(2, ',', ' ') }} €</div>
                             {% if produit.prixAchat %}
-                                <small class="text-muted">
-                                    Marge: {{ produit.marge }} € ({{ produit.tauxMarge }}%)
+                                <small class="text-success" style="font-size: 0.75rem;" data-bs-toggle="tooltip" title="Marge: {{ produit.marge }}€">
+                                    {{ produit.tauxMarge }}% marge
                                 </small>
                             {% endif %}
                         </td>
                         <td>
-                            <span class="{% if produit.expireBientot(30) %}text-danger fw-bold{% endif %}">
+                            <span class="{% if produit.expireBientot(30) %}text-danger fw-bold{% else %}text-muted{% endif %}">
                                 {{ produit.dateExpiration|date('d/m/Y') }}
                             </span>
-                            {% if produit.expireBientot(30) %}
-                                <br>
-                                <small class="text-danger">
-                                    J-{{ produit.joursAvantExpiration }}
-                                </small>
-                            {% endif %}
                         </td>
-                        <td>
-                            <div class="btn-group btn-group-sm">
-                                <a href="{{ path('app_produit_show', {'idProduit': produit.id}) }}" 
-                                   class="btn btn-outline-info" 
-                                   title="Voir les détails">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                                <a href="{{ path('app_produit_edit', {'idProduit': produit.id}) }}" 
-                                   class="btn btn-outline-warning" 
-                                   title="Modifier">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <button type="button" 
-                                        class="btn btn-outline-success" 
-                                        title="Ajouter au stock"
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#ajouterStockModal{{ produit.id }}">
-                                    <i class="bi bi-plus-lg"></i>
+                        <td class="text-center pe-4">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light border-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-three-dots-vertical"></i>
                                 </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                    <li>
+                                        <a class="dropdown-item py-2" href="{{ path('app_produit_show', {'idProduit': produit.id}) }}">
+                                            <i class="bi bi-eye text-primary me-2"></i> Voir les détails
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item py-2" href="{{ path('app_produit_edit', {'idProduit': produit.id}) }}">
+                                            <i class="bi bi-pencil text-warning me-2"></i> Modifier
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <button type="button" class="dropdown-item py-2" data-bs-toggle="modal" data-bs-target="#ajouterStockModal{{ produit.id }}">
+                                            <i class="bi bi-plus-lg text-success me-2"></i> Ajouter au stock
+                                        </button>
+                                    </li>
+                                </ul>
                             </div>
                         </td>
                     </tr>
@@ -221,20 +187,23 @@
                 </tbody>
             </table>
         </div>
+        
+        <div class="px-4 pb-3">
+            {{ include('partials/_pagination.html.twig', { items: produits }) }}
+        </div>
         {% else %}
         <div class="text-center py-5">
-            <i class="bi bi-capsule display-1 text-muted"></i>
+            <i class="bi bi-box-seam display-1 text-muted opacity-25"></i>
             <h4 class="text-muted mt-3">Aucun produit enregistré</h4>
-            <p class="text-muted">Commencez par ajouter votre premier produit.</p>
-            <a href="{{ path('app_produit_new') }}" class="btn btn-primary">
-                <i class="bi bi-plus-circle"></i> Ajouter un Produit
+            <p class="text-muted mb-4">Commencez par ajouter votre premier produit pour gérer votre stock.</p>
+            <a href="{{ path('app_produit_new') }}" class="btn btn-primary shadow-sm">
+                <i class="bi bi-plus-circle me-1"></i> Ajouter un Produit
             </a>
         </div>
         {% endif %}
     </div>
 </div>
 
-<!-- Script pour les tooltips -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -243,19 +212,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-
-<style>
-.progress {
-    min-width: 80px;
-}
-.table > tbody > tr.table-danger:hover > td {
-    background-color: #f8d7da !important;
-}
-.table > tbody > tr.table-warning:hover > td {
-    background-color: #fff3cd !important;
-}
-.table > tbody > tr.table-info:hover > td {
-    background-color: #d1ecf1 !important;
-}
-</style>
 {% endblock %}

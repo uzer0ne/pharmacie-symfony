@@ -1,4 +1,11 @@
-<form method="post" action="{{ path('app_mutuelle_delete', {'id': mutuelle.id}) }}">
+<form method="post" action="{{ path('app_mutuelle_delete', {'id': mutuelle.id}) }}"
+      class="d-inline-block m-0"
+      data-controller="modal-form"
+      data-action="submit->modal-form#confirm"
+      data-modal-form-title-value="Supprimer la Mutuelle"
+      data-modal-form-text-value="Êtes-vous absolument sûr de vouloir supprimer la mutuelle {{ mutuelle.nomMutuelle }} ? Ses patients associés perdront cette couverture dans le système.">
     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ mutuelle.id) }}">
-    <button class="btn">Supprimer</button>
+    <button class="btn btn-danger shadow-sm">
+        <i class="bi bi-trash me-1"></i> Supprimer
+    </button>
 </form>

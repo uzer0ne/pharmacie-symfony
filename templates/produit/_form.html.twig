@@ -1,257 +1,161 @@
 {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true}}) }}
-<div class="card shadow-sm">
-    {# Changement: bg-primary -> bg-success #}
-    <div class="card-header bg-success text-white">
-        <h5 class="card-title mb-0">
-            <i class="bi bi-plus-square"></i> 
-            {{ button_label|default('Créer un nouveau Produit') }}
-        </h5>
-    </div>
-    <div class="card-body">
-        
-        <!-- Ligne 1: Infos principales et Tarifs/Dates -->
-        <div class="row">
-            
-            <!-- Colonne Informations Produit -->
-            <div class="col-md-6">
-                {# Changement: text-primary -> text-success #}
-                <h6 class="text-success mb-3 border-bottom pb-2">
-                    <i class="bi bi-box-seam"></i> Informations Produit
-                </h6>
-                
-                <!-- Nom du produit -->
-                <div class="mb-3">
-                    {{ form_label(form.nom_produit, 'Nom du Produit *', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-box-seam"></i></span>
-                        {{ form_widget(form.nom_produit, {'attr': {
-                            'class': 'form-control',
-                            'placeholder': 'Entrez le nom commercial'
-                        }}) }}
-                    </div>
-                    {{ form_errors(form.nom_produit) }}
-                </div>
 
-                <!-- Code Produit -->
-                <div class="mb-3">
-                    {{ form_label(form.code_produit, 'Code Interne / SKU *', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
-                        {{ form_widget(form.code_produit, {'attr': {
-                            'class': 'form-control',
-                            'placeholder': 'ex: MED-00123'
-                        }}) }}
+<div class="row g-4">
+    <!-- Colonne Principale -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
+                <h5 class="card-title mb-0 text-dark fw-bold">
+                    <i class="bi bi-box-seam text-primary me-2"></i> Informations générales
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <div class="form-floating mb-3">
+                            {{ form_widget(form.nom_produit, {'attr': {'class': 'form-control form-control-lg fw-bold text-dark', 'placeholder': 'Nom commercial du produit'}}) }}
+                            {{ form_label(form.nom_produit, 'Nom commercial du produit *') }}
+                            {{ form_errors(form.nom_produit) }}
+                        </div>
                     </div>
-                    {{ form_errors(form.code_produit) }}
-                </div>
 
-                <!-- Code CIP (Optionnel) -->
-                <div class="mb-3">
-                    {{ form_label(form.code_cip, 'Code CIP (Optionnel)', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-barcode"></i></span>
-                        {{ form_widget(form.code_cip, {'attr': {
-                            'class': 'form-control',
-                            'placeholder': 'ex: 34009...'
-                        }}) }}
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            {{ form_widget(form.code_produit, {'attr': {'class': 'form-control font-monospace', 'placeholder': 'Code Interne'}}) }}
+                            {{ form_label(form.code_produit, 'Code Interne (SKU) *') }}
+                            {{ form_errors(form.code_produit) }}
+                        </div>
                     </div>
-                    {{ form_errors(form.code_cip) }}
-                </div>
 
-                <!-- Dosage -->
-                <div class="mb-3">
-                    {{ form_label(form.dosage_produit, 'Dosage *', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-beaker"></i></span>
-                        {{ form_widget(form.dosage_produit, {'attr': {
-                            'class': 'form-control',
-                            'placeholder': 'ex: 500mg, 10ml'
-                        }}) }}
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            {{ form_widget(form.code_cip, {'attr': {'class': 'form-control font-monospace', 'placeholder': 'Code CIP'}}) }}
+                            {{ form_label(form.code_cip, 'Code CIP (Code-barres)') }}
+                            {{ form_errors(form.code_cip) }}
+                        </div>
                     </div>
-                    {{ form_errors(form.dosage_produit) }}
+
+                    <div class="col-md-12">
+                        <div class="form-floating mb-3">
+                            {{ form_widget(form.dosage_produit, {'attr': {'class': 'form-control', 'placeholder': 'Dosage'}}) }}
+                            {{ form_label(form.dosage_produit, 'Dosage (ex: 500mg, 10ml) *') }}
+                            {{ form_errors(form.dosage_produit) }}
+                        </div>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Colonne Tarifs & Dates -->
-            <div class="col-md-6">
-                {# Changement: text-primary -> text-success #}
-                <h6 class="text-success mb-3 border-bottom pb-2">
-                    <i class="bi bi-calendar-check"></i> Tarifs & Dates
-                </h6>
-
-                <!-- Prix de Vente -->
-                <div class="mb-3">
-                    {{ form_label(form.prix_produit, 'Prix de Vente *', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-currency-euro"></i></span>
-                        {{ form_widget(form.prix_produit, {'attr': {
-                            'class': 'form-control',
-                            'placeholder': 'ex: 12.50',
-                            'type': 'number',
-                            'step': '0.01'
-                        }}) }}
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
+                <h5 class="card-title mb-0 text-dark fw-bold">
+                    <i class="bi bi-calendar3 text-primary me-2"></i> Cycle de vie
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            {{ form_widget(form.date_fabrication, {'attr': {'class': 'form-control', 'placeholder': 'Date'}}) }}
+                            {{ form_label(form.date_fabrication, 'Date de fabrication *') }}
+                            {{ form_errors(form.date_fabrication) }}
+                        </div>
                     </div>
-                    {{ form_errors(form.prix_produit) }}
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            {{ form_widget(form.date_expiration, {'attr': {'class': 'form-control', 'placeholder': 'Date'}}) }}
+                            {{ form_label(form.date_expiration, "Date d'expiration *") }}
+                            {{ form_errors(form.date_expiration) }}
+                        </div>
+                    </div>
                 </div>
+            </div>
+        </div>
+    </div>
 
-                <!-- Prix d'Achat (Optionnel) -->
-                <div class="mb-3">
-                    {{ form_label(form.prix_achat, "Prix d'Achat (Optionnel)", {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-cart-plus"></i></span>
-                        {{ form_widget(form.prix_achat, {'attr': {
-                            'class': 'form-control',
-                            'placeholder': 'ex: 8.20',
-                            'type': 'number',
-                            'step': '0.01'
-                        }}) }}
-                    </div>
+    <!-- Colonne Latérale -->
+    <div class="col-lg-4">
+        <!-- Section Tarification -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
+                <h5 class="card-title mb-0 text-dark fw-bold">
+                    <i class="bi bi-tag text-primary me-2"></i> Tarification
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="form-floating mb-3">
+                    {{ form_widget(form.prix_achat, {'attr': {'class': 'form-control', 'placeholder': 'Prix achat'}}) }}
+                    {{ form_label(form.prix_achat, "Prix d'achat HT (€)") }}
                     {{ form_errors(form.prix_achat) }}
                 </div>
-
-                <!-- Date de Fabrication -->
-                <div class="mb-3">
-                    {{ form_label(form.date_fabrication, 'Date de Fabrication *', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-calendar-plus"></i></span>
-                        {{ form_widget(form.date_fabrication, {'attr': {
-                            'class': 'form-control'
-                        }}) }}
-                    </div>
-                    {{ form_errors(form.date_fabrication) }}
-                </div>
-
-                <!-- Date d'Expiration -->
-                <div class="mb-3">
-                    {{ form_label(form.date_expiration, "Date d'Expiration *", {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-calendar-x"></i></span>
-                        {{ form_widget(form.date_expiration, {'attr': {
-                            'class': 'form-control'
-                        }}) }}
-                    </div>
-                    {{ form_errors(form.date_expiration) }}
+                
+                <div class="form-floating mb-3">
+                    {{ form_widget(form.prix_produit, {'attr': {'class': 'form-control fs-5 fw-bold text-success', 'placeholder': 'Prix vente'}}) }}
+                    {{ form_label(form.prix_produit, 'Prix de vente TTC (€) *') }}
+                    {{ form_errors(form.prix_produit) }}
                 </div>
             </div>
         </div>
 
-        <!-- Ligne 2: Paramètres de Stock -->
-        <hr class="my-4">
-        <div class="row">
-             {# Changement: text-primary -> text-success #}
-             <h6 class="text-success mb-3 border-bottom pb-2">
-                <i class="bi bi-boxes"></i> Paramètres de Stock
-            </h6>
-
-            <!-- Stock Actuel -->
-            <div class="col-md-3">
-                {{ form_label(form.stock_actuel, 'Stock Initial *', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-boxes"></i></span>
-                    {{ form_widget(form.stock_actuel, {'attr': {
-                        'class': 'form-control',
-                        'type': 'number',
-                        'step': '1'
-                    }}) }}
+        <!-- Section Stock -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
+                <h5 class="card-title mb-0 text-dark fw-bold">
+                    <i class="bi bi-boxes text-primary me-2"></i> Gestion des Stocks
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="form-floating mb-3">
+                    {{ form_widget(form.stock_actuel, {'attr': {'class': 'form-control', 'placeholder': 'Stock initial'}}) }}
+                    {{ form_label(form.stock_actuel, 'Stock actuel *') }}
+                    {{ form_errors(form.stock_actuel) }}
                 </div>
-                {{ form_errors(form.stock_actuel) }}
-            </div>
-
-            <!-- Stock Alerte -->
-            <div class="col-md-3">
-                {{ form_label(form.stock_alerte, "Seuil d'Alerte *", {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-exclamation-triangle"></i></span>
-                    {{ form_widget(form.stock_alerte, {'attr': {
-                        'class': 'form-control',
-                        'type': 'number',
-                        'step': '1'
-                    }}) }}
+                <div class="form-floating mb-3">
+                    {{ form_widget(form.stock_alerte, {'attr': {'class': 'form-control border-warning', 'placeholder': 'Seuil alerte'}}) }}
+                    {{ form_label(form.stock_alerte, "Seuil d'alerte *") }}
+                    {{ form_errors(form.stock_alerte) }}
                 </div>
-                {{ form_errors(form.stock_alerte) }}
-            </div>
-
-            <!-- Stock Minimum -->
-            <div class="col-md-3">
-                {{ form_label(form.stock_minimum, 'Seuil Critique *', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-graph-down-arrow"></i></span>
-                    {{ form_widget(form.stock_minimum, {'attr': {
-                        'class': 'form-control',
-                        'type': 'number',
-                        'step': '1'
-                    }}) }}
+                <div class="form-floating mb-3">
+                    {{ form_widget(form.stock_minimum, {'attr': {'class': 'form-control border-danger', 'placeholder': 'Seuil critique'}}) }}
+                    {{ form_label(form.stock_minimum, 'Seuil critique (Rupture) *') }}
+                    {{ form_errors(form.stock_minimum) }}
                 </div>
-                {{ form_errors(form.stock_minimum) }}
+                
+                <hr class="my-4">
+                
+                <div class="form-check form-switch fs-5">
+                    {{ form_widget(form.actif, {'attr': {'class': 'form-check-input'}}) }}
+                    {{ form_label(form.actif, 'Produit disponible à la vente', {'label_attr': {'class': 'form-check-label text-dark'}}) }}
+                </div>
             </div>
-            
-            <!-- Actif (Checkbox) -->
-            <div class="col-md-3 d-flex align-items-end pb-2">
-                 {{ form_row(form.actif, {
-                    'label': 'Produit Actif',
-                    'attr': {'class': 'form-check-input'}
-                }) }}
-            </div>
-        </div>
-
-    </div>
-    
-    <!-- Footer du formulaire -->
-    <div class="card-footer bg-light">
-        <div class="d-flex justify-content-between align-items-center">
-            <a href="{{ path('app_produit_index') }}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left"></i> Retour à la liste
-            </a>
-            {# Le bouton de soumission principal reste 'btn-success' #}
-            <button type="submit" class="btn btn-success">
-                <i class="bi bi-check-circle"></i> 
-                {{ button_label|default('Créer le Produit') }}
-            </button>
         </div>
     </div>
 </div>
+
+<div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+    <a href="{{ path('app_produit_index') }}" class="btn btn-light text-muted fw-bold px-4 py-2">
+        Annuler
+    </a>
+    <button type="submit" class="btn btn-primary fw-bold px-5 py-2 shadow-sm">
+        {{ button_label|default('Enregistrer le Produit') }}
+    </button>
+</div>
+
 {{ form_end(form) }}
 
-{# CSS mis à jour pour une palette de verts #}
 <style>
-.form-label {
-    /* Changement: couleur bleue -> couleur verte (Bootstrap success) */
-    color: #146c43; /* Un vert foncé pour les libellés */
+/* Surcharge locale pour les floating labels avec validation Symfony */
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+    color: var(--color-primary);
+    transform: scale(.85) translateY(-.5rem) translateX(.15rem);
 }
-.input-group-text {
-    background-color: #f8f9fa;
-    border-right: none;
+.form-floating > .form-control {
+    border-radius: 0.5rem;
+    border: 1px solid #e2e8f0;
 }
-.form-check {
-    padding-left: 2.5em;
-}
-.form-check .form-check-input {
-    float: none;
-    margin-right: 0.5em;
-}
-.form-check-label {
-    font-weight: bold;
-    color: #2ca06aff; /* Vert foncé */
-}
-
-.form-control {
-    border-left: none;
-}
-.input-group > .form-control[type="date"],
-.input-group > .form-control[type="number"] {
-    border-left: none;
-}
-.form-check-input {
-    border-left: var(--bs-border-width) solid var(--bs-border-color);
-}
-
-.form-control:focus {
-    /* Changement: box-shadow bleue -> box-shadow verte */
-    border-color: #198754; /* Vert Bootstrap standard */
-    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
-}
-.card {
-    border: none;
-    border-radius: 10px;
+.form-floating > .form-control:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 0.25rem rgba(16, 185, 129, 0.15);
 }
 </style>

@@ -1,4 +1,11 @@
-<form method="post" action="{{ path('app_medecin_delete', {'idMedecin': medecin.idMedecin}) }}" onsubmit="return confirm('Are you sure you want to delete this item?');">
-    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ medecin.idMedecin) }}">
-    <button class="btn">Delete</button>
+<form method="post" action="{{ path('app_medecin_delete', {'idMedecin': medecin.id}) }}"
+      class="d-inline-block"
+      data-controller="modal-form"
+      data-action="submit->modal-form#confirm"
+      data-modal-form-title-value="Supprimer le Médecin"
+      data-modal-form-text-value="Êtes-vous sûr de vouloir supprimer le Dr. {{ medecin.prenomMedecin }} {{ medecin.nomMedecin }} ? Cette action est irréversible.">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ medecin.id) }}">
+    <button class="btn btn-danger shadow-sm">
+        <i class="bi bi-trash me-1"></i> Supprimer
+    </button>
 </form>

@@ -1,4 +1,78 @@
-{{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
+{{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true}}) }}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
+                <h5 class="card-title mb-0 text-dark fw-bold">
+                    <i class="bi bi-person-badge text-primary me-2"></i> Fiche Médecin
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            {{ form_widget(form.prenom_medecin, {'attr': {'class': 'form-control', 'placeholder': 'Prénom'}}) }}
+                            {{ form_label(form.prenom_medecin, 'Prénom *') }}
+                            {{ form_errors(form.prenom_medecin) }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            {{ form_widget(form.nom_medecin, {'attr': {'class': 'form-control fw-bold text-dark', 'placeholder': 'Nom'}}) }}
+                            {{ form_label(form.nom_medecin, 'Nom *') }}
+                            {{ form_errors(form.nom_medecin) }}
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+                
+                <h6 class="text-dark fw-bold mb-3"><i class="bi bi-telephone text-primary me-2"></i>Contact & Cabinet</h6>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="form-floating mb-3">
+                            {{ form_widget(form.contact_medecin, {'attr': {'class': 'form-control', 'placeholder': 'Téléphone / Email'}}) }}
+                            {{ form_label(form.contact_medecin, 'Contact (Téléphone / Email)') }}
+                            {{ form_errors(form.contact_medecin) }}
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-floating mb-3">
+                            {{ form_widget(form.adresse_medecin, {'attr': {'class': 'form-control', 'placeholder': 'Adresse complète', 'style': 'height: 100px'}}) }}
+                            {{ form_label(form.adresse_medecin, 'Adresse du cabinet') }}
+                            {{ form_errors(form.adresse_medecin) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+            <a href="{{ path('app_medecin_index') }}" class="btn btn-light text-muted fw-bold px-4 py-2">
+                Annuler
+            </a>
+            <button type="submit" class="btn btn-primary fw-bold px-5 py-2 shadow-sm">
+                {{ button_label|default('Enregistrer le Médecin') }}
+            </button>
+        </div>
+    </div>
+</div>
+
 {{ form_end(form) }}
+
+<style>
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+    color: var(--color-primary);
+    transform: scale(.85) translateY(-.5rem) translateX(.15rem);
+}
+.form-floating > .form-control {
+    border-radius: 0.5rem;
+    border: 1px solid #e2e8f0;
+}
+.form-floating > .form-control:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 0.25rem rgba(16, 185, 129, 0.15);
+}
+</style>

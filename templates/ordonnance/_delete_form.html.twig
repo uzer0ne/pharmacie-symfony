@@ -1,4 +1,11 @@
-<form method="post" action="{{ path('app_ordonnance_delete', {'id': ordonnance.id}) }}">
+<form method="post" action="{{ path('app_ordonnance_delete', {'id': ordonnance.id}) }}"
+      class="d-inline-block m-0"
+      data-controller="modal-form"
+      data-action="submit->modal-form#confirm"
+      data-modal-form-title-value="Supprimer l'Ordonnance"
+      data-modal-form-text-value="Êtes-vous absolument sûr de vouloir supprimer l'ordonnance n°{{ ordonnance.id }} ? Cette action est irréversible.">
     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ ordonnance.id) }}">
-    <button class="btn">Delete</button>
+    <button class="btn btn-danger btn-sm shadow-sm">
+        <i class="bi bi-trash me-1"></i> Supprimer
+    </button>
 </form>

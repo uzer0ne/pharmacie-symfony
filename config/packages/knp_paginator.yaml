@@ -1,0 +1,13 @@
+knp_paginator:
+    page_range: 5                       # Nombre de pages affichées dans la navigation
+    default_options:
+        page_name: page                 # Nom du paramètre GET pour la page
+        sort_field_name: sort           # Nom du paramètre GET pour le tri
+        sort_direction_name: direction  # Nom du paramètre GET pour la direction du tri
+        distinct: true                  # Résultats distincts
+        filter_field_name: filterField
+        filter_value_name: filterValue
+    template:
+        pagination: '@KnpPaginator/Pagination/bootstrap_v5_pagination.html.twig'
+        sortable: '@KnpPaginator/Pagination/bootstrap_v5_bi_sortable.html.twig'
+        filtration: '@KnpPaginator/Pagination/bootstrap_v5_filtration.html.twig'

@@ -6,6 +6,7 @@ use App\Entity\LigneVente;
 use App\Entity\Produit;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Doctrine\ORM\EntityRepository; // Nécessaire pour le query_builder
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -17,6 +18,12 @@ class LigneVenteType extends AbstractType
         $builder
             ->add('produit', EntityType::class, [
                 'class' => Produit::class,
+                'query_builder' => function (EntityRepository $er) {
+                    return $er->createQueryBuilder('p')
+                        ->where('p.actif = :val') // Supposant qu'il y a un champ 'actif'
+                        ->setParameter('val', true)
+                        ->orderBy('p.nom_produit', 'ASC');
+                },
                 'choice_label' => 'nom_produit', // Affiche le nom du produit dans la liste
                 'label' => 'Produit',
                 'placeholder' => 'Choisir un produit',

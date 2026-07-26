@@ -8,19 +8,30 @@ use App\Repository\OrdonnanceRepository;
 use App\Repository\PatientRepository;
 use App\Repository\ProduitRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/ordonnance')]
 class OrdonnanceController extends AbstractController
 {
     #[Route('/', name: 'app_ordonnance_index', methods: ['GET'])]
-    public function index(OrdonnanceRepository $repo): Response
+    public function index(OrdonnanceRepository $repo, PaginatorInterface $paginator, Request $request): Response
     {
+        $query = $repo->createQueryBuilder('o')
+            ->orderBy('o.date_ordonnance', 'DESC')
+            ->getQuery();
+
+        $ordonnances = $paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1),
+            15
+        );
+
         return $this->render('ordonnance/index.html.twig', [
-            'ordonnances' => $repo->findAll(),
+            'ordonnances' => $ordonnances,
         ]);
     }
 
@@ -43,7 +54,7 @@ class OrdonnanceController extends AbstractController
 
         return $this->render('ordonnance/new.html.twig', [
             'ordonnance' => $ordonnance,
-            'form' => $form->createView(), // ⭐ CORRECTION : ajouter createView()
+            'form' => $form,
         ]);
     }
 
@@ -69,7 +80,7 @@ class OrdonnanceController extends AbstractController
 
         return $this->render('ordonnance/edit.html.twig', [
             'ordonnance' => $ordonnance,
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
     }
 

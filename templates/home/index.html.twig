@@ -3,229 +3,166 @@
 {% block title %}Tableau de Bord - PharmaGest{% endblock %}
 
 {% block body %}
-<div class="container-fluid">
-    <div class="row">
-        
-        <!-- 1. SIDEBAR (Barre latérale) -->
-        <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse border-end min-vh-100">
-            <div class="position-sticky pt-3">
-                
-                <!-- LIEN ACCUEIL -->
-                <ul class="nav flex-column mb-2">
-                    <li class="nav-item">
-                        <a class="nav-link active mb-2 fs-6" href="{{ path('app_home') }}">
-                            <i class="bi bi-speedometer2 me-2"></i>
-                            Tableau de Bord
-                        </a>
-                    </li>
-                </ul>
-
-                <!-- MODULE CAISSE (Mis en avant) -->
-                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted text-uppercase">
-                    <span>Caisse</span>
-                </h6>
-                <ul class="nav flex-column mb-2">
-                    <li class="nav-item">
-                        <a class="nav-link bg-warning bg-opacity-10 text-dark fw-bold rounded mx-2 mb-1" href="{{ path('app_vente_new') }}">
-                            <i class="bi bi-cart-plus text-warning me-2"></i> Nouvelle Vente
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link link-dark mx-2" href="{{ path('app_vente_index') }}">
-                            <i class="bi bi-clock-history text-warning me-2"></i> Historique
-                        </a>
-                    </li>
-                </ul>
-
-                <!-- MODULES DE GESTION (Menus Déroulants) -->
-                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
-                    <span>Gestion</span>
-                </h6>
-                
-                <ul class="nav flex-column">
-                    
-                    <!-- 1. PRODUITS / STOCKS (Nouveau) -->
-                    <li class="nav-item">
-                        <a class="nav-link link-dark d-flex justify-content-between align-items-center collapsed" 
-                           data-bs-toggle="collapse" href="#submenu-produits" role="button" aria-expanded="false">
-                            <span><i class="bi bi-box-seam text-purple me-2" style="color: #6f42c1;"></i> Produits</span>
-                            <i class="bi bi-chevron-down small"></i>
-                        </a>
-                        <div class="collapse" id="submenu-produits">
-                            <ul class="nav flex-column ms-3 border-start border-2 ps-1">
-                                <li class="nav-item">
-                                    <a class="nav-link link-secondary py-1" href="{{ path('app_produit_index') }}">Liste des produits</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link link-secondary py-1" href="{{ path('app_produit_new') }}">Ajouter un produit</a>
-                                </li>
-                                <li class="nav-item">
-                                    {# Si vous avez créé le contrôleur de stock, sinon mettez '#' #}
-                                    <a class="nav-link link-danger py-1" href="{{ path('app_stock_reapprovisionnement') }}">
-                                        <i class="bi bi-exclamation-triangle me-1"></i> Alertes Stock
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
-
-                    <!-- 2. PATIENTS -->
-                    <li class="nav-item">
-                        <a class="nav-link link-dark d-flex justify-content-between align-items-center collapsed" 
-                           data-bs-toggle="collapse" href="#submenu-patients" role="button" aria-expanded="false">
-                            <span><i class="bi bi-people text-primary me-2"></i> Patients</span>
-                            <i class="bi bi-chevron-down small"></i>
-                        </a>
-                        <div class="collapse" id="submenu-patients">
-                            <ul class="nav flex-column ms-3 border-start border-2 ps-1">
-                                <li class="nav-item">
-                                    <a class="nav-link link-secondary py-1" href="{{ path('app_patient_index') }}">Annuaire</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link link-secondary py-1" href="{{ path('app_patient_new') }}">Nouveau Patient</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
-
-                    <!-- 3. ORDONNANCES -->
-                    <li class="nav-item">
-                        <a class="nav-link link-dark d-flex justify-content-between align-items-center collapsed" 
-                           data-bs-toggle="collapse" href="#submenu-ordonnances" role="button" aria-expanded="false">
-                            <span><i class="bi bi-file-text text-info me-2"></i> Ordonnances</span>
-                            <i class="bi bi-chevron-down small"></i>
-                        </a>
-                        <div class="collapse" id="submenu-ordonnances">
-                            <ul class="nav flex-column ms-3 border-start border-2 ps-1">
-                                <li class="nav-item">
-                                    {# Assurez-vous que ces routes existent ou mettez '#' #}
-                                    <a class="nav-link link-secondary py-1" href="{{ path('app_ordonnance_index') }}">Historique</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link link-secondary py-1" href="{{ path('app_ordonnance_new') }}">Saisir Ordonnance</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
-
-                    <!-- 4. MUTUELLES -->
-                    <li class="nav-item">
-                        <a class="nav-link link-dark d-flex justify-content-between align-items-center collapsed" 
-                           data-bs-toggle="collapse" href="#submenu-mutuelles" role="button" aria-expanded="false">
-                            <span><i class="bi bi-shield-check text-success me-2"></i> Mutuelles</span>
-                            <i class="bi bi-chevron-down small"></i>
-                        </a>
-                        <div class="collapse" id="submenu-mutuelles">
-                            <ul class="nav flex-column ms-3 border-start border-2 ps-1">
-                                <li class="nav-item">
-                                    <a class="nav-link link-secondary py-1" href="{{ path('app_mutuelle_index') }}">Liste Mutuelles</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link link-secondary py-1" href="{{ path('app_mutuelle_new') }}">Ajouter Mutuelle</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
-
-                </ul>
-            </div>
-        </nav>
-
-        <!-- 2. CONTENU PRINCIPAL -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-            
-            <!-- En-tête -->
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">Tableau de Bord</h1>
-                <div class="btn-toolbar mb-2 mb-md-0">
-                    <button type="button" class="btn btn-sm btn-outline-secondary">
-                        <i class="bi bi-calendar"></i> {{ "now"|date("d/m/Y") }}
-                    </button>
-                </div>
-            </div>
-
-            <!-- Stats Rapides -->
-            <div class="row mb-4">
-                <div class="col-md-3">
-                   <div class="card border-start border-warning border-4 shadow-sm">
-                       <div class="card-body">
-                           <div class="text-muted small text-uppercase">Ventes du Jour</div>
-                           <div class="h3 fw-bold text-warning mb-0">1,250 €</div>
-                       </div>
-                   </div>
-                </div>
-                <div class="col-md-3">
-                   <div class="card border-start border-primary border-4 shadow-sm">
-                       <div class="card-body">
-                           <div class="text-muted small text-uppercase">Patients</div>
-                           <div class="h3 fw-bold text-primary mb-0">1,403</div>
-                       </div>
-                   </div>
-                </div>
-                 <div class="col-md-3">
-                   <div class="card border-start border-danger border-4 shadow-sm">
-                       <div class="card-body">
-                           <div class="text-muted small text-uppercase">Stock Critique</div>
-                           <div class="h3 fw-bold text-danger mb-0">5 <span class="fs-6 fw-normal text-muted">produits</span></div>
-                       </div>
-                   </div>
-                </div>
-            </div>
-
-            <!-- Bannière d'Action -->
-            <div class="p-5 mb-4 bg-light rounded-3 border">
-                <div class="container-fluid py-3">
-                    <h1 class="display-5 fw-bold text-primary">Bonjour Docteur,</h1>
-                    <p class="col-md-8 fs-4">Prêt pour une nouvelle journée ? Accédez rapidement à la caisse ou gérez vos réapprovisionnements.</p>
-                    <a class="btn btn-primary btn-lg" href="{{ path('app_vente_new') }}">
-                        <i class="bi bi-cart-plus"></i> Ouvrir la Caisse
-                    </a>
-                    <a class="btn btn-outline-secondary btn-lg ms-2" href="{{ path('app_stock_reapprovisionnement') }}">
-                        <i class="bi bi-clipboard-check"></i> Vérifier Stock
-                    </a>
-                </div>
-            </div>
-
-        </main>
+<!-- En-tête -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 page-title">
+            <i class="bi bi-speedometer2 text-primary me-2"></i> Tableau de Bord
+        </h1>
+        <p class="page-subtitle mb-0">Vue d'ensemble de l'activité de votre pharmacie</p>
+    </div>
+    <div>
+        <div class="bg-white px-4 py-2 rounded-pill shadow-sm border text-primary fw-medium">
+            <i class="bi bi-calendar3 me-2"></i> Aujourd'hui : {{ "now"|date("d/m/Y") }}
+        </div>
     </div>
 </div>
 
-<!-- CSS pour gérer l'accordéon de la sidebar -->
-<style>
-    .sidebar {
-        position: fixed;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        z-index: 100;
-        padding: 48px 0 0;
-        box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
-    }
-    
-    /* Style des liens principaux */
-    .nav-link {
-        color: #333;
-        font-weight: 500;
-        transition: all 0.2s;
-    }
-    .nav-link:hover {
-        color: #0d6efd; /* Bootstrap Primary Blue */
-        background-color: rgba(13, 110, 253, 0.05);
-    }
-    
-    /* Rotation de la petite flèche quand le menu est ouvert */
-    .nav-link[aria-expanded="true"] .bi-chevron-down {
-        transform: rotate(180deg);
-        transition: transform 0.2s;
-    }
-    .bi-chevron-down {
-        transition: transform 0.2s;
-    }
+<!-- Bannière d'Action Rapide -->
+<div class="card shadow-sm border-0 mb-4 bg-primary text-white" style="background: linear-gradient(135deg, var(--color-primary) 0%, #059669 100%);">
+    <div class="card-body p-4 p-md-5">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2 class="fw-bold mb-2">Bonjour {{ app.user ? app.user.userIdentifier : 'Docteur' }},</h2>
+                <p class="fs-5 opacity-75 mb-4 mb-md-0">Prêt pour une nouvelle journée ? Accédez rapidement à la caisse ou consultez vos alertes de stock.</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a class="btn btn-light btn-lg text-primary fw-bold shadow-sm mb-2 mb-md-0 me-2" href="{{ path('app_vente_new') }}">
+                    <i class="bi bi-cart-plus me-2"></i> Caisse
+                </a>
+                <a class="btn btn-outline-light btn-lg fw-bold" href="{{ path('app_stock_reapprovisionnement') }}">
+                    <i class="bi bi-box-seam me-2"></i> Stocks
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 
-    /* Ajustement layout */
-    @media (min-width: 768px) {
-        .col-md-9 { margin-left: 25%; }
-        .col-lg-10 { margin-left: 16.666667%; }
-    }
-</style>
+<!-- KPI Cards -->
+<div class="row g-4 mb-4">
+    <!-- CA du jour -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="bg-success bg-opacity-10 text-success rounded-3 p-3">
+                        <i class="bi bi-currency-euro fs-4"></i>
+                    </div>
+                </div>
+                <h6 class="text-muted text-uppercase fw-bold mb-1">Ventes du jour</h6>
+                <div class="h3 fw-bold text-dark mb-0">{{ chiffreAffairesJour|number_format(2, ',', ' ') }} €</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patients -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-3 p-3">
+                        <i class="bi bi-people fs-4"></i>
+                    </div>
+                </div>
+                <h6 class="text-muted text-uppercase fw-bold mb-1">Patients Actifs</h6>
+                <div class="h3 fw-bold text-dark mb-0">{{ nbPatients }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ordonnances récentes -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="bg-info bg-opacity-10 text-info rounded-3 p-3">
+                        <i class="bi bi-file-medical fs-4"></i>
+                    </div>
+                </div>
+                <h6 class="text-muted text-uppercase fw-bold mb-1">Ordonnances (7J)</h6>
+                <div class="h3 fw-bold text-dark mb-0">{{ nbOrdonnancesRecentes }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alertes Stock -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card shadow-sm border-0 h-100 position-relative overflow-hidden">
+            {% if nbStockCritique > 0 %}
+                <div class="position-absolute top-0 start-0 w-100 h-100 bg-danger opacity-10"></div>
+            {% endif %}
+            <div class="card-body p-4 position-relative z-1">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="{% if nbStockCritique > 0 %}bg-danger text-white{% else %}bg-secondary bg-opacity-10 text-secondary{% endif %} rounded-3 p-3">
+                        <i class="bi bi-exclamation-triangle fs-4"></i>
+                    </div>
+                </div>
+                <h6 class="{% if nbStockCritique > 0 %}text-danger{% else %}text-muted{% endif %} text-uppercase fw-bold mb-1">Stock Critique</h6>
+                <div class="h3 fw-bold {% if nbStockCritique > 0 %}text-danger{% else %}text-dark{% endif %} mb-0">{{ nbStockCritique }}</div>
+                {% if nbStockCritique > 0 %}
+                    <a href="{{ path('app_stock_reapprovisionnement') }}" class="stretched-link"></a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section Graphique et Raccourcis -->
+<div class="row g-4">
+    <!-- Graphique des ventes -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
+                <h5 class="card-title mb-0 text-dark fw-bold">
+                    <i class="bi bi-graph-up-arrow text-primary me-2"></i> Évolution des Ventes (7 derniers jours)
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <canvas id="salesChart"
+                        height="100"
+                        data-controller="sales-chart"
+                        data-sales-chart-labels-value="{{ ventesChartLabels|raw }}"
+                        data-sales-chart-data-value="{{ ventesChartData|raw }}">
+                </canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Raccourcis utiles -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
+                <h5 class="card-title mb-0 text-dark fw-bold">
+                    <i class="bi bi-lightning text-warning me-2"></i> Accès Rapides
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    <a href="{{ path('app_patient_new') }}" class="list-group-item list-group-item-action p-4 d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-2 me-3">
+                            <i class="bi bi-person-plus fs-5"></i>
+                        </div>
+                        <div class="fw-medium">Nouveau Patient</div>
+                        <i class="bi bi-chevron-right ms-auto text-muted"></i>
+                    </a>
+                    <a href="{{ path('app_ordonnance_new') }}" class="list-group-item list-group-item-action p-4 d-flex align-items-center">
+                        <div class="bg-success bg-opacity-10 text-success rounded-circle p-2 me-3">
+                            <i class="bi bi-file-earmark-plus fs-5"></i>
+                        </div>
+                        <div class="fw-medium">Saisir une Ordonnance</div>
+                        <i class="bi bi-chevron-right ms-auto text-muted"></i>
+                    </a>
+                    <a href="{{ path('app_produit_index') }}" class="list-group-item list-group-item-action p-4 d-flex align-items-center">
+                        <div class="bg-info bg-opacity-10 text-info rounded-circle p-2 me-3">
+                            <i class="bi bi-box fs-5"></i>
+                        </div>
+                        <div class="fw-medium">Catalogue Produits</div>
+                        <i class="bi bi-chevron-right ms-auto text-muted"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

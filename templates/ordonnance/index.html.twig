@@ -3,161 +3,116 @@
 {% block title %}Ordonnances - PharmaGest{% endblock %}
 
 {% block body %}
-<!-- Breadcrumb -->
-<nav aria-label="breadcrumb" class="mb-4">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item">
-            <a href="{{ path('app_home') }}" class="text-decoration-none">
-                <i class="bi bi-house-door"></i> Accueil
-            </a>
-        </li>
-        <li class="breadcrumb-item active" aria-current="page">
-            <i class="bi bi-file-text"></i> Ordonnances
-        </li>
-    </ol>
-</nav>
-
 <!-- En-tête de page -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h1 class="h2 text-primary">
-            <i class="bi bi-file-text"></i> Gestion des Ordonnances
+        <h1 class="h2 page-title">
+            <i class="bi bi-file-medical text-primary me-2"></i> Gestion des Ordonnances
         </h1>
-        <p class="text-muted mb-0">Consultez et gérez l'ensemble des ordonnances</p>
+        <p class="page-subtitle mb-0">Consultez et gérez l'ensemble des prescriptions</p>
     </div>
-    <div>
-        <a href="{{ path('app_home') }}" class="btn btn-outline-secondary me-2">
-            <i class="bi bi-arrow-left"></i> Retour à l'accueil
+    <div class="d-flex gap-2">
+        <a href="{{ path('app_patient_index') }}" class="btn btn-outline-info shadow-sm">
+            <i class="bi bi-people me-1"></i> Patients
         </a>
-        <a href="{{ path('app_ordonnance_new') }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Nouvelle Ordonnance
+        <a href="{{ path('app_ordonnance_new') }}" class="btn btn-primary shadow-sm">
+            <i class="bi bi-plus-circle me-1"></i> Nouvelle Ordonnance
         </a>
-    </div>
-</div>
-
-<!-- Cartes de statistiques -->
-<div class="row mb-4">
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-primary shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                            Total Ordonnances
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ ordonnances|length }}</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="bi bi-file-text fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 
 <!-- Tableau des ordonnances -->
-<div class="card shadow-sm">
-    <div class="card-header bg-light">
-        <h5 class="card-title mb-0">
-            <i class="bi bi-list-ul"></i> Liste des Ordonnances
-        </h5>
-    </div>
-    <div class="card-body">
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
         {% if ordonnances|length > 0 %}
         <div class="table-responsive">
-            <table class="table table-hover table-striped">
-                <thead class="table-primary">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
                     <tr>
-                        <th>#ID</th>
-                        <th>Date</th>
-                        <th>Durée Traitement</th>
-                        <th>Patient</th>
-                        <th>Médecin</th>
-                        <th>Produits</th>
-                        <th>Actions</th>
+                        <th class="ps-4 border-0">N° Ord.</th>
+                        <th class="border-0">Date</th>
+                        <th class="border-0">Patient</th>
+                        <th class="border-0">Médecin</th>
+                        <th class="border-0">Produits / Durée</th>
+                        <th class="border-0 text-center pe-4">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                 {% for ordonnance in ordonnances %}
                     <tr>
+                        <td class="ps-4 text-dark fw-bold">#{{ ordonnance.id }}</td>
                         <td>
-                            <strong>#{{ ordonnance.id }}</strong>
-                        </td>
-                        <td>
-                            <span class="badge bg-info text-dark">
-                                {{ ordonnance.dateOrdonnance ? ordonnance.dateOrdonnance|date('d/m/Y') : 'N/A' }}
+                            <span class="badge bg-light text-dark border">
+                                <i class="bi bi-calendar3 me-1"></i>{{ ordonnance.dateOrdonnance ? ordonnance.dateOrdonnance|date('d/m/Y') : 'N/A' }}
                             </span>
-                        </td>
-                        <td>
-                            <span class="fw-bold">{{ ordonnance.dureeTraitement }}</span>
                         </td>
                         <td>
                             {% if ordonnance.patient %}
                                 <div class="d-flex align-items-center">
-                                    <i class="bi bi-person me-2 text-muted"></i>
-                                    <div>
-                                        <div class="fw-bold">{{ ordonnance.patient.prenomPatient }} {{ ordonnance.patient.nomPatient }}</div>
-                                        <small class="text-muted">ID: #{{ ordonnance.patient.idPatient }}</small>
+                                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-2 me-2" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="bi bi-person-fill"></i>
                                     </div>
+                                    <span class="fw-medium text-dark">{{ ordonnance.patient.prenomPatient }} {{ ordonnance.patient.nomPatient }}</span>
                                 </div>
                             {% else %}
-                                <span class="text-muted fst-italic">
-                                    <i class="bi bi-exclamation-triangle"></i> Non défini
+                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">
+                                    <i class="bi bi-exclamation-triangle me-1"></i> Non défini
                                 </span>
                             {% endif %}
                         </td>
                         <td>
                             {% if ordonnance.medecin %}
-                                <div class="d-flex align-items-center">
-                                    <i class="bi bi-heart-pulse me-2 text-muted"></i>
-                                    <div>
-                                        <div>Dr. {{ ordonnance.medecin.prenomMedecin }} {{ ordonnance.medecin.nomMedecin }}</div>
-                                        <small class="text-muted">{{ ordonnance.medecin.contactMedecin }}</small>
-                                    </div>
-                                </div>
+                                <div class="text-dark fw-medium">Dr. {{ ordonnance.medecin.prenomMedecin }} {{ ordonnance.medecin.nomMedecin }}</div>
                             {% else %}
-                                <span class="text-muted fst-italic">
-                                    <i class="bi bi-person-x"></i> Non spécifié
-                                </span>
+                                <span class="text-muted fst-italic">Non spécifié</span>
                             {% endif %}
                         </td>
                         <td>
-                            {% if ordonnance.produits is defined and ordonnance.produits is not empty %}
-                                <div class="produits-list">
-                                    {% for produit in ordonnance.produits %}
-                                        <span class="badge bg-success mb-1" 
-                                            data-bs-toggle="tooltip" 
-                                            title="{{ produit.nomProduit }} - {{ produit.dosageProduit }}">
+                            <div class="mb-1">
+                                <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25">
+                                    <i class="bi bi-clock me-1"></i>{{ ordonnance.dureeTraitement }}
+                                </span>
+                            </div>
+                            <div class="d-flex flex-wrap gap-1 mt-1">
+                                {% if ordonnance.produits|length > 0 %}
+                                    {% for produit in ordonnance.produits|slice(0, 3) %}
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border">
                                             {{ produit.nomProduit }}
                                         </span>
                                     {% endfor %}
-                                </div>
-                            {% else %}
-                                <span class="badge bg-secondary">Aucun produit</span>
-                            {% endif %}
+                                    {% if ordonnance.produits|length > 3 %}
+                                        <span class="badge bg-light text-muted border">+{{ ordonnance.produits|length - 3 }}</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted small">Aucun produit</span>
+                                {% endif %}
+                            </div>
                         </td>
-                        <td>
-                            <div class="btn-group btn-group-sm">
-                                <a href="{{ path('app_ordonnance_show', {'id': ordonnance.id}) }}" 
-                                   class="btn btn-outline-info" 
-                                   title="Voir les détails">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                                <a href="{{ path('app_ordonnance_edit', {'id': ordonnance.id}) }}" 
-                                   class="btn btn-outline-warning" 
-                                   title="Modifier">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <form method="post" 
-                                      action="{{ path('app_ordonnance_delete', {'id': ordonnance.id}) }}" 
-                                      class="d-inline"
-                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette ordonnance ?');">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ ordonnance.id) }}">
-                                    <button class="btn btn-outline-danger" title="Supprimer">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
+                        <td class="text-center pe-4">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light border-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                    <li>
+                                        <a class="dropdown-item py-2" href="{{ path('app_ordonnance_show', {'id': ordonnance.id}) }}">
+                                            <i class="bi bi-eye text-primary me-2"></i> Voir les détails
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item py-2" href="{{ path('app_ordonnance_edit', {'id': ordonnance.id}) }}">
+                                            <i class="bi bi-pencil text-warning me-2"></i> Modifier
+                                        </a>
+                                    </li>
+                                    {% if ordonnance.patient %}
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item py-2" href="{{ path('app_patient_show', {'idPatient': ordonnance.patient.idPatient}) }}">
+                                                <i class="bi bi-person-lines-fill text-info me-2"></i> Dossier patient
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
                             </div>
                         </td>
                     </tr>
@@ -165,61 +120,18 @@
                 </tbody>
             </table>
         </div>
-        {% else %}
-        <div class="text-center py-5">
-            <i class="bi bi-file-text display-1 text-muted"></i>
-            <h4 class="text-muted mt-3">Aucune ordonnance enregistrée</h4>
-            <p class="text-muted">Commencez par créer votre première ordonnance.</p>
-            <a href="{{ path('app_ordonnance_new') }}" class="btn btn-primary">
-                <i class="bi bi-plus-circle"></i> Créer une Ordonnance
-            </a>
+        
+        <div class="px-4 pb-3">
+            {{ include('partials/_pagination.html.twig', { items: ordonnances }) }}
         </div>
+        {% else %}
+        {{ include('partials/_empty_state.html.twig', {
+            icon: 'file-medical',
+            title: 'Aucune ordonnance enregistrée',
+            subtitle: 'Commencez par créer votre première prescription médicale.',
+            action: { label: 'Créer une Ordonnance', path: 'app_ordonnance_new', icon: 'plus-lg' }
+        }) }}
         {% endif %}
     </div>
 </div>
-
-<!-- Boutons d'action -->
-<div class="mt-3 d-flex gap-2">
-    <a href="{{ path('app_ordonnance_new') }}" class="btn btn-primary">
-        <i class="bi bi-plus-circle"></i> Nouvelle Ordonnance
-    </a>
-    <a href="{{ path('app_patient_index') }}" class="btn btn-outline-info">
-        <i class="bi bi-people"></i> Gérer les Patients
-    </a>
-    <a href="{{ path('app_medecin_index') }}" class="btn btn-outline-success">
-        <i class="bi bi-heart-pulse"></i> Gérer les Médecins
-    </a>
-</div>
-
-<!-- Script pour les tooltips -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-});
-</script>
-
-<style>
-.produits-list .badge {
-    font-size: 0.7rem;
-    margin-right: 2px;
-    margin-bottom: 2px;
-    display: inline-block;
-}
-.card {
-    border: none;
-    border-radius: 10px;
-}
-.table th {
-    border-top: none;
-    font-weight: 600;
-    color: #2c5aa0;
-}
-.btn-group .btn {
-    border-radius: 6px;
-    margin-right: 2px;
-}
-</style>
 {% endblock %}

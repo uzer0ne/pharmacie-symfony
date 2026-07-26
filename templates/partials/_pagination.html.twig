@@ -1,0 +1,14 @@
+{# templates/partials/_pagination.html.twig #}
+{# Composant de pagination réutilisable Bootstrap 5 #}
+{% if items.getTotalItemCount > 0 %}
+<div class="d-flex justify-content-between align-items-center mt-4">
+    <div class="text-muted small">
+        Affichage de {{ items.currentPageNumber == 1 ? 1 : ((items.currentPageNumber - 1) * items.itemNumberPerPage) + 1 }}
+        à {{ min(items.currentPageNumber * items.itemNumberPerPage, items.getTotalItemCount) }}
+        sur {{ items.getTotalItemCount }} résultats
+    </div>
+    <div>
+        {{ knp_pagination_render(items) }}
+    </div>
+</div>
+{% endif %}

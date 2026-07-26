@@ -1,38 +1,76 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Medecin{% endblock %}
+{% block title %}Fiche Médecin - Dr. {{ medecin.prenomMedecin }} {{ medecin.nomMedecin }}{% endblock %}
 
 {% block body %}
-    <h1>Medecin</h1>
+<!-- En-tête de page -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center">
+        <div class="bg-primary text-white rounded-circle p-3 me-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 64px; height: 64px;">
+            <i class="bi bi-person-badge fs-2"></i>
+        </div>
+        <div>
+            <h1 class="h2 page-title mb-1">
+                Dr. {{ medecin.prenomMedecin }} {{ medecin.nomMedecin }}
+            </h1>
+            <p class="page-subtitle mb-0">Fiche Médecin Prescripteur #{{ medecin.id }}</p>
+        </div>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ path('app_medecin_index') }}" class="btn btn-outline-secondary shadow-sm">
+            <i class="bi bi-arrow-left me-1"></i> Retour
+        </a>
+        <a href="{{ path('app_medecin_edit', {'idMedecin': medecin.id}) }}" class="btn btn-warning shadow-sm">
+            <i class="bi bi-pencil-square me-1"></i> Modifier
+        </a>
+        {{ include('medecin/_delete_form.html.twig') }}
+    </div>
+</div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>IdMedecin</th>
-                <td>{{ medecin.idMedecin }}</td>
-            </tr>
-            <tr>
-                <th>Nom_medecin</th>
-                <td>{{ medecin.nomMedecin }}</td>
-            </tr>
-            <tr>
-                <th>Prenom_medecin</th>
-                <td>{{ medecin.prenomMedecin }}</td>
-            </tr>
-            <tr>
-                <th>Contact_medecin</th>
-                <td>{{ medecin.contactMedecin }}</td>
-            </tr>
-            <tr>
-                <th>Adresse_medecin</th>
-                <td>{{ medecin.adresseMedecin }}</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_medecin_index') }}">back to list</a>
-
-    <a href="{{ path('app_medecin_edit', {'idMedecin': medecin.idMedecin}) }}">edit</a>
-
-    {{ include('medecin/_delete_form.html.twig') }}
+<div class="row justify-content-center">
+    <!-- Colonne Principale -->
+    <div class="col-lg-8">
+        
+        <!-- Informations -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
+                <h5 class="card-title mb-0 text-dark fw-bold">
+                    <i class="bi bi-info-circle text-primary me-2"></i> Coordonnées
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="d-flex flex-column gap-3">
+                            <div>
+                                <small class="text-muted fw-bold text-uppercase d-block mb-1">Nom complet</small>
+                                <div class="fs-5 text-dark fw-medium">Dr. {{ medecin.prenomMedecin }} {{ medecin.nomMedecin }}</div>
+                            </div>
+                            <div>
+                                <small class="text-muted fw-bold text-uppercase d-block mb-1">Identifiant Système</small>
+                                <div class="fs-6 text-dark font-monospace text-muted">DOC-{{ '%06d'|format(medecin.id|default(0)) }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex flex-column gap-3">
+                            <div>
+                                <small class="text-muted fw-bold text-uppercase d-block mb-1">Contact</small>
+                                <div class="fs-6 text-dark">
+                                    <i class="bi bi-telephone text-muted me-2"></i>{{ medecin.contactMedecin ?: 'Non renseigné' }}
+                                </div>
+                            </div>
+                            <div>
+                                <small class="text-muted fw-bold text-uppercase d-block mb-1">Adresse du Cabinet</small>
+                                <div class="fs-6 text-dark">
+                                    <i class="bi bi-geo-alt text-muted me-2"></i>{{ medecin.adresseMedecin ?: 'Non renseignée' }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
