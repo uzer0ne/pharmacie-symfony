@@ -7,77 +7,112 @@
             PharmaGest
         </div>
 
-        {# ── Bouton action rapide ── #}
-        <a href="{{ path('app_vente_new') }}" class="sidebar-quick-action mb-3">
-            <i class="bi bi-plus-lg"></i> Nouvelle Vente
-        </a>
+        {# ── Contenu de la sidebar selon le rôle ── #}
+        {% set isGestionnaire = is_granted('ROLE_GESTIONNAIRE_STOCK') and not is_granted('ROLE_PHARMACIEN') %}
+        {% set isPharmacien   = is_granted('ROLE_PHARMACIEN') %}
 
-        <ul class="nav flex-column mb-auto">
-            <li class="nav-item">
-                <a class="nav-link {% if app.request.get('_route') == 'app_home' %}active{% endif %}"
-                   href="{{ path('app_home') }}"
-                   data-action="click->sidebar#closeOnMobile">
-                    <i class="bi bi-house-door me-2"></i>
-                    Tableau de Bord
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if app.request.get('_route') starts with 'app_vente' %}active{% endif %}"
-                   href="{{ path('app_vente_index') }}"
-                   data-action="click->sidebar#closeOnMobile">
-                    <i class="bi bi-receipt me-2"></i>
-                    Ventes (POS)
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if app.request.get('_route') starts with 'app_produit' %}active{% endif %}"
-                   href="{{ path('app_produit_index') }}"
-                   data-action="click->sidebar#closeOnMobile">
-                    <i class="bi bi-capsule me-2"></i>
-                    Produits & Stock
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if app.request.get('_route') starts with 'app_ordonnance' %}active{% endif %}"
-                   href="{{ path('app_ordonnance_index') }}"
-                   data-action="click->sidebar#closeOnMobile">
-                    <i class="bi bi-file-text me-2"></i>
-                    Ordonnances
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if app.request.get('_route') starts with 'app_patient' %}active{% endif %}"
-                   href="{{ path('app_patient_index') }}"
-                   data-action="click->sidebar#closeOnMobile">
-                    <i class="bi bi-people me-2"></i>
-                    Patients
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if app.request.get('_route') starts with 'app_medecin' %}active{% endif %}"
-                   href="{{ path('app_medecin_index') }}"
-                   data-action="click->sidebar#closeOnMobile">
-                    <i class="bi bi-heart-pulse me-2"></i>
-                    Médecins
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if app.request.get('_route') starts with 'app_mutuelle' %}active{% endif %}"
-                   href="{{ path('app_mutuelle_index') }}"
-                   data-action="click->sidebar#closeOnMobile">
-                    <i class="bi bi-shield-plus me-2"></i>
-                    Mutuelles
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if app.request.get('_route') starts with 'app_stock' %}active{% endif %}"
-                   href="{{ path('app_stock_reapprovisionnement') }}"
-                   data-action="click->sidebar#closeOnMobile">
-                    <i class="bi bi-exclamation-triangle me-2 {% if app.request.get('_route') starts with 'app_stock' %}text-white{% else %}text-warning{% endif %}"></i>
-                    Alertes Stock
-                </a>
-            </li>
-        </ul>
+        {% if isGestionnaire %}
+            {# ── SIDEBAR GESTIONNAIRE DE STOCK ── #}
+            <div class="px-3 mb-3">
+                <span class="badge w-100 py-2" style="background-color: #f59e0b; font-size: 0.75rem;">
+                    <i class="bi bi-box-seam me-1"></i> Gestionnaire Stock
+                </span>
+            </div>
+
+            <ul class="nav flex-column mb-auto">
+                <li class="nav-item">
+                    <a class="nav-link {% if app.request.get('_route') starts with 'app_stock' %}active{% endif %}"
+                       href="{{ path('app_stock_reapprovisionnement') }}"
+                       data-action="click->sidebar#closeOnMobile">
+                        <i class="bi bi-exclamation-triangle me-2 text-warning"></i>
+                        Alertes & Réappro.
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if app.request.get('_route') starts with 'app_produit' %}active{% endif %}"
+                       href="{{ path('app_produit_index') }}"
+                       data-action="click->sidebar#closeOnMobile">
+                        <i class="bi bi-capsule me-2"></i>
+                        Catalogue Produits
+                    </a>
+                </li>
+            </ul>
+
+        {% else %}
+            {# ── SIDEBAR PHARMACIEN / ADMIN (accès complet) ── #}
+
+            {# Bouton action rapide #}
+            <a href="{{ path('app_vente_new') }}" class="sidebar-quick-action mb-3">
+                <i class="bi bi-plus-lg"></i> Nouvelle Vente
+            </a>
+
+            <ul class="nav flex-column mb-auto">
+                <li class="nav-item">
+                    <a class="nav-link {% if app.request.get('_route') == 'app_home' %}active{% endif %}"
+                       href="{{ path('app_home') }}"
+                       data-action="click->sidebar#closeOnMobile">
+                        <i class="bi bi-house-door me-2"></i>
+                        Tableau de Bord
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if app.request.get('_route') starts with 'app_vente' %}active{% endif %}"
+                       href="{{ path('app_vente_index') }}"
+                       data-action="click->sidebar#closeOnMobile">
+                        <i class="bi bi-receipt me-2"></i>
+                        Ventes (POS)
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if app.request.get('_route') starts with 'app_produit' %}active{% endif %}"
+                       href="{{ path('app_produit_index') }}"
+                       data-action="click->sidebar#closeOnMobile">
+                        <i class="bi bi-capsule me-2"></i>
+                        Produits & Stock
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if app.request.get('_route') starts with 'app_ordonnance' %}active{% endif %}"
+                       href="{{ path('app_ordonnance_index') }}"
+                       data-action="click->sidebar#closeOnMobile">
+                        <i class="bi bi-file-text me-2"></i>
+                        Ordonnances
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if app.request.get('_route') starts with 'app_patient' %}active{% endif %}"
+                       href="{{ path('app_patient_index') }}"
+                       data-action="click->sidebar#closeOnMobile">
+                        <i class="bi bi-people me-2"></i>
+                        Patients
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if app.request.get('_route') starts with 'app_medecin' %}active{% endif %}"
+                       href="{{ path('app_medecin_index') }}"
+                       data-action="click->sidebar#closeOnMobile">
+                        <i class="bi bi-heart-pulse me-2"></i>
+                        Médecins
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if app.request.get('_route') starts with 'app_mutuelle' %}active{% endif %}"
+                       href="{{ path('app_mutuelle_index') }}"
+                       data-action="click->sidebar#closeOnMobile">
+                        <i class="bi bi-shield-plus me-2"></i>
+                        Mutuelles
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if app.request.get('_route') starts with 'app_stock' %}active{% endif %}"
+                       href="{{ path('app_stock_reapprovisionnement') }}"
+                       data-action="click->sidebar#closeOnMobile">
+                        <i class="bi bi-exclamation-triangle me-2 {% if app.request.get('_route') starts with 'app_stock' %}text-white{% else %}text-warning{% endif %}"></i>
+                        Alertes Stock
+                    </a>
+                </li>
+            </ul>
+        {% endif %}
 
         {# ── Utilisateur connecté + déconnexion ── #}
         {% if app.user %}

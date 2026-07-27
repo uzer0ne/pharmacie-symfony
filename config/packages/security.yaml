@@ -10,10 +10,19 @@ security:
                 class: App\Entity\User
                 property: email
 
-    # Hiérarchie des rôles : ROLE_ADMIN hérite de ROLE_PHARMACIEN qui hérite de ROLE_USER
+    # ── Hiérarchie des rôles ──────────────────────────────────────────────────
+    #
+    #   ROLE_ADMIN
+    #     └─ hérite de ROLE_PHARMACIEN
+    #           └─ hérite de ROLE_USER
+    #
+    #   ROLE_GESTIONNAIRE_STOCK  (rôle indépendant, accès uniquement au stock)
+    #     └─ hérite de ROLE_USER (nécessaire pour être authentifié)
+    #
     role_hierarchy:
-        ROLE_PHARMACIEN: ROLE_USER
-        ROLE_ADMIN: ROLE_PHARMACIEN
+        ROLE_PHARMACIEN:          ROLE_USER
+        ROLE_ADMIN:               ROLE_PHARMACIEN
+        ROLE_GESTIONNAIRE_STOCK:  ROLE_USER
 
     firewalls:
         dev:
@@ -37,10 +46,19 @@ security:
                 lifetime: 604800  # 1 semaine en secondes
                 path: /
 
-    # Contrôle d'accès — la PREMIÈRE règle qui matche est appliquée
+    # ── Contrôle d'accès ─────────────────────────────────────────────────────
+    # ⚠️  Symfony applique la PREMIÈRE règle qui matche — ordre critique !
     access_control:
+        # 1. Login : tout le monde
         - { path: ^/login$, roles: PUBLIC_ACCESS }
-        - { path: ^/, roles: ROLE_USER }
+
+        # 2. Routes Stock & Produit : accessibles au gestionnaire ET aux rôles supérieurs
+        - { path: ^/stock,   roles: [ROLE_GESTIONNAIRE_STOCK, ROLE_PHARMACIEN] }
+        - { path: ^/produit, roles: [ROLE_GESTIONNAIRE_STOCK, ROLE_PHARMACIEN] }
+
+        # 3. Tout le reste : ROLE_PHARMACIEN (et ROLE_ADMIN) uniquement
+        #    Le gestionnaire de stock ne peut PAS accéder aux ventes, patients, ordonnances, etc.
+        - { path: ^/, roles: ROLE_PHARMACIEN }
 
 when@test:
     security:

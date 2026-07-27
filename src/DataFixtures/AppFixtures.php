@@ -30,6 +30,8 @@ class AppFixtures extends Fixture
             ['email' => 'admin@pharmagest.fr',      'password' => 'admin123',      'roles' => ['ROLE_ADMIN']],
             ['email' => 'pharmacien@pharmagest.fr',  'password' => 'pharma123',     'roles' => ['ROLE_PHARMACIEN']],
             ['email' => 'user@pharmagest.fr',        'password' => 'user123',       'roles' => []],
+            // ── Gestionnaire de stock : accès limité au stock uniquement ──
+            ['email' => 'stock@pharmagest.fr',       'password' => 'stock123',      'roles' => ['ROLE_GESTIONNAIRE_STOCK']],
         ];
 
         foreach ($usersData as $data) {

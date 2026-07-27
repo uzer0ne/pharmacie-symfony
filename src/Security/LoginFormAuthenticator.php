@@ -44,11 +44,24 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
+        $user = $token->getUser();
+
+        // ── Redirection prioritaire selon le rôle ────────────────────────────
+        // IMPORTANT : ce check doit passer AVANT getTargetPath() pour éviter
+        // que le gestionnaire soit redirigé vers une URL interdite sauvegardée
+        // en session (ex: "/" qui requiert ROLE_PHARMACIEN).
+        if (in_array('ROLE_GESTIONNAIRE_STOCK', $user->getRoles(), true)) {
+            // On vide le target path pour éviter toute redirection parasite
+            $this->removeTargetPath($request->getSession(), $firewallName);
+            return new RedirectResponse($this->urlGenerator->generate('app_stock_reapprovisionnement'));
+        }
+
+        // Pour les rôles PHARMACIEN / ADMIN : on respecte le target path
         if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
             return new RedirectResponse($targetPath);
         }
 
-        // Rediriger vers le dashboard après connexion
+        // Redirection par défaut → dashboard
         return new RedirectResponse($this->urlGenerator->generate('app_home'));
     }
 
