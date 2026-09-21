@@ -128,7 +128,10 @@
                 
                 <div class="mb-2">
                     {{ form_label(form.ordonnance, 'Ordonnance rattachée', {'label_attr': {'class': 'fw-medium mb-2'}}) }}
-                    {{ form_widget(form.ordonnance, {'attr': {'class': 'form-select'}}) }}
+                    {{ form_widget(form.ordonnance, {'attr': {'class': 'form-select', 'id': 'ordonnance-select'}}) }}
+                    <button type="button" id="prefill-from-ordonnance-btn" class="btn btn-outline-success btn-sm mt-2 w-100 d-none">
+                        <i class="bi bi-magic me-1"></i> Pré-remplir les produits depuis l'ordonnance
+                    </button>
                 </div>
             </div>
         </div>
@@ -298,4 +301,111 @@
 
     document.addEventListener('DOMContentLoaded', initVenteForm);
     document.addEventListener('turbo:load', initVenteForm);
+
+    // ===== LOGIQUE PRÉ-REMPLISSAGE DEPUIS ORDONNANCE =====
+    function initPrefillOrdonnance() {
+        const ordonnanceSelect = document.getElementById('ordonnance-select');
+        const list = document.querySelector('#ligne-ventes-list');
+        const prototypeWrapper = document.querySelector('#ligne-vente-prototype-wrapper');
+
+        if (!ordonnanceSelect) return;
+
+        // Pré-remplissage AUTOMATIQUE dès qu'une ordonnance est sélectionnée
+        const prefillOrdonnance = function() {
+            const ordonnanceId = ordonnanceSelect.value;
+            if (!ordonnanceId || !list || !prototypeWrapper) return;
+
+            // Afficher un petit retour visuel
+            const originalText = ordonnanceSelect.options[ordonnanceSelect.selectedIndex].text;
+            ordonnanceSelect.options[ordonnanceSelect.selectedIndex].text = '⏳ Chargement...';
+
+            // Ajout des credentials pour que la session (cookie) soit envoyée,
+            // et X-Requested-With pour que Symfony sache que c'est une requête AJAX
+            fetch('/api/ordonnance/' + ordonnanceId + '/produits', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                credentials: 'same-origin'
+            })
+                .then(r => {
+                    if (!r.ok) throw new Error("Erreur réseau ou non autorisé (code " + r.status + ")");
+                    return r.json();
+                })
+                .then(function(produits) {
+                    ordonnanceSelect.options[ordonnanceSelect.selectedIndex].text = originalText;
+
+                    if (!produits || produits.length === 0) {
+                        alert("Cette ordonnance ne contient aucun produit.");
+                        return;
+                    }
+
+                    // Vider les lignes actuelles
+                    list.querySelectorAll('.ligne-vente-item').forEach(item => {
+                        const sel = item.querySelector('.produit-select');
+                        if (sel && sel.tomselect) sel.tomselect.destroy();
+                        item.remove();
+                    });
+                    list.dataset.index = 0;
+
+                    // Créer une ligne par produit de l'ordonnance
+                    produits.forEach(function(produit) {
+                        const prototype = prototypeWrapper.dataset.prototype;
+                        let index = parseInt(list.dataset.index || 0);
+                        let newForm = prototype.replace(/__name__label__/g, index);
+                        newForm = newForm.replace(/__name__/g, index);
+
+                        const newItem = document.createElement('div');
+                        newItem.classList.add('ligne-vente-item', 'bg-white', 'p-3', 'mb-3', 'border', 'rounded', 'shadow-sm', 'position-relative');
+                        newItem.innerHTML = `
+                            <div class="d-flex align-items-end gap-3 w-100">
+                                <div class="flex-grow-1">${newForm}</div>
+                                <button type="button" class="btn btn-outline-danger border-0 remove-btn mb-3" title="Retirer"><i class="bi bi-trash"></i></button>
+                            </div>
+                        `;
+                        list.appendChild(newItem);
+                        list.dataset.index = index + 1;
+
+                        const newSelect = newItem.querySelector('.produit-select');
+                        const qtyInput = newItem.querySelector('.quantite-input');
+                        initSelects([newSelect]);
+
+                        // Pré-sélectionner le produit et la quantité
+                        setTimeout(function() {
+                            if (newSelect && newSelect.tomselect) {
+                                newSelect.tomselect.setValue(String(produit.id), true);
+                            } else if (newSelect) {
+                                newSelect.value = produit.id;
+                            }
+                            if (qtyInput) qtyInput.value = produit.quantite;
+                            
+                            // Déclencher l'événement change pour TomSelect afin de mettre à jour la carte d'identité
+                            if (newSelect) {
+                                const event = new Event('change');
+                                newSelect.dispatchEvent(event);
+                            }
+                        }, 150);
+                    });
+                })
+                .catch(function(err) {
+                    ordonnanceSelect.options[ordonnanceSelect.selectedIndex].text = originalText;
+                    console.error('Erreur prefill ordonnance:', err);
+                    alert("Impossible de pré-remplir l'ordonnance. Détails: " + err.message);
+                });
+        };
+
+        // Supprimer les anciens écouteurs pour éviter les doublons avec Turbo
+        ordonnanceSelect.replaceWith(ordonnanceSelect.cloneNode(true));
+        const newOrdonnanceSelect = document.getElementById('ordonnance-select');
+        newOrdonnanceSelect.addEventListener('change', prefillOrdonnance);
+        
+        // Si l'ordonnance est déjà sélectionnée au chargement (par ex. retour arrière navigateur)
+        if (newOrdonnanceSelect.value) {
+            prefillOrdonnance();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', initPrefillOrdonnance);
+    document.addEventListener('turbo:load', initPrefillOrdonnance);
 </script>

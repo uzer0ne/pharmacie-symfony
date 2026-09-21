@@ -1,3 +1,7 @@
+<!-- TomSelect CSS/JS pour des listes déroulantes avancées -->
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
 {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true}}) }}
 
 <div class="row g-4">
@@ -11,29 +15,55 @@
             </div>
             <div class="card-body p-4">
                 <div class="row g-3">
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <div class="form-floating mb-3">
-                            {{ form_widget(form.date_ordonnance, {'attr': {'class': 'form-control', 'placeholder': 'Date de prescription'}}) }}
-                            {{ form_label(form.date_ordonnance, 'Date de prescription *') }}
-                            {{ form_errors(form.date_ordonnance) }}
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-floating mb-3">
-                            {{ form_widget(form.duree_traitement, {'attr': {'class': 'form-control fw-bold text-dark', 'placeholder': 'Durée (ex: 7 jours)'}}) }}
-                            {{ form_label(form.duree_traitement, 'Durée du traitement *') }}
-                            {{ form_errors(form.duree_traitement) }}
+                            {{ form_widget(form.dateOrdonnance, {'attr': {'class': 'form-control', 'placeholder': 'Date de prescription'}}) }}
+                            {{ form_label(form.dateOrdonnance, 'Date de prescription *') }}
+                            {{ form_errors(form.dateOrdonnance) }}
                         </div>
                     </div>
                 </div>
 
                 <hr class="my-4">
                 
-                <h6 class="text-dark fw-bold mb-3"><i class="bi bi-capsule text-primary me-2"></i>Produits Prescrits</h6>
-                <div class="mb-3">
-                    {{ form_widget(form.produits, {'attr': {'class': 'form-select', 'size': 6}}) }}
-                    <div class="form-text mt-2"><i class="bi bi-info-circle me-1"></i>Maintenez Ctrl (ou Cmd) pour sélectionner plusieurs produits.</div>
-                    {{ form_errors(form.produits) }}
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="text-dark fw-bold mb-0"><i class="bi bi-capsule text-primary me-2"></i>Lignes de prescription</h6>
+                    <button type="button" class="btn btn-sm btn-outline-primary add-item-btn">
+                        <i class="bi bi-plus-lg me-1"></i> Ajouter un médicament
+                    </button>
+                </div>
+
+                <div class="lignes-collection" 
+                     data-index="{{ form.lignes|length > 0 ? form.lignes|last.vars.name + 1 : 0 }}"
+                     data-prototype="{{ include('ordonnance/_ligne_prototype.html.twig', { 'form': form.lignes.vars.prototype })|e('html_attr') }}">
+                     
+                     {% for ligne in form.lignes %}
+                        <div class="card bg-light border-0 mb-3 item-card">
+                            <div class="card-body p-3">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="fw-bold text-muted small text-uppercase">Médicament #{{ loop.index }}</span>
+                                    <button type="button" class="btn btn-sm btn-link text-danger p-0 remove-item-btn"><i class="bi bi-trash"></i></button>
+                                </div>
+                                <div class="row g-2">
+                                    <div class="col-md-8">
+                                        {{ form_row(ligne.produit, {'attr': {'class': 'form-select form-select-sm produit-select'}}) }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form_row(ligne.quantite, {'attr': {'class': 'form-control form-control-sm quantite-input'}}) }}
+                                    </div>
+                                    <div class="col-md-12">
+                                        {{ form_row(ligne.posologie, {'attr': {'class': 'form-control form-control-sm'}}) }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form_row(ligne.dureeTraitement, {'attr': {'class': 'form-control form-control-sm'}}) }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form_row(ligne.renouvellementsAutorises, {'attr': {'class': 'form-control form-control-sm'}}) }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                     {% endfor %}
                 </div>
             </div>
         </div>
@@ -91,3 +121,108 @@
     box-shadow: 0 0 0 0.25rem rgba(16, 185, 129, 0.15); /* Vert émeraude */
 }
 </style>
+
+<script>
+function initTomSelectProduit(selectEl, cardEl) {
+    if (!selectEl || typeof TomSelect === 'undefined') return;
+    if (selectEl.tomselect) return; // Déjà initialisé
+
+    new TomSelect(selectEl, {
+        placeholder: 'Tapez pour chercher un produit...',
+        create: false,
+        dropdownParent: 'body', // ← Fix z-index
+        render: {
+            option: function(data, escape) {
+                // ✅ Lire les attributs data-* directement depuis l'élément <option> du DOM
+                const optionEl = selectEl.querySelector('option[value="' + data.value + '"]');
+                const stock    = optionEl ? parseInt(optionEl.getAttribute('data-stock') || 0) : 0;
+                const dosage   = optionEl ? (optionEl.getAttribute('data-dosage') || '') : '';
+                const nom      = data.text.split(' - ')[0]; // Juste le nom sans dosage
+                const stockColor = stock > 10 ? '#28a745' : (stock > 0 ? '#fd7e14' : '#dc3545');
+
+                return `<div style="padding:8px 12px;border-bottom:1px solid #f0f0f0;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                        <div>
+                            <strong style="font-size:0.95rem;">${escape(nom)}</strong>
+                            ${dosage ? `<small style="color:#6c757d;display:block;">Dosage: ${escape(dosage)}</small>` : ''}
+                        </div>
+                        <span style="background:${stockColor};color:#fff;border-radius:20px;padding:2px 10px;font-size:0.8rem;white-space:nowrap;flex-shrink:0;">
+                            Stock: ${stock}
+                        </span>
+                    </div>
+                </div>`;
+            },
+            item: function(data, escape) {
+                // Afficher juste le nom dans le champ sélectionné (sans "(Stock: 0)")
+                const nom = data.text.split(' - ')[0];
+                return `<div><strong>${escape(nom)}</strong></div>`;
+            }
+        },
+        onChange: function(value) {
+            if (!value || !cardEl) return;
+            // ✅ Lire le stock depuis le DOM, pas depuis l'objet TomSelect interne
+            const optionEl = selectEl.querySelector('option[value="' + value + '"]');
+            const stock = optionEl ? parseInt(optionEl.getAttribute('data-stock') || 0) : 0;
+            const qtyInput = cardEl.querySelector('.quantite-input');
+            if (qtyInput) {
+                qtyInput.max = stock;
+                if (parseInt(qtyInput.value) > stock) {
+                    qtyInput.value = Math.max(1, stock);
+                }
+            }
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.querySelector('.lignes-collection');
+    const addButton = document.querySelector('.add-item-btn');
+
+    if (addButton && container) {
+        // Bouton "Ajouter un médicament"
+        addButton.addEventListener('click', function() {
+            let index = parseInt(container.dataset.index);
+            let prototype = container.dataset.prototype;
+            let newForm = prototype.replace(/__name__/g, index);
+            let div = document.createElement('div');
+            div.innerHTML = newForm;
+            container.appendChild(div.firstElementChild);
+            
+            let newCard = container.lastElementChild;
+            let select = newCard.querySelector('.produit-select');
+            initTomSelectProduit(select, newCard);
+
+            // Validation max stock sur quantite
+            let qtyInput = newCard.querySelector('.quantite-input');
+            if (qtyInput && select) {
+                qtyInput.addEventListener('input', function() {
+                    let rawSelect = select;
+                    let selectedOption = rawSelect.options[rawSelect.selectedIndex];
+                    if (selectedOption && selectedOption.dataset.stock) {
+                        let stock = parseInt(selectedOption.dataset.stock);
+                        if (parseInt(this.value) > stock) {
+                            this.value = stock;
+                        }
+                    }
+                });
+            }
+
+            container.dataset.index = index + 1;
+        });
+
+        // Bouton "Supprimer" (délégation)
+        container.addEventListener('click', function(e) {
+            if (e.target.closest('.remove-item-btn')) {
+                e.target.closest('.item-card').remove();
+            }
+        });
+
+        // Initialiser TomSelect sur les selects existants (mode édition)
+        container.querySelectorAll('.produit-select').forEach(function(sel) {
+            let card = sel.closest('.item-card');
+            initTomSelectProduit(sel, card);
+        });
+    }
+});
+</script>
+

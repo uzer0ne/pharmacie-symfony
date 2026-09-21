@@ -18,12 +18,9 @@ class OrdonnanceType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('date_ordonnance', DateType::class, [
+            ->add('dateOrdonnance', DateType::class, [
                 'widget' => 'single_text',
-            ])
-            ->add('duree_traitement', TextareaType::class, [
-                'required' => false,
-                'label' => 'Durée du traitement / Consignes'
+                'label' => 'Date de l\'ordonnance'
             ])
             ->add('patient', EntityType::class, [
                 'class' => Patient::class,
@@ -32,16 +29,15 @@ class OrdonnanceType extends AbstractType
             ])
             ->add('medecin', EntityType::class, [
                 'class' => Medecin::class,
-                'choice_label' => 'NomMedecin', // adapte
+                'choice_label' => 'NomMedecin',
                 'placeholder' => 'Choisir un médecin',
             ])
-           ->add('produits', EntityType::class, [
-                'class' => Produit::class,
-                'choice_label' => 'nomProduit',
-                'multiple' => true,
-                'expanded' => false,
-                'required' => false,
-                'label' => 'Produits prescrits'
+            ->add('lignes', \Symfony\Component\Form\Extension\Core\Type\CollectionType::class, [
+                'entry_type' => LigneOrdonnanceType::class,
+                'allow_add' => true,
+                'allow_delete' => true,
+                'by_reference' => false,
+                'label' => false
             ])
         ;
     }

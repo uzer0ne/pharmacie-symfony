@@ -193,15 +193,19 @@
                                         <span class="text-muted fst-italic">Non spécifié</span>
                                     {% endif %}
                                 </td>
-                                <td>{{ ordonnance.dureeTraitement }}</td>
                                 <td>
-                                    <div class="d-flex flex-wrap gap-1">
-                                        {% for produit in ordonnance.produits %}
-                                            <span class="badge bg-secondary bg-opacity-10 text-secondary border" title="{{ produit.dosageProduit }}">
-                                                {{ produit.nomProduit }}
-                                            </span>
-                                        {% endfor %}
-                                    </div>
+                                    {% if ordonnance.validForFirstDispense %}
+                                        <span class="badge bg-success bg-opacity-10 text-success">Valide</span>
+                                    {% else %}
+                                        <span class="badge bg-danger bg-opacity-10 text-danger">Expirée</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if ordonnance.lignes|length > 0 %}
+                                        {{ ordonnance.lignes|length }} médicament(s)
+                                    {% else %}
+                                        <span class="text-muted small">Aucun médicament</span>
+                                    {% endif %}
                                 </td>
                                 <td class="text-center pe-4">
                                     <a href="{{ path('app_ordonnance_show', {'id': ordonnance.id}) }}" class="btn btn-sm btn-light border" title="Voir">

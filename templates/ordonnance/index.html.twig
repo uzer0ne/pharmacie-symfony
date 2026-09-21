@@ -69,19 +69,25 @@
                         </td>
                         <td>
                             <div class="mb-1">
-                                <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25">
-                                    <i class="bi bi-clock me-1"></i>{{ ordonnance.dureeTraitement }}
-                                </span>
+                                {% if ordonnance.validForFirstDispense %}
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25" title="Moins de 3 mois">
+                                        <i class="bi bi-check-circle me-1"></i>Valide (Délivrance)
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25" title="Plus de 3 mois">
+                                        <i class="bi bi-x-circle me-1"></i>Expirée (Délivrance)
+                                    </span>
+                                {% endif %}
                             </div>
                             <div class="d-flex flex-wrap gap-1 mt-1">
-                                {% if ordonnance.produits|length > 0 %}
-                                    {% for produit in ordonnance.produits|slice(0, 3) %}
+                                {% if ordonnance.lignes|length > 0 %}
+                                    {% for ligne in ordonnance.lignes|slice(0, 3) %}
                                         <span class="badge bg-secondary bg-opacity-10 text-secondary border">
-                                            {{ produit.nomProduit }}
+                                            {{ ligne.produit.nomProduit }} ({{ ligne.quantite }}x, {{ ligne.dureeTraitement }}j)
                                         </span>
                                     {% endfor %}
-                                    {% if ordonnance.produits|length > 3 %}
-                                        <span class="badge bg-light text-muted border">+{{ ordonnance.produits|length - 3 }}</span>
+                                    {% if ordonnance.lignes|length > 3 %}
+                                        <span class="badge bg-light text-muted border">+{{ ordonnance.lignes|length - 3 }}</span>
                                     {% endif %}
                                 {% else %}
                                     <span class="text-muted small">Aucun produit</span>

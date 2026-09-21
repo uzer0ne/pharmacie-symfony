@@ -37,40 +37,51 @@
                     </div>
                     <div class="text-end text-muted">
                         <p class="mb-0"><i class="bi bi-calendar3 me-1"></i> Fait le {{ ordonnance.dateOrdonnance ? ordonnance.dateOrdonnance|date('d/m/Y') : 'N/A' }}</p>
-                        <p class="mb-0 mt-1"><i class="bi bi-clock me-1"></i> Durée: {{ ordonnance.dureeTraitement }}</p>
+                        <p class="mb-0 mt-1">
+                            {% if ordonnance.validForFirstDispense %}
+                                <span class="badge bg-success bg-opacity-10 text-success"><i class="bi bi-check-circle me-1"></i>Valide</span>
+                            {% else %}
+                                <span class="badge bg-danger bg-opacity-10 text-danger"><i class="bi bi-x-circle me-1"></i>Expirée</span>
+                            {% endif %}
+                        </p>
                     </div>
                 </div>
             </div>
 
             <div class="card-body p-5">
-                <h5 class="text-dark fw-bold mb-4 border-bottom pb-2">Produits prescrits</h5>
+                <h5 class="text-dark fw-bold mb-4 border-bottom pb-2">Prescription détaillée</h5>
                 <div class="table-responsive">
                     <table class="table table-borderless align-middle">
                         <thead class="table-light">
                             <tr>
                                 <th class="ps-3 border-0 rounded-start">Médicament</th>
-                                <th class="border-0">Code CIP</th>
-                                <th class="border-0 text-end rounded-end pe-3">Dosage</th>
+                                <th class="border-0">Posologie</th>
+                                <th class="border-0">Durée</th>
+                                <th class="border-0 text-end rounded-end pe-3">Renouvellements</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for produit in ordonnance.produits %}
+                            {% for ligne in ordonnance.lignes %}
                                 <tr>
                                     <td class="ps-3">
-                                        <div class="fw-bold text-dark">{{ produit.nomProduit }}</div>
+                                        <div class="fw-bold text-dark">{{ ligne.produit.nomProduit }}</div>
+                                        <small class="text-muted">Quantité: {{ ligne.quantite }}</small>
                                     </td>
                                     <td>
-                                        <small class="text-muted font-monospace">{{ produit.codeProduit }}</small>
+                                        <small class="text-muted">{{ ligne.posologie }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25">{{ ligne.dureeTraitement }} j</span>
                                     </td>
                                     <td class="text-end pe-3">
-                                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">{{ produit.dosageProduit }}</span>
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25">{{ ligne.renouvellementsAutorises }}</span>
                                     </td>
                                 </tr>
                             {% else %}
                                 <tr>
-                                    <td colspan="3" class="text-center text-muted py-4">
+                                    <td colspan="4" class="text-center text-muted py-4">
                                         <i class="bi bi-capsule d-block fs-3 mb-2 opacity-50"></i>
-                                        Aucun produit n'est rattaché à cette ordonnance.
+                                        Aucune ligne de prescription.
                                     </td>
                                 </tr>
                             {% endfor %}

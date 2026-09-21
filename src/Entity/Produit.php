@@ -53,9 +53,7 @@ class Produit
     #[ORM\Column(type: Types::BOOLEAN)]
     private bool $actif = true;
 
-    // ⭐ CORRECTION : Collection au lieu de ?Ordonnance
-    #[ORM\ManyToMany(targetEntity: Ordonnance::class, mappedBy: 'produits')]
-    private Collection $ordonnances;
+    // Property removed
        // ▼▼▼ AJOUTEZ CETTE PROPRIÉTÉ ▼▼▼
     #[ORM\OneToMany(mappedBy: "produit", targetEntity: LigneVente::class)]
     private Collection $ligneVentes;
@@ -68,7 +66,7 @@ class Produit
 
     public function __construct()
     {
-        $this->ordonnances = new ArrayCollection();
+        // init removed
         $this->stock_actuel = 0;
         $this->stock_minimum = 5;
         $this->stock_alerte = 10;
@@ -77,35 +75,7 @@ class Produit
 
     }
 
-    // ⭐ CORRECTION : Retourne Collection, pas ?Ordonnance
-    /**
-     * return Collection<int, Ordonnance>
-     */
-    public function getOrdonnances(): Collection
-    {
-        return $this->ordonnances;
-    }
-
-    // ⭐ SUPPRIMER setOrdonnance() car ManyToMany n'a pas de setter
-
-    public function addOrdonnance(Ordonnance $ordonnance): static
-    {
-        if (!$this->ordonnances->contains($ordonnance)) {
-            $this->ordonnances->add($ordonnance);
-            $ordonnance->addProduit($this);
-        }
-
-        return $this;
-    }
-
-    public function removeOrdonnance(Ordonnance $ordonnance): static
-    {
-        if ($this->ordonnances->removeElement($ordonnance)) {
-            $ordonnance->removeProduit($this);
-        }
-
-        return $this;
-    }
+    // Methods removed
 
     // ... autres getters/setters existants ...
     public function getId(): ?int

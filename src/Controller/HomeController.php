@@ -41,7 +41,7 @@ final class HomeController extends AbstractController
         // 4. Nombre d'ordonnances récentes (7 derniers jours)
         $sevenDaysAgo = (new \DateTime())->modify('-7 days');
         $ordonnancesRecentes = $entityManager->getRepository(Ordonnance::class)->createQueryBuilder('o')
-            ->where('o.date_ordonnance >= :sevenDaysAgo')
+            ->where('o.dateOrdonnance >= :sevenDaysAgo')
             ->setParameter('sevenDaysAgo', $sevenDaysAgo)
             ->getQuery()
             ->getResult();
