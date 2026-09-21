@@ -33,6 +33,16 @@ class ProduitType extends AbstractType
                 'help' => 'Code Identifiant de Présentation'
             ])
             ->add('nom_produit')
+            ->add('famille', TextType::class, [
+                'label' => 'Famille de produit',
+                'required' => false,
+                'attr' => ['placeholder' => 'Ex: Antalgique, Antibiotique...']
+            ])
+            ->add('description', \Symfony\Component\Form\Extension\Core\Type\TextareaType::class, [
+                'label' => 'Description & Indications',
+                'required' => false,
+                'attr' => ['placeholder' => 'Ce que fait le produit...', 'style' => 'height: 100px;']
+            ])
             ->add('prix_produit')
             /***->add('ordonnances', EntityType::class, [
                 'class' => Ordonnance::class,

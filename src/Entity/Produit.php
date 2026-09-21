@@ -60,6 +60,12 @@ class Produit
     #[ORM\OneToMany(mappedBy: "produit", targetEntity: LigneVente::class)]
     private Collection $ligneVentes;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $famille = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $description = null;
+
     public function __construct()
     {
         $this->ordonnances = new ArrayCollection();
@@ -368,6 +374,30 @@ class Produit
                 $ligneVente->setProduit(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getFamille(): ?string
+    {
+        return $this->famille;
+    }
+
+    public function setFamille(?string $famille): static
+    {
+        $this->famille = $famille;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
 
         return $this;
     }

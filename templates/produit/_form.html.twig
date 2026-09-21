@@ -19,6 +19,22 @@
                         </div>
                     </div>
 
+                    <div class="col-md-12">
+                        <div class="form-floating mb-3">
+                            {{ form_widget(form.famille, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Antalgique, Antibiotique...'}}) }}
+                            {{ form_label(form.famille, 'Famille de produit') }}
+                            {{ form_errors(form.famille) }}
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="form-floating mb-3">
+                            {{ form_widget(form.description, {'attr': {'class': 'form-control', 'placeholder': 'Ce que fait le produit...'}}) }}
+                            {{ form_label(form.description, 'Description & Indications') }}
+                            {{ form_errors(form.description) }}
+                        </div>
+                    </div>
+
                     <div class="col-md-6">
                         <div class="form-floating mb-3">
                             {{ form_widget(form.code_produit, {'attr': {'class': 'form-control font-monospace', 'placeholder': 'Code Interne'}}) }}
@@ -158,4 +174,51 @@
     border-color: var(--color-primary);
     box-shadow: 0 0 0 0.25rem rgba(16, 185, 129, 0.15);
 }
+
+/* Correction Z-index pour TomSelect */
+.ts-wrapper {
+    position: relative;
+    z-index: 10;
+}
+.ts-dropdown {
+    z-index: 1050 !important; /* Pour passer au-dessus des autres champs */
+}
+/* Ajustement visuel pour le label flottant avec TomSelect */
+.form-floating .ts-wrapper .ts-control {
+    padding-top: 1.625rem;
+    padding-bottom: 0.625rem;
+    height: calc(3.5rem + 2px);
+}
 </style>
+
+<!-- Intégration de TomSelect pour le champ Famille -->
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const familleInput = document.getElementById('{{ form.famille.vars.id }}');
+        if (familleInput && !familleInput.tomselect) {
+            // Options existantes passées depuis le contrôleur
+            const existingFamilies = {{ familles_existantes|default([])|json_encode|raw }};
+            const options = existingFamilies.map(f => ({value: f, text: f}));
+
+            new TomSelect(familleInput, {
+                create: true, // Permet d'ajouter une nouvelle famille
+                createOnBlur: true,
+                maxItems: 1, // On ne peut choisir qu'une seule famille
+                valueField: 'value',
+                labelField: 'text',
+                searchField: 'text',
+                options: options,
+                dropdownParent: 'body', // <-- FIX: Attache le menu au <body> pour éviter les problèmes de z-index
+                placeholder: 'Sélectionnez ou créez une famille...',
+                render: {
+                    option_create: function(data, escape) {
+                        return '<div class="create">Ajouter <strong>' + escape(data.input) + '</strong>&hellip;</div>';
+                    }
+                }
+            });
+        }
+    });
+</script>

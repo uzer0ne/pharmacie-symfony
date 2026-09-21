@@ -27,11 +27,11 @@ class AppFixtures extends Fixture
         // 0. UTILISATEURS — Comptes par défaut pour chaque rôle
         // =====================================================================
         $usersData = [
-            ['email' => 'admin@pharmagest.fr',      'password' => 'admin123',      'roles' => ['ROLE_ADMIN']],
-            ['email' => 'pharmacien@pharmagest.fr',  'password' => 'pharma123',     'roles' => ['ROLE_PHARMACIEN']],
-            ['email' => 'user@pharmagest.fr',        'password' => 'user123',       'roles' => []],
+            ['email' => 'admin@Jeffarma.fr',      'password' => 'admin123',      'roles' => ['ROLE_ADMIN']],
+            ['email' => 'pharmacien@Jeffarma.fr',  'password' => 'pharma123',     'roles' => ['ROLE_PHARMACIEN']],
+            ['email' => 'user@Jeffarma.fr',        'password' => 'user123',       'roles' => []],
             // ── Gestionnaire de stock : accès limité au stock uniquement ──
-            ['email' => 'stock@pharmagest.fr',       'password' => 'stock123',      'roles' => ['ROLE_GESTIONNAIRE_STOCK']],
+            ['email' => 'stock@Jeffarma.fr',       'password' => 'stock123',      'roles' => ['ROLE_GESTIONNAIRE_STOCK']],
         ];
 
         foreach ($usersData as $data) {

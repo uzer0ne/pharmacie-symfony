@@ -53,9 +53,13 @@ final class ProduitController extends AbstractController
             return $this->redirectToRoute('app_produit_index', [], Response::HTTP_SEE_OTHER);
         }
 
+        // Fetch distinct families
+        $familles = $entityManager->createQuery('SELECT DISTINCT p.famille FROM App\Entity\Produit p WHERE p.famille IS NOT NULL ORDER BY p.famille ASC')->getSingleColumnResult();
+
         return $this->render('produit/new.html.twig', [
             'produit' => $produit,
             'form' => $form,
+            'familles_existantes' => $familles,
         ]);
     }
 
@@ -83,9 +87,13 @@ final class ProduitController extends AbstractController
             return $this->redirectToRoute('app_produit_index', [], Response::HTTP_SEE_OTHER);
         }
 
+        // Fetch distinct families
+        $familles = $entityManager->createQuery('SELECT DISTINCT p.famille FROM App\Entity\Produit p WHERE p.famille IS NOT NULL ORDER BY p.famille ASC')->getSingleColumnResult();
+
         return $this->render('produit/edit.html.twig', [
             'produit' => $produit,
             'form' => $form,
+            'familles_existantes' => $familles,
         ]);
     }
 

@@ -20,20 +20,27 @@ class LigneVenteType extends AbstractType
                 'class' => Produit::class,
                 'query_builder' => function (EntityRepository $er) {
                     return $er->createQueryBuilder('p')
-                        ->where('p.actif = :val') // Supposant qu'il y a un champ 'actif'
+                        ->where('p.actif = :val')
+                        ->andWhere('p.stock_actuel > 0')
                         ->setParameter('val', true)
                         ->orderBy('p.nom_produit', 'ASC');
                 },
-                'choice_label' => 'nom_produit', // Affiche le nom du produit dans la liste
+                'choice_label' => function(Produit $produit) {
+                    return $produit->getNomProduit() . ' - ' . $produit->getDosageProduit();
+                },
+                'choice_attr' => function(Produit $produit) {
+                    return [
+                        'data-stock' => $produit->getStockActuel(),
+                        'data-dosage' => $produit->getDosageProduit(),
+                        'data-famille' => $produit->getFamille() ?? 'Non définie',
+                        'data-description' => $produit->getDescription() ?? 'Aucune description',
+                    ];
+                },
                 'label' => 'Produit',
                 'placeholder' => 'Choisir un produit',
                 'attr' => [
-                    'class' => 'form-select produit-select', // Classe pour JS
+                    'class' => 'form-select produit-select',
                 ],
-                'group_by' => function($choice, $key, $value) {
-                    // Optionnel: groupe les produits par leur statut de stock
-                    return $choice->getStatutStock();
-                },
             ])
             ->add('quantite', NumberType::class, [
                 'label' => 'Quantité',
