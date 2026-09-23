@@ -12,17 +12,17 @@ security:
 
     # ── Hiérarchie des rôles ──────────────────────────────────────────────────
     #
-    #   ROLE_ADMIN
-    #     └─ hérite de ROLE_PHARMACIEN
-    #           └─ hérite de ROLE_USER
+    #   ROLE_PHARMACIEN (Le gérant/patron)
+    #     └─ hérite de ROLE_GESTIONNAIRE_STOCK
+    #     └─ hérite de ROLE_CAISSIER
     #
-    #   ROLE_GESTIONNAIRE_STOCK  (rôle indépendant, accès uniquement au stock)
-    #     └─ hérite de ROLE_USER (nécessaire pour être authentifié)
+    #   ROLE_GESTIONNAIRE_STOCK  (accès au stock et produits)
+    #   ROLE_CAISSIER            (accès aux ventes, ordonnances, patients)
     #
     role_hierarchy:
-        ROLE_PHARMACIEN:          ROLE_USER
-        ROLE_ADMIN:               ROLE_PHARMACIEN
+        ROLE_CAISSIER:            ROLE_USER
         ROLE_GESTIONNAIRE_STOCK:  ROLE_USER
+        ROLE_PHARMACIEN:          [ROLE_CAISSIER, ROLE_GESTIONNAIRE_STOCK]
 
     firewalls:
         dev:
@@ -49,15 +49,28 @@ security:
     # ── Contrôle d'accès ─────────────────────────────────────────────────────
     # ⚠️  Symfony applique la PREMIÈRE règle qui matche — ordre critique !
     access_control:
-        # 1. Login : tout le monde
+        # 1. Login et Logout : tout le monde
         - { path: ^/login$, roles: PUBLIC_ACCESS }
+        - { path: ^/logout$, roles: PUBLIC_ACCESS }
 
-        # 2. Routes Stock & Produit : accessibles au gestionnaire ET aux rôles supérieurs
-        - { path: ^/stock,   roles: [ROLE_GESTIONNAIRE_STOCK, ROLE_PHARMACIEN] }
-        - { path: ^/produit, roles: [ROLE_GESTIONNAIRE_STOCK, ROLE_PHARMACIEN] }
+        # 2. Gestion des produits et stocks (Gestionnaire et Pharmacien)
+        - { path: ^/produit/new, roles: ROLE_GESTIONNAIRE_STOCK }
+        - { path: ^/produit/[^/]+/edit, roles: ROLE_GESTIONNAIRE_STOCK }
+        - { path: ^/produit/[^/]+$, methods: [POST, DELETE], roles: ROLE_GESTIONNAIRE_STOCK }
+        - { path: ^/stock, roles: ROLE_GESTIONNAIRE_STOCK }
+        - { path: ^/mouvements-stock, roles: ROLE_GESTIONNAIRE_STOCK }
 
-        # 3. Tout le reste : ROLE_PHARMACIEN (et ROLE_ADMIN) uniquement
-        #    Le gestionnaire de stock ne peut PAS accéder aux ventes, patients, ordonnances, etc.
+        # 3. Accès au catalogue (Lecture seule pour caissier)
+        - { path: ^/produit, roles: [ROLE_GESTIONNAIRE_STOCK, ROLE_CAISSIER] }
+
+        # 4. Caissier : Ventes, Patients, Ordonnances, Mutuelles, Médecins
+        - { path: ^/vente, roles: ROLE_CAISSIER }
+        - { path: ^/patient, roles: ROLE_CAISSIER }
+        - { path: ^/ordonnance, roles: ROLE_CAISSIER }
+        - { path: ^/mutuelle, roles: ROLE_CAISSIER }
+        - { path: ^/medecin, roles: ROLE_CAISSIER }
+
+        # 5. Dashboard et tout le reste : Pharmacien
         - { path: ^/, roles: ROLE_PHARMACIEN }
 
 when@test:

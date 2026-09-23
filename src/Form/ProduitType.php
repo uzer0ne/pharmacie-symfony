@@ -18,7 +18,6 @@ class ProduitType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('code_produit')
             ->add('date_fabrication')
             ->add('date_expiration')
             ->add('dosage_produit')
@@ -69,11 +68,25 @@ class ProduitType extends AbstractType
             // ⭐ NOUVEAUX CHAMPS STOCKS
             ->add('stock_actuel', IntegerType::class, [
                 'label' => 'Stock actuel',
+                'disabled' => true,
+                'help' => 'Calculé via l\'historique des mouvements.'
+            ])
+            ->add('ajustement_quantite', IntegerType::class, [
+                'mapped' => false,
+                'required' => false,
+                'label' => 'Ajuster le stock (+ ou -)',
                 'attr' => [
-                    'min' => 0,
-                    'placeholder' => '0'
+                    'placeholder' => 'ex: 10 pour ajouter, -5 pour retirer'
                 ],
-                'help' => 'Quantité actuellement en stock'
+                'help' => 'Laissez vide si vous ne modifiez pas le stock.'
+            ])
+            ->add('ajustement_motif', TextType::class, [
+                'mapped' => false,
+                'required' => false,
+                'label' => 'Motif de l\'ajustement',
+                'attr' => [
+                    'placeholder' => 'ex: Inventaire, Casse, Réception commande...'
+                ]
             ])
             ->add('stock_minimum', IntegerType::class, [
                 'label' => 'Stock minimum',

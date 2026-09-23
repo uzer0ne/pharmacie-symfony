@@ -7,7 +7,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4 d-print-none">
     <div>
         <h1 class="h2 page-title">
-            <i class="bi bi-receipt-cutoff text-success me-2"></i> Reçu de Vente n°{{ vente.id }}
+            <i class="bi bi-receipt-cutoff text-success me-2"></i> Facture n°{{ vente.id }}
         </h1>
         <p class="page-subtitle mb-0">Transaction du {{ vente.dateVente|date('d/m/Y à H:i') }}</p>
     </div>
@@ -93,16 +93,40 @@
 
                 <div class="row">
                     <div class="col-md-6 offset-md-6">
-                        <div class="d-flex justify-content-between align-items-center bg-light rounded p-4 border border-success border-opacity-25">
-                            <h5 class="mb-0 text-muted">Total Net TTC</h5>
-                            <h2 class="mb-0 text-success fw-bold">{{ vente.montantTotal|number_format(2, ',', ' ') }} €</h2>
+                        <div class="bg-light rounded p-4 border border-success border-opacity-25">
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0 text-muted">Total Net TTC</h6>
+                                <h5 class="mb-0 text-dark fw-bold">{{ vente.montantTotal|number_format(2, ',', ' ') }} €</h5>
+                            </div>
+
+                            {% if vente.ordonnance and (vente.montantSecu > 0 or vente.montantMutuelle > 0) %}
+                                <div class="d-flex justify-content-between align-items-center mb-2 text-info">
+                                    <span class="small">Assurance Maladie</span>
+                                    <span class="small fw-bold">- {{ vente.montantSecu|number_format(2, ',', ' ') }} €</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-3 text-info">
+                                    <span class="small">Mutuelle</span>
+                                    <span class="small fw-bold">- {{ vente.montantMutuelle|number_format(2, ',', ' ') }} €</span>
+                                </div>
+                                <hr class="my-2 border-success">
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <h5 class="mb-0 text-success">Reste à charge patient</h5>
+                                    <h2 class="mb-0 text-success fw-bold">{{ vente.resteAPayer|number_format(2, ',', ' ') }} €</h2>
+                                </div>
+                            {% else %}
+                                <hr class="my-2 border-success">
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <h5 class="mb-0 text-success">Reste à charge patient</h5>
+                                    <h2 class="mb-0 text-success fw-bold">{{ vente.montantTotal|number_format(2, ',', ' ') }} €</h2>
+                                </div>
+                            {% endif %}
+
                         </div>
                     </div>
                 </div>
                 
-                <div class="text-center text-muted mt-5 pt-4 border-top d-print-block">
-                    <p class="small mb-0">Merci de votre confiance. Gardez ce reçu comme preuve d'achat.</p>
-                </div>
+                
             </div>
         </div>
     </div>

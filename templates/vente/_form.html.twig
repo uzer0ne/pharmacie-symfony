@@ -29,13 +29,29 @@
     padding: 3px 6px;
     border-radius: 10px;
 }
+
+/* Alignement horizontal des champs ajoutés dynamiquement */
+.dynamic-fields-wrapper > div {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    width: 100%;
+}
+.dynamic-fields-wrapper > div > div:nth-child(1) {
+    flex: 3; /* Le produit prend plus de place */
+    margin-bottom: 0 !important;
+}
+.dynamic-fields-wrapper > div > div:nth-child(2) {
+    flex: 1; /* La quantité prend moins de place */
+    margin-bottom: 0 !important;
+}
 </style>
 
 {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true}}) }}
 
 <div class="row g-4">
     <!-- Section principale: POS & Scanner -->
-    <div class="col-lg-8">
+    <div class="col-md-7 col-lg-8">
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
                 <h5 class="card-title mb-0 text-dark fw-bold">
@@ -46,111 +62,127 @@
                     <input type="text" id="scanner-input" class="form-control border-start-0 bg-light" placeholder="Scanner CIP..." autocomplete="off">
                 </div>
             </div>
-            <div class="card-body p-4 bg-light bg-opacity-50">
-                <div id="ligne-ventes-list" class="collection-ligne-ventes" data-index="{{ form.ligneVentes|length }}">
-                    {% for ligneVenteForm in form.ligneVentes %}
-                        <div class="ligne-vente-item bg-white p-3 mb-3 border rounded shadow-sm position-relative">
-                            <div class="row align-items-center">
-                                <div class="col-md-5">
-                                    {{ form_row(ligneVenteForm.produit) }}
-                                </div>
-                                <div class="col-md-3">
-                                    {{ form_row(ligneVenteForm.quantite) }}
-                                </div>
-                                <div class="col-md-3">
-                                    {{ form_row(ligneVenteForm.prixUnitaireVente) }}
-                                </div>
-                                <div class="col-md-1 text-end">
-                                    <button type="button" class="btn btn-outline-danger btn-sm border-0 remove-btn mt-3" title="Retirer">
-                                        <i class="bi bi-x-lg"></i>
-                                    </button>
+            
+            <div class="card-body p-4 bg-white">
+                
+                <!-- Zone d'ajout rapide (Le "vrai" formulaire vu par l'utilisateur) -->
+                <div class="row align-items-end mb-4 p-3 bg-light rounded border border-2 border-primary border-opacity-25 shadow-sm">
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold text-primary"><i class="bi bi-search me-1"></i> Rechercher un produit</label>
+                        <select id="quick-add-produit" class="form-select produit-select-quick"></select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Quantité</label>
+                        <input type="number" id="quick-add-qty" class="form-control fw-bold text-center" value="1" min="1">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" id="quick-add-btn" class="btn btn-primary w-100 fw-bold">
+                            <i class="bi bi-plus-lg"></i> Ajouter
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Carte d'identité du produit (Affichée dynamiquement lors de la sélection) -->
+                <div class="card border-0 shadow-sm d-none border-primary" id="produit-identity-card">
+                    <div class="card-header bg-primary bg-opacity-10 text-primary border-bottom-0 pt-3 pb-2 px-4">
+                        <h6 class="card-title mb-0 fw-bold">
+                            <i class="bi bi-info-circle me-2"></i> Détails du produit sélectionné
+                        </h6>
+                    </div>
+                    <div class="card-body p-4 bg-light rounded-bottom">
+                        <h5 id="id-card-nom" class="fw-bold text-dark mb-1">Nom du produit</h5>
+                        <p id="id-card-famille" class="text-muted small mb-3 text-uppercase fw-semibold" style="letter-spacing: 0.5px;">Famille</p>
+                        
+                        <div class="row mb-3 g-3">
+                            <div class="col-md-6">
+                                <div class="p-3 bg-white rounded border border-2 text-center h-100 d-flex flex-column justify-content-center">
+                                    <small class="text-muted d-block text-uppercase fw-bold mb-1" style="font-size:0.75rem">Dosage</small>
+                                    <strong id="id-card-dosage" class="text-dark fs-5">--</strong>
                                 </div>
                             </div>
+                            <div class="col-md-6">
+                                <div class="p-3 bg-white rounded border border-2 text-center h-100 d-flex flex-column justify-content-center">
+                                    <small class="text-muted d-block text-uppercase fw-bold mb-1" style="font-size:0.75rem">En stock</small>
+                                    <strong id="id-card-stock" class="text-primary fs-4">--</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p id="id-card-description" class="small text-secondary mb-0 border-top pt-3">
+                            Description du produit...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- FORMULAIRE SYMFONY CACHÉ (C'est ce qui sera envoyé au serveur) -->
+                <div id="ligne-ventes-list" class="d-none collection-ligne-ventes" data-index="{{ form.ligneVentes|length }}">
+                    {% for ligneVenteForm in form.ligneVentes %}
+                        <div class="ligne-vente-item">
+                            {{ form_row(ligneVenteForm.produit, {'attr': {'class': 'produit-select'}}) }}
+                            {{ form_row(ligneVenteForm.quantite, {'attr': {'class': 'quantite-input'}}) }}
                         </div>
                     {% endfor %}
                 </div>
 
-                <div class="text-center mt-4">
-                    <button type="button" class="btn btn-light fw-bold text-primary px-4 add-ligne-vente-btn border">
-                        <i class="bi bi-plus-lg me-1"></i> Ajouter une ligne de produit
-                    </button>
-                </div>
             </div>
         </div>
     </div>
 
     <!-- Section latérale: Client & Résumé -->
-    <div class="col-lg-4">
-        <!-- Carte d'identité du produit (Affichée dynamiquement) -->
-        <div class="card border-0 shadow-sm mb-4 d-none border-primary" id="produit-identity-card">
-            <div class="card-header bg-primary text-white pt-3 pb-2 px-4">
-                <h6 class="card-title mb-0 fw-bold">
-                    <i class="bi bi-box-seam me-2"></i> Informations Produit
-                </h6>
-            </div>
-            <div class="card-body p-4 bg-light">
-                <h5 id="id-card-nom" class="fw-bold text-dark mb-1">Nom du produit</h5>
-                <p id="id-card-famille" class="text-muted small mb-3 text-uppercase fw-semibold" style="letter-spacing: 0.5px;">Famille</p>
-                
-                <div class="row mb-3 g-2">
-                    <div class="col-6">
-                        <div class="p-2 bg-white rounded border text-center">
-                            <small class="text-muted d-block" style="font-size:0.75rem">Dosage</small>
-                            <strong id="id-card-dosage" class="text-dark">--</strong>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="p-2 bg-white rounded border text-center">
-                            <small class="text-muted d-block" style="font-size:0.75rem">En stock</small>
-                            <strong id="id-card-stock" class="text-primary fs-5">--</strong>
-                        </div>
-                    </div>
-                </div>
+    <div class="col-md-5 col-lg-4">
+        <!-- Rendre la colonne collante pour ne pas la perdre de vue au scroll -->
+        <div class="sticky-top" style="top: 1.5rem; z-index: 1020;">
+            
+            <!-- 1. RÉSUMÉ DE LA COMMANDE (Toujours visible en haut) -->
+            <div class="card bg-primary text-white border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h6 class="text-white-50 text-uppercase fw-bold mb-3">Résumé de la commande</h6>
+                    
+                    <!-- Conteneur pour la liste dynamique des produits -->
+                    <ul id="order-summary-list" class="list-unstyled mb-3 border-bottom border-light pb-3">
+                        <li class="text-white-50 small fst-italic" id="empty-summary-msg">Aucun produit sélectionné</li>
+                    </ul>
 
-                <p id="id-card-description" class="small text-secondary mb-0 border-top pt-3">
-                    Description du produit...
-                </p>
-            </div>
-        </div>
-
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
-                <h5 class="card-title mb-0 text-dark fw-bold">
-                    <i class="bi bi-person text-primary me-2"></i> Client & Ordonnance
-                </h5>
-            </div>
-            <div class="card-body p-4">
-                <div class="mb-4">
-                    {{ form_label(form.patient, 'Sélectionner un patient', {'label_attr': {'class': 'fw-medium mb-2'}}) }}
-                    {{ form_widget(form.patient, {'attr': {'class': 'form-select form-select-lg'}}) }}
-                    <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Laissez vide pour une vente libre</small>
-                </div>
-                
-                <div class="mb-2">
-                    {{ form_label(form.ordonnance, 'Ordonnance rattachée', {'label_attr': {'class': 'fw-medium mb-2'}}) }}
-                    {{ form_widget(form.ordonnance, {'attr': {'class': 'form-select', 'id': 'ordonnance-select'}}) }}
-                    <button type="button" id="prefill-from-ordonnance-btn" class="btn btn-outline-success btn-sm mt-2 w-100 d-none">
-                        <i class="bi bi-magic me-1"></i> Pré-remplir les produits depuis l'ordonnance
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <span class="fs-5">Montant Total</span>
+                        <span class="fs-2 fw-bold text-white" id="total-amount-display">0,00 €</span>
+                    </div>
+                    
+                    {{ form_errors(form) }}
+                    {{ form_errors(form.ligneVentes) }}
+                    
+                    <button type="submit" class="btn btn-light w-100 py-3 fw-bold fs-5 text-primary">
+                        <i class="bi bi-check-circle-fill me-2"></i> {{ button_label|default('Validé') }}
                     </button>
                 </div>
             </div>
-        </div>
 
-        <div class="card bg-primary text-white border-0 shadow-sm">
-            <div class="card-body p-4">
-                <h6 class="text-white-50 text-uppercase fw-bold mb-3">Résumé de la commande</h6>
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <span class="fs-5">Montant Total</span>
-                    <span class="fs-2 fw-bold text-white">0,00 €</span>
+            <!-- 2. CLIENT & ORDONNANCE -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
+                    <h5 class="card-title mb-0 text-dark fw-bold">
+                        <i class="bi bi-person text-primary me-2"></i> Client & Ordonnance
+                    </h5>
                 </div>
-                
-                {{ form_errors(form) }}
-                {{ form_errors(form.ligneVentes) }}
-                
-                <button type="submit" class="btn btn-light w-100 py-3 fw-bold fs-5 text-primary">
-                    <i class="bi bi-check-circle-fill me-2"></i> {{ button_label|default('Encaisser') }}
-                </button>
+                <div class="card-body p-4">
+                    <div class="mb-4">
+                        {{ form_label(form.patient, 'Sélectionner un patient', {'label_attr': {'class': 'fw-medium mb-2'}}) }}
+                        {{ form_widget(form.patient, {'attr': {'class': 'form-select form-select-lg'}}) }}
+                        <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Laissez vide pour une vente libre</small>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <div class="form-check form-switch fs-6 mt-3 p-3 bg-light rounded border border-info border-opacity-25">
+                            {{ form_widget(form.creer_ordonnance, {'attr': {'class': 'form-check-input ms-0 me-3'}}) }}
+                            {{ form_label(form.creer_ordonnance, null, {'label_attr': {'class': 'form-check-label fw-bold text-dark'}}) }}
+                            <div class="form-text mt-1 text-muted ms-5">
+                                <i class="bi bi-info-circle me-1"></i>Créera automatiquement l'historique d'ordonnance pour ce patient.
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+
         </div>
     </div>
 </div>
@@ -162,16 +194,125 @@
 <div id="ligne-vente-prototype-wrapper" class="d-none" data-prototype="{{ form_widget(form.ligneVentes.vars.prototype)|e('html_attr') }}"></div>
 
 <script>
+    // === MISE À JOUR DU RÉSUMÉ (PANIER UNIQUE) ===
+    function updateOrderSummary() {
+        const list = document.querySelector('#ligne-ventes-list');
+        const summaryList = document.getElementById('order-summary-list');
+        const totalDisplay = document.getElementById('total-amount-display');
+        
+        let total = 0;
+        let summaryHtml = '';
+        let hasItems = false;
+
+        if (list) {
+            list.querySelectorAll('.ligne-vente-item').forEach((item, index) => {
+                const select = item.querySelector('select'); // Produit
+                const qtyInput = item.querySelector('input'); // Quantité
+                
+                if (select && qtyInput && select.value) {
+                    const option = select.querySelector(`option[value="${select.value}"]`);
+                    if (option) {
+                        const prix = parseFloat(option.getAttribute('data-prix') || 0);
+                        const dosage = option.getAttribute('data-dosage') || '--';
+                        const qty = parseInt(qtyInput.value || 1);
+                        const nom = option.text.split('-')[0].trim();
+                        
+                        const subtotal = prix * qty;
+                        total += subtotal;
+                        hasItems = true;
+
+                        // HTML de la carte du produit dans le résumé
+                        summaryHtml += `
+                            <li class="bg-white text-dark rounded p-3 mb-2 shadow-sm list-group-item-action">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <div class="fw-bold text-primary" style="font-size:0.95rem">${nom}</div>
+                                        <div class="text-muted" style="font-size:0.8rem">Dosage: <span class="fw-medium">${dosage}</span> | PU: ${prix.toFixed(2)} €</div>
+                                    </div>
+                                    <button type="button" class="btn btn-sm text-danger p-0 ms-2 cart-remove-btn" data-index="${index}"><i class="bi bi-x-circle-fill fs-5"></i></button>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+                                    <div class="input-group input-group-sm" style="width: 90px;">
+                                        <button class="btn btn-outline-secondary px-2 cart-qty-minus" type="button" data-index="${index}">-</button>
+                                        <input type="number" class="form-control text-center cart-qty-update fw-bold px-1" data-index="${index}" value="${qty}" min="1">
+                                        <button class="btn btn-outline-secondary px-2 cart-qty-plus" type="button" data-index="${index}">+</button>
+                                    </div>
+                                    <div class="fw-bold fs-6">${subtotal.toFixed(2).replace('.', ',')} €</div>
+                                </div>
+                            </li>
+                        `;
+                    }
+                }
+            });
+        }
+
+        if (hasItems) {
+            summaryList.innerHTML = summaryHtml;
+        } else {
+            summaryList.innerHTML = '<li class="text-white-50 small fst-italic py-2 text-center">Aucun produit dans le panier</li>';
+        }
+
+        totalDisplay.textContent = total.toFixed(2).replace('.', ',') + ' €';
+
+        // Événements pour la quantité directe (input manuel)
+        document.querySelectorAll('.cart-qty-update').forEach(input => {
+            input.addEventListener('change', function() {
+                const idx = this.getAttribute('data-index');
+                const hiddenRows = list.querySelectorAll('.ligne-vente-item');
+                if (hiddenRows[idx]) {
+                    hiddenRows[idx].querySelector('input').value = Math.max(1, this.value);
+                    updateOrderSummary();
+                }
+            });
+        });
+
+        // Événements pour les boutons + et -
+        document.querySelectorAll('.cart-qty-minus').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const idx = this.getAttribute('data-index');
+                const hiddenRows = list.querySelectorAll('.ligne-vente-item');
+                if (hiddenRows[idx]) {
+                    const input = hiddenRows[idx].querySelector('input');
+                    input.value = Math.max(1, parseInt(input.value) - 1);
+                    updateOrderSummary();
+                }
+            });
+        });
+        document.querySelectorAll('.cart-qty-plus').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const idx = this.getAttribute('data-index');
+                const hiddenRows = list.querySelectorAll('.ligne-vente-item');
+                if (hiddenRows[idx]) {
+                    const input = hiddenRows[idx].querySelector('input');
+                    input.value = parseInt(input.value) + 1;
+                    updateOrderSummary();
+                }
+            });
+        });
+
+        // Événement pour la suppression
+        document.querySelectorAll('.cart-remove-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const idx = this.getAttribute('data-index');
+                const hiddenRows = list.querySelectorAll('.ligne-vente-item');
+                if (hiddenRows[idx]) {
+                    hiddenRows[idx].remove();
+                    updateOrderSummary();
+                }
+            });
+        });
+    }
+
     // Configuration globale de TomSelect pour nos produits
     function initSelects(elements) {
         elements.forEach(function(el) {
-            if (el.tomselect) return; // Déjà initialisé
-            if (!el.classList.contains('produit-select')) return; // Juste au cas où
+            if (el.tomselect) return; 
 
             new TomSelect(el, {
                 create: false,
                 sortField: { field: "text", direction: "asc" },
                 placeholder: "Tapez pour chercher un produit...",
+                dropdownParent: 'body', // <-- FIX: Attache au body pour éviter les problèmes de z-index
                 render: {
                     option: function(data, escape) {
                         const optionEl = el.querySelector('option[value="' + escape(data.value) + '"]');
@@ -179,13 +320,16 @@
 
                         const stock = optionEl.getAttribute('data-stock') || '0';
                         const dosage = optionEl.getAttribute('data-dosage') || '';
+                        const prix = optionEl.getAttribute('data-prix') || '0';
                         
                         let stockBadgeClass = parseInt(stock) > 10 ? 'bg-success' : (parseInt(stock) > 0 ? 'bg-warning text-dark' : 'bg-danger');
 
-                        return '<div class="option">' +
+                        return '<div class="option d-flex justify-content-between align-items-center w-100">' +
+                               '<div>' +
+                                 '<div class="nom">' + escape(data.text.split('-')[0]) + '</div>' +
+                                 '<div class="details">Dosage: ' + escape(dosage) + ' | Prix: ' + parseFloat(prix).toFixed(2) + ' €</div>' +
+                               '</div>' +
                                '<span class="stock-badge ' + stockBadgeClass + '">Stock: ' + escape(stock) + '</span>' +
-                               '<div class="nom">' + escape(data.text.split('-')[0]) + '</div>' +
-                               '<div class="details">Dosage: ' + escape(dosage) + '</div>' +
                                '</div>';
                     },
                     item: function(data, escape) {
@@ -217,13 +361,9 @@
                         
                         document.getElementById('produit-identity-card').classList.remove('d-none');
                         
-                        // Met en évidence si le stock est faible
                         const stockEl = document.getElementById('id-card-stock');
-                        if(parseInt(stock) < 5) {
-                            stockEl.className = "text-danger fs-5 fw-bold";
-                        } else {
-                            stockEl.className = "text-success fs-5 fw-bold";
-                        }
+                        if(parseInt(stock) < 5) stockEl.className = "text-danger fs-5 fw-bold";
+                        else stockEl.className = "text-success fs-5 fw-bold";
                     }
                 }
             });
@@ -231,181 +371,89 @@
     }
 
     function initVenteForm() {
-        const addBtn = document.querySelector('.add-ligne-vente-btn');
         const list = document.querySelector('#ligne-ventes-list');
         const prototypeWrapper = document.querySelector('#ligne-vente-prototype-wrapper');
+        const quickAddSelect = document.getElementById('quick-add-produit');
+        const quickAddQty = document.getElementById('quick-add-qty');
+        const quickAddBtn = document.getElementById('quick-add-btn');
 
-        // Initialiser les selects déjà présents
-        initSelects(document.querySelectorAll('.produit-select'));
+        if (!list || !prototypeWrapper || !quickAddSelect) return;
 
-        if (!addBtn || !list || !prototypeWrapper) return;
+        // Extraire les options du prototype pour remplir le select de recherche rapide
+        if (quickAddSelect.options.length === 0) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = prototypeWrapper.dataset.prototype;
+            const selectProto = tempDiv.querySelector('select');
+            if (selectProto) {
+                quickAddSelect.innerHTML = selectProto.innerHTML;
+            }
+        }
+
+        // Initialiser TomSelect sur le champ de recherche rapide
+        initSelects([quickAddSelect]);
+        updateOrderSummary();
 
         if (!list.dataset.index) {
             list.dataset.index = list.querySelectorAll('.ligne-vente-item').length;
         }
 
-        const newBtn = addBtn.cloneNode(true);
-        addBtn.parentNode.replaceChild(newBtn, addBtn);
-
-        newBtn.addEventListener('click', function(e) {
+        // --- Logique d'ajout au panier ---
+        quickAddBtn.addEventListener('click', function(e) {
             e.preventDefault();
             
-            const prototype = prototypeWrapper.dataset.prototype;
-            let index = parseInt(list.dataset.index);
+            const productId = quickAddSelect.value;
+            const qtyToAdd = parseInt(quickAddQty.value || 1);
 
-            let newForm = prototype.replace(/__name__label__/g, index);
-            newForm = newForm.replace(/__name__/g, index);
-
-            const newItem = document.createElement('div');
-            newItem.classList.add('ligne-vente-item', 'bg-white', 'p-3', 'mb-3', 'border', 'rounded', 'shadow-sm', 'position-relative');
-            
-            newItem.innerHTML = `
-                <div class="row align-items-center">
-                    <div class="col-md-5">${newForm.replace(/<div[^>]*>.*?<label[^>]*>.*?<\/label>.*?<select/s, '<select').replace(/<\/div>$/s, '')}</div>
-                    <div class="col-md-1 text-end">
-                        <button type="button" class="btn btn-outline-danger btn-sm border-0 remove-btn" title="Retirer"><i class="bi bi-x-lg"></i></button>
-                    </div>
-                </div>
-            `;
-            newItem.innerHTML = `
-                <div class="d-flex align-items-end gap-3 w-100">
-                    <div class="flex-grow-1">${newForm}</div>
-                    <button type="button" class="btn btn-outline-danger border-0 remove-btn mb-3" title="Retirer"><i class="bi bi-trash"></i></button>
-                </div>
-            `;
-
-            list.appendChild(newItem);
-            list.dataset.index = index + 1;
-
-            // Initialiser TomSelect sur la nouvelle ligne ajoutée
-            const newSelects = newItem.querySelectorAll('.produit-select');
-            initSelects(newSelects);
-        });
-
-        list.addEventListener('click', function(e) {
-            if (e.target && (e.target.matches('.remove-btn') || e.target.closest('.remove-btn'))) {
-                e.preventDefault();
-                const item = e.target.closest('.ligne-vente-item');
-                // Détruire l'instance TomSelect si elle existe
-                const select = item.querySelector('.produit-select');
-                if (select && select.tomselect) {
-                    select.tomselect.destroy();
-                }
-                item.remove();
-                
-                // Cacher la carte d'identité s'il n'y a plus de produit sélectionné
-                document.getElementById('produit-identity-card').classList.add('d-none');
+            if (!productId) {
+                alert("Veuillez sélectionner un produit.");
+                return;
             }
+
+            // Vérifier si le produit est déjà dans le panier caché
+            let existingRow = null;
+            list.querySelectorAll('.ligne-vente-item').forEach(item => {
+                const select = item.querySelector('select');
+                if (select && select.value === productId) {
+                    existingRow = item;
+                }
+            });
+
+            if (existingRow) {
+                // Incrémenter la quantité existante
+                const qtyInput = existingRow.querySelector('input');
+                qtyInput.value = parseInt(qtyInput.value) + qtyToAdd;
+            } else {
+                // Créer une nouvelle ligne cachée à partir du prototype
+                const prototype = prototypeWrapper.dataset.prototype;
+                let index = parseInt(list.dataset.index);
+
+                let newForm = prototype.replace(/__name__label__/g, index);
+                newForm = newForm.replace(/__name__/g, index);
+
+                const newItem = document.createElement('div');
+                newItem.classList.add('ligne-vente-item');
+                newItem.innerHTML = newForm;
+
+                // Assigner la valeur du produit et la quantité
+                const newSelect = newItem.querySelector('select');
+                const newQtyInput = newItem.querySelector('input');
+                
+                newSelect.value = productId;
+                newQtyInput.value = qtyToAdd;
+
+                list.appendChild(newItem);
+                list.dataset.index = index + 1;
+            }
+
+            // Mettre à jour l'affichage
+            updateOrderSummary();
+
+            // Réinitialiser le formulaire rapide
+            quickAddSelect.tomselect.clear();
+            quickAddQty.value = 1;
         });
     }
 
     document.addEventListener('DOMContentLoaded', initVenteForm);
     document.addEventListener('turbo:load', initVenteForm);
-
-    // ===== LOGIQUE PRÉ-REMPLISSAGE DEPUIS ORDONNANCE =====
-    function initPrefillOrdonnance() {
-        const ordonnanceSelect = document.getElementById('ordonnance-select');
-        const list = document.querySelector('#ligne-ventes-list');
-        const prototypeWrapper = document.querySelector('#ligne-vente-prototype-wrapper');
-
-        if (!ordonnanceSelect) return;
-
-        // Pré-remplissage AUTOMATIQUE dès qu'une ordonnance est sélectionnée
-        const prefillOrdonnance = function() {
-            const ordonnanceId = ordonnanceSelect.value;
-            if (!ordonnanceId || !list || !prototypeWrapper) return;
-
-            // Afficher un petit retour visuel
-            const originalText = ordonnanceSelect.options[ordonnanceSelect.selectedIndex].text;
-            ordonnanceSelect.options[ordonnanceSelect.selectedIndex].text = '⏳ Chargement...';
-
-            // Ajout des credentials pour que la session (cookie) soit envoyée,
-            // et X-Requested-With pour que Symfony sache que c'est une requête AJAX
-            fetch('/api/ordonnance/' + ordonnanceId + '/produits', {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                },
-                credentials: 'same-origin'
-            })
-                .then(r => {
-                    if (!r.ok) throw new Error("Erreur réseau ou non autorisé (code " + r.status + ")");
-                    return r.json();
-                })
-                .then(function(produits) {
-                    ordonnanceSelect.options[ordonnanceSelect.selectedIndex].text = originalText;
-
-                    if (!produits || produits.length === 0) {
-                        alert("Cette ordonnance ne contient aucun produit.");
-                        return;
-                    }
-
-                    // Vider les lignes actuelles
-                    list.querySelectorAll('.ligne-vente-item').forEach(item => {
-                        const sel = item.querySelector('.produit-select');
-                        if (sel && sel.tomselect) sel.tomselect.destroy();
-                        item.remove();
-                    });
-                    list.dataset.index = 0;
-
-                    // Créer une ligne par produit de l'ordonnance
-                    produits.forEach(function(produit) {
-                        const prototype = prototypeWrapper.dataset.prototype;
-                        let index = parseInt(list.dataset.index || 0);
-                        let newForm = prototype.replace(/__name__label__/g, index);
-                        newForm = newForm.replace(/__name__/g, index);
-
-                        const newItem = document.createElement('div');
-                        newItem.classList.add('ligne-vente-item', 'bg-white', 'p-3', 'mb-3', 'border', 'rounded', 'shadow-sm', 'position-relative');
-                        newItem.innerHTML = `
-                            <div class="d-flex align-items-end gap-3 w-100">
-                                <div class="flex-grow-1">${newForm}</div>
-                                <button type="button" class="btn btn-outline-danger border-0 remove-btn mb-3" title="Retirer"><i class="bi bi-trash"></i></button>
-                            </div>
-                        `;
-                        list.appendChild(newItem);
-                        list.dataset.index = index + 1;
-
-                        const newSelect = newItem.querySelector('.produit-select');
-                        const qtyInput = newItem.querySelector('.quantite-input');
-                        initSelects([newSelect]);
-
-                        // Pré-sélectionner le produit et la quantité
-                        setTimeout(function() {
-                            if (newSelect && newSelect.tomselect) {
-                                newSelect.tomselect.setValue(String(produit.id), true);
-                            } else if (newSelect) {
-                                newSelect.value = produit.id;
-                            }
-                            if (qtyInput) qtyInput.value = produit.quantite;
-                            
-                            // Déclencher l'événement change pour TomSelect afin de mettre à jour la carte d'identité
-                            if (newSelect) {
-                                const event = new Event('change');
-                                newSelect.dispatchEvent(event);
-                            }
-                        }, 150);
-                    });
-                })
-                .catch(function(err) {
-                    ordonnanceSelect.options[ordonnanceSelect.selectedIndex].text = originalText;
-                    console.error('Erreur prefill ordonnance:', err);
-                    alert("Impossible de pré-remplir l'ordonnance. Détails: " + err.message);
-                });
-        };
-
-        // Supprimer les anciens écouteurs pour éviter les doublons avec Turbo
-        ordonnanceSelect.replaceWith(ordonnanceSelect.cloneNode(true));
-        const newOrdonnanceSelect = document.getElementById('ordonnance-select');
-        newOrdonnanceSelect.addEventListener('change', prefillOrdonnance);
-        
-        // Si l'ordonnance est déjà sélectionnée au chargement (par ex. retour arrière navigateur)
-        if (newOrdonnanceSelect.value) {
-            prefillOrdonnance();
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', initPrefillOrdonnance);
-    document.addEventListener('turbo:load', initPrefillOrdonnance);
 </script>

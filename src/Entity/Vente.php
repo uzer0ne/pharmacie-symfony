@@ -22,6 +22,15 @@ class Vente
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
     private ?string $montant_total = '0.00';
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    private ?string $montant_secu = '0.00';
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    private ?string $montant_mutuelle = '0.00';
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    private ?string $reste_a_payer = '0.00';
+
     // Une vente peut être liée à un patient (mais c'est facultatif, pour les ventes libres)
     #[ORM\ManyToOne(targetEntity: Patient::class, inversedBy: 'ventes')]
     #[ORM\JoinColumn(name: 'Id_Patient', referencedColumnName: 'Id_Patient', nullable: true)]
@@ -74,6 +83,39 @@ class Vente
     {
         $this->montant_total = $montant_total;
 
+        return $this;
+    }
+
+    public function getMontantSecu(): ?string
+    {
+        return $this->montant_secu;
+    }
+
+    public function setMontantSecu(?string $montant_secu): static
+    {
+        $this->montant_secu = $montant_secu;
+        return $this;
+    }
+
+    public function getMontantMutuelle(): ?string
+    {
+        return $this->montant_mutuelle;
+    }
+
+    public function setMontantMutuelle(?string $montant_mutuelle): static
+    {
+        $this->montant_mutuelle = $montant_mutuelle;
+        return $this;
+    }
+
+    public function getResteAPayer(): ?string
+    {
+        return $this->reste_a_payer;
+    }
+
+    public function setResteAPayer(?string $reste_a_payer): static
+    {
+        $this->reste_a_payer = $reste_a_payer;
         return $this;
     }
 

@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Form\FormError;
 
 #[Route('/produit')]
 final class ProduitController extends AbstractController
@@ -47,10 +48,36 @@ final class ProduitController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($produit);
-            $entityManager->flush();
+            
+            // Gérer l'ajustement de stock manuel lors de la création (Stock initial)
+            $ajustQuantite = $form->get('ajustement_quantite')->getData();
+            if ($ajustQuantite !== null && $ajustQuantite != 0) {
+                if ($ajustQuantite < 0) {
+                    $form->get('ajustement_quantite')->addError(new FormError("Le stock initial ne peut pas être négatif."));
+                } else {
+                    // Mettre à jour le stock actuel
+                    $produit->setStockActuel($ajustQuantite); // C'est un nouveau produit, donc on set la valeur absolue
 
-            return $this->redirectToRoute('app_produit_index', [], Response::HTTP_SEE_OTHER);
+                    // Créer le mouvement de stock pour l'historique
+                    $mouvement = new \App\Entity\MouvementStock();
+                    $mouvement->setProduit($produit);
+                    $mouvement->setQuantite($ajustQuantite);
+                    $mouvement->setType('ENTREE_INITIALE');
+                    
+                    $motif = $form->get('ajustement_motif')->getData();
+                    $mouvement->setMotif($motif ?: 'Stock initial');
+                    $mouvement->setUtilisateur($this->getUser());
+                    
+                    $entityManager->persist($mouvement);
+                }
+            }
+
+            if ($form->isValid()) {
+                $entityManager->persist($produit);
+                $entityManager->flush();
+
+                return $this->redirectToRoute('app_produit_index', [], Response::HTTP_SEE_OTHER);
+            }
         }
 
         // Fetch distinct families
@@ -82,9 +109,36 @@ final class ProduitController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
+            
+            // Gérer l'ajustement de stock manuel
+            $ajustQuantite = $form->get('ajustement_quantite')->getData();
+            if ($ajustQuantite !== null && $ajustQuantite != 0) {
+                $nouveauStock = $produit->getStockActuel() + $ajustQuantite;
+                
+                if ($nouveauStock < 0) {
+                    $form->get('ajustement_quantite')->addError(new FormError("Le stock final ne peut pas être négatif (stock actuel : {$produit->getStockActuel()})."));
+                } else {
+                    // Mettre à jour le stock actuel
+                    $produit->setStockActuel($nouveauStock);
 
-            return $this->redirectToRoute('app_produit_index', [], Response::HTTP_SEE_OTHER);
+                    // Créer le mouvement de stock pour l'historique
+                    $mouvement = new \App\Entity\MouvementStock();
+                    $mouvement->setProduit($produit);
+                    $mouvement->setQuantite($ajustQuantite);
+                    $mouvement->setType($ajustQuantite > 0 ? 'CORRECTION_AJOUT' : 'CORRECTION_RETRAIT');
+                    
+                    $motif = $form->get('ajustement_motif')->getData();
+                    $mouvement->setMotif($motif ?: 'Ajustement manuel');
+                    $mouvement->setUtilisateur($this->getUser());
+                    
+                    $entityManager->persist($mouvement);
+                }
+            }
+
+            if ($form->isValid()) {
+                $entityManager->flush();
+                return $this->redirectToRoute('app_produit_show', ['idProduit' => $produit->getId()], Response::HTTP_SEE_OTHER);
+            }
         }
 
         // Fetch distinct families

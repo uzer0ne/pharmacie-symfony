@@ -14,10 +14,12 @@
         <a href="{{ path('app_produit_index') }}" class="btn btn-outline-secondary shadow-sm">
             <i class="bi bi-arrow-left me-1"></i> Retour
         </a>
+        {% if is_granted('ROLE_GESTIONNAIRE_STOCK') %}
         <a href="{{ path('app_produit_edit', {'idProduit': produit.id}) }}" class="btn btn-warning shadow-sm">
             <i class="bi bi-pencil me-1"></i> Modifier
         </a>
         {{ include('produit/_delete_form.html.twig') }}
+        {% endif %}
     </div>
 </div>
 
@@ -29,9 +31,6 @@
             </div>
             <div class="card-body p-4">
                 <dl class="row mb-0">
-                    <dt class="col-sm-4 text-muted fw-normal">Code Produit (SKU)</dt>
-                    <dd class="col-sm-8 fw-bold">{{ produit.codeProduit }}</dd>
-
                     <dt class="col-sm-4 text-muted fw-normal">Code CIP</dt>
                     <dd class="col-sm-8 font-monospace">{{ produit.codeCip ?? 'N/A' }}</dd>
 
@@ -74,6 +73,61 @@
                         </span>
                     </dd>
                 </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0 text-dark fw-bold">Historique des mouvements de stock</h5>
+                <span class="badge bg-primary fs-6">Stock actuel : {{ produit.stockActuel }}</span>
+            </div>
+            <div class="card-body p-0">
+                {% if produit.mouvementsStock|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Date</th>
+                                    <th>Type</th>
+                                    <th>Quantité</th>
+                                    <th>Motif</th>
+                                    <th class="pe-4">Utilisateur</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {# On trie les mouvements du plus récent au plus ancien #}
+                                {% for mouvement in produit.mouvementsStock|sort((a, b) => b.dateMouvement <=> a.dateMouvement) %}
+                                    <tr>
+                                        <td class="ps-4 text-muted">{{ mouvement.dateMouvement|date('d/m/Y H:i') }}</td>
+                                        <td>
+                                            {% if mouvement.quantite > 0 %}
+                                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25"><i class="bi bi-arrow-up-right"></i> Entrée</span>
+                                            {% else %}
+                                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25"><i class="bi bi-arrow-down-right"></i> Sortie</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="fw-bold {% if mouvement.quantite > 0 %}text-success{% else %}text-danger{% endif %}">
+                                            {{ mouvement.quantite > 0 ? '+' : '' }}{{ mouvement.quantite }}
+                                        </td>
+                                        <td>{{ mouvement.motif }}</td>
+                                        <td class="pe-4 text-muted small">
+                                            {{ mouvement.utilisateur ? mouvement.utilisateur.userIdentifier : 'Système' }}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-clock-history d-block fs-1 mb-3 opacity-25"></i>
+                        Aucun mouvement de stock enregistré pour ce produit.
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>

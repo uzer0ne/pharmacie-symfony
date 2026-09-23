@@ -1,0 +1,79 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Historique Global des Stocks - Jeffarma{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 page-title">
+            <i class="bi bi-clock-history text-primary me-2"></i> Historique des Mouvements de Stock
+        </h1>
+        <p class="page-subtitle mb-0">Registre complet des entrées, sorties et ventes</p>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Date</th>
+                        <th>Produit (CIP)</th>
+                        <th>Type</th>
+                        <th class="text-center">Quantité</th>
+                        <th>Motif</th>
+                        <th class="pe-4">Utilisateur</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mouvement in mouvements %}
+                        <tr>
+                            <td class="ps-4 text-muted">{{ mouvement.dateMouvement|date('d/m/Y H:i') }}</td>
+                            <td>
+                                <a href="{{ path('app_produit_show', {'idProduit': mouvement.produit.id}) }}" class="fw-bold text-decoration-none">
+                                    {{ mouvement.produit.nomProduit }}
+                                </a>
+                                <div class="small text-muted font-monospace">{{ mouvement.produit.codeCip ?? 'N/A' }}</div>
+                            </td>
+                            <td>
+                                {% if mouvement.quantite > 0 %}
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25"><i class="bi bi-arrow-up-right"></i> Entrée</span>
+                                {% else %}
+                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25"><i class="bi bi-arrow-down-right"></i> Sortie</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center fw-bold {% if mouvement.quantite > 0 %}text-success{% else %}text-danger{% endif %} fs-5">
+                                {{ mouvement.quantite > 0 ? '+' : '' }}{{ mouvement.quantite }}
+                            </td>
+                            <td>{{ mouvement.motif }}</td>
+                            <td class="pe-4 text-muted small">
+                                {% if mouvement.utilisateur %}
+                                    <i class="bi bi-person-circle me-1"></i> {{ mouvement.utilisateur.userIdentifier }}
+                                {% else %}
+                                    <span class="text-secondary"><i class="bi bi-cpu me-1"></i> Système</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-folder2-open d-block fs-1 mb-3 opacity-25"></i>
+                                Aucun mouvement de stock enregistré.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% if mouvements.getTotalItemCount() > 0 %}
+        <div class="card-footer bg-white border-top p-4 d-flex justify-content-between align-items-center">
+            <span class="text-muted small">Total: {{ mouvements.getTotalItemCount() }} mouvements</span>
+            <div class="d-flex justify-content-end">
+                {{ include('partials/_pagination.html.twig', { items: mouvements }) }}
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

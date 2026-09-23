@@ -3,6 +3,71 @@
 <div class="row g-4">
     <!-- Colonne Principale -->
     <div class="col-lg-8">
+
+        <!-- ======================================================= -->
+        <!-- WIDGET DE RECHERCHE BDPM (ANSM) — Pré-remplissage auto  -->
+        <!-- ======================================================= -->
+        <div class="card border-2 border-primary shadow-sm mb-4 position-relative" id="bdpm-search-card" style="border-style: dashed !important; z-index: 1050;">
+            <div class="card-header bg-primary bg-opacity-10 border-0 pt-3 pb-2 px-4">
+                <h5 class="card-title mb-0 text-primary fw-bold">
+                    <i class="bi bi-search me-2"></i> Rechercher dans la base officielle ANSM (BDPM)
+                </h5>
+                <p class="text-muted small mb-0 mt-1">Tapez le nom du médicament pour pré-remplir automatiquement la fiche. Les données proviennent de la Base de Données Publique des Médicaments.</p>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-10">
+                        <label class="form-label fw-bold">Nom du médicament, DCI ou substance active</label>
+                        <div class="input-group input-group-lg shadow-sm">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-capsule text-primary"></i></span>
+                            <input type="text"
+                                   id="bdpm-search-input"
+                                   class="form-control border-start-0 ps-0"
+                                   placeholder="Ex: Doliprane, Paracétamol, Amoxicilline..."
+                                   autocomplete="off">
+                            <button type="button" class="btn btn-outline-secondary" id="bdpm-clear-btn" style="display:none" title="Effacer">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                        <!-- Dropdown résultats BDPM -->
+                        <div id="bdpm-results-dropdown" class="position-relative">
+                            <ul class="list-group shadow-lg position-absolute w-100 z-index-dropdown d-none" id="bdpm-results-list" style="z-index:1050; max-height: 320px; overflow-y:auto;"></ul>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="text-center text-muted small mt-2">
+                            <i class="bi bi-database-check text-success fs-4"></i><br>
+                            <span id="bdpm-status-text">BDPM chargée</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fiche de prévisualisation du médicament sélectionné depuis BDPM -->
+                <div id="bdpm-preview" class="mt-4 p-3 bg-light rounded border d-none">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="fw-bold text-primary mb-0" id="bdpm-preview-nom">—</h6>
+                        <button type="button" class="btn btn-sm btn-success" id="bdpm-apply-btn">
+                            <i class="bi bi-check-circle me-1"></i> Utiliser ces données
+                        </button>
+                    </div>
+                    <div class="row g-2 small text-muted">
+                        <div class="col-md-3"><strong>Substance :</strong> <span id="bdpm-preview-substance">—</span></div>
+                        <div class="col-md-2"><strong>Dosage :</strong> <span id="bdpm-preview-dosage">—</span></div>
+                        <div class="col-md-3"><strong>Forme :</strong> <span id="bdpm-preview-forme">—</span></div>
+                        <div class="col-md-4"><strong>Laboratoire :</strong> <span id="bdpm-preview-labo">—</span></div>
+                        
+                        <div class="col-md-12 mt-2"><strong>Présentation :</strong> <span id="bdpm-preview-pres">—</span></div>
+                        
+                        <div class="col-md-3 mt-2"><strong>Code CIP-13 :</strong> <span class="font-monospace" id="bdpm-preview-cip">—</span></div>
+                        <div class="col-md-3 mt-2"><strong>Prix BDPM :</strong> <span id="bdpm-preview-prix-bdpm">—</span></div>
+                        <div class="col-md-3 mt-2"><strong>Taux remb. :</strong> <span id="bdpm-preview-taux">—</span></div>
+                        <div class="col-md-3 mt-2"><strong class="text-success" id="bdpm-preview-prix-sugg-label">Prix vente suggéré :</strong> <span class="fw-bold text-success" id="bdpm-preview-prix-sugg">—</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- FIN WIDGET BDPM -->
+
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
                 <h5 class="card-title mb-0 text-dark fw-bold">
@@ -37,21 +102,13 @@
 
                     <div class="col-md-6">
                         <div class="form-floating mb-3">
-                            {{ form_widget(form.code_produit, {'attr': {'class': 'form-control font-monospace', 'placeholder': 'Code Interne'}}) }}
-                            {{ form_label(form.code_produit, 'Code Interne (SKU) *') }}
-                            {{ form_errors(form.code_produit) }}
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-floating mb-3">
                             {{ form_widget(form.code_cip, {'attr': {'class': 'form-control font-monospace', 'placeholder': 'Code CIP'}}) }}
                             {{ form_label(form.code_cip, 'Code CIP (Code-barres)') }}
                             {{ form_errors(form.code_cip) }}
                         </div>
                     </div>
 
-                    <div class="col-md-12">
+                    <div class="col-md-6">
                         <div class="form-floating mb-3">
                             {{ form_widget(form.dosage_produit, {'attr': {'class': 'form-control', 'placeholder': 'Dosage'}}) }}
                             {{ form_label(form.dosage_produit, 'Dosage (ex: 500mg, 10ml) *') }}
@@ -136,9 +193,36 @@
                     {{ form_label(form.stock_minimum, 'Seuil critique (Rupture) *') }}
                     {{ form_errors(form.stock_minimum) }}
                 </div>
-                
                 <hr class="my-4">
+
+                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-arrow-left-right text-primary me-2"></i> Ajustement Manuel</h6>
                 
+                <!-- Boutons personnalisés pour Ajouter ou Enlever du stock -->
+                <div class="d-flex gap-2 mb-3">
+                    <button type="button" class="btn btn-success flex-fill fw-bold text-white shadow-sm" id="btn-add-stock">
+                        <i class="bi bi-plus-circle me-1"></i> Ajouter
+                    </button>
+                    <button type="button" class="btn btn-outline-danger flex-fill fw-bold bg-white" id="btn-remove-stock">
+                        <i class="bi bi-dash-circle me-1"></i> Enlever
+                    </button>
+                </div>
+
+                <!-- Contenu de l'ajustement -->
+                <div class="border rounded p-3 mb-4 bg-white shadow-sm" id="stock-adjust-container">
+                    <div class="form-floating mb-3">
+                        {{ form_widget(form.ajustement_quantite, {'attr': {'class': 'form-control fs-5 fw-bold text-center text-success border-success', 'placeholder': 'Quantité'}}) }}
+                        <label for="{{ form.ajustement_quantite.vars.id }}">Quantité</label>
+                        {{ form_errors(form.ajustement_quantite) }}
+                        <div class="form-text text-muted small mt-1" id="ajustement-help">Saisissez la quantité à ajouter.</div>
+                    </div>
+
+                    <div class="form-floating mb-1">
+                        {{ form_widget(form.ajustement_motif, {'attr': {'class': 'form-control', 'placeholder': 'Motif'}}) }}
+                        {{ form_label(form.ajustement_motif, "Motif de l'opération") }}
+                    </div>
+                </div>
+
+                <hr class="my-4">
                 <div class="form-check form-switch fs-5">
                     {{ form_widget(form.actif, {'attr': {'class': 'form-check-input'}}) }}
                     {{ form_label(form.actif, 'Produit disponible à la vente', {'label_attr': {'class': 'form-check-label text-dark'}}) }}
@@ -216,6 +300,296 @@
                 render: {
                     option_create: function(data, escape) {
                         return '<div class="create">Ajouter <strong>' + escape(data.input) + '</strong>&hellip;</div>';
+                    }
+                }
+            });
+        }
+    });
+
+    // ============================================================
+    // WIDGET BDPM — Recherche et pré-remplissage depuis l'ANSM
+    // ============================================================
+    (function() {
+        const searchInput   = document.getElementById('bdpm-search-input');
+        const resultsList   = document.getElementById('bdpm-results-list');
+        const preview       = document.getElementById('bdpm-preview');
+        const applyBtn      = document.getElementById('bdpm-apply-btn');
+        const clearBtn      = document.getElementById('bdpm-clear-btn');
+        const statusText    = document.getElementById('bdpm-status-text');
+
+        if (!searchInput) return;
+
+        let selectedMed = null;
+        let debounceTimer = null;
+
+        // Champs du formulaire Symfony à pré-remplir
+        const fieldNom         = document.querySelector('[name*="nom_produit"]');
+        const fieldFamille     = document.querySelector('[name*="famille"]');
+        const fieldDescription = document.querySelector('[name*="description"]');
+        const fieldCodeCip     = document.querySelector('[name*="code_cip"]');
+        const fieldDosage      = document.querySelector('[name*="dosage_produit"]');
+        const fieldPrix        = document.querySelector('[name*="prix_produit"]');
+
+        // Recherche avec debounce (attendre 300ms après la frappe)
+        searchInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            const q = this.value.trim();
+
+            clearBtn.style.display = q.length > 0 ? 'block' : 'none';
+            preview.classList.add('d-none');
+
+            if (q.length < 2) {
+                resultsList.classList.add('d-none');
+                resultsList.innerHTML = '';
+                return;
+            }
+
+            statusText.textContent = 'Recherche...';
+
+            debounceTimer = setTimeout(function() {
+                fetch('/api/medicaments/search?q=' + encodeURIComponent(q), {
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(r => r.json())
+                .then(function(results) {
+                    statusText.textContent = results.length + ' résultat(s)';
+                    resultsList.innerHTML = '';
+
+                    if (results.length === 0) {
+                        resultsList.innerHTML = '<li class="list-group-item text-muted fst-italic">Aucun médicament trouvé pour "' + q + '"</li>';
+                        resultsList.classList.remove('d-none');
+                        return;
+                    }
+
+                    results.forEach(function(med) {
+                        const li = document.createElement('li');
+                        li.className = 'list-group-item list-group-item-action py-3 px-4 cursor-pointer';
+                        li.style.cursor = 'pointer';
+
+                        const prixBadge = med.prixVenteSuggere
+                            ? `<span class="badge bg-success ms-2">${parseFloat(med.prixVenteSuggere).toFixed(2)} €</span>`
+                            : '';
+                        const taux = med.tauxRemboursement
+                            ? `<span class="badge bg-info text-dark ms-1">Remb. ${med.tauxRemboursement}</span>`
+                            : '';
+
+                        li.innerHTML = `
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-bold text-dark">${med.denomination}</div>
+                                    <small class="text-muted">
+                                        ${med.substanceActive || ''} ${med.dosage ? '— ' + med.dosage : ''} 
+                                        ${med.formePharmaceutique ? '| ' + med.formePharmaceutique : ''} 
+                                        ${med.titulaire ? '<br><i class="bi bi-building"></i> ' + med.titulaire : ''}
+                                    </small>
+                                </div>
+                                <div class="text-end flex-shrink-0 ms-3">
+                                    ${prixBadge}${taux}
+                                </div>
+                            </div>
+                        `;
+
+                        li.addEventListener('click', function() {
+                            selectedMed = med;
+                            searchInput.value = med.denomination;
+                            resultsList.classList.add('d-none');
+
+                            // Afficher la fiche de prévisualisation
+                            document.getElementById('bdpm-preview-nom').textContent       = med.denomination;
+                            document.getElementById('bdpm-preview-substance').textContent  = med.substanceActive || '—';
+                            document.getElementById('bdpm-preview-dosage').textContent    = med.dosage || '—';
+                            document.getElementById('bdpm-preview-forme').textContent     = med.formePharmaceutique || '—';
+                            document.getElementById('bdpm-preview-labo').textContent      = med.titulaire || '—';
+                            document.getElementById('bdpm-preview-pres').textContent      = med.libellePresentation || '—';
+                            document.getElementById('bdpm-preview-cip').textContent       = med.codeCip13 || '—';
+                            document.getElementById('bdpm-preview-prix-bdpm').textContent = med.prixRemboursement ? parseFloat(med.prixRemboursement).toFixed(2) + ' €' : '—';
+                            document.getElementById('bdpm-preview-taux').textContent      = med.tauxRemboursement || '—';
+                            document.getElementById('bdpm-preview-prix-sugg').textContent = med.prixVenteSuggere ? parseFloat(med.prixVenteSuggere).toFixed(2) + ' €' : '—';
+                            
+                            const suggLabel = document.getElementById('bdpm-preview-prix-sugg-label');
+                            if (med.tauxRemboursement && med.tauxRemboursement.trim() !== '') {
+                                suggLabel.textContent = 'Prix réglementé (Remb.) :';
+                                suggLabel.classList.replace('text-success', 'text-primary');
+                                document.getElementById('bdpm-preview-prix-sugg').classList.replace('text-success', 'text-primary');
+                            } else {
+                                suggLabel.textContent = 'Prix vente suggéré (+30%) :';
+                                suggLabel.classList.replace('text-primary', 'text-success');
+                                document.getElementById('bdpm-preview-prix-sugg').classList.replace('text-primary', 'text-success');
+                            }
+
+                            preview.classList.remove('d-none');
+                        });
+
+                        resultsList.appendChild(li);
+                    });
+
+                    resultsList.classList.remove('d-none');
+                })
+                .catch(function(err) {
+                    statusText.textContent = 'Erreur API';
+                    console.error('Erreur BDPM search:', err);
+                });
+            }, 300);
+        });
+
+        // Bouton "Effacer"
+        clearBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            resultsList.innerHTML = '';
+            resultsList.classList.add('d-none');
+            preview.classList.add('d-none');
+            clearBtn.style.display = 'none';
+            selectedMed = null;
+            statusText.textContent = 'BDPM chargée';
+            searchInput.focus();
+        });
+
+        // Fermer le dropdown si on clique ailleurs
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#bdpm-search-card')) {
+                resultsList.classList.add('d-none');
+            }
+        });
+
+        // Bouton "Utiliser ces données" — pré-remplissage du formulaire Symfony
+        applyBtn.addEventListener('click', function() {
+            if (!selectedMed) return;
+
+            const nom = selectedMed.denomination;
+
+            // Pré-remplir le nom du produit
+            if (fieldNom) {
+                fieldNom.value = nom;
+                fieldNom.dispatchEvent(new Event('input'));
+            }
+
+            // Pré-remplir le dosage
+            if (fieldDosage && selectedMed.dosage) {
+                fieldDosage.value = selectedMed.dosage;
+            }
+
+            // Pré-remplir le code CIP
+            if (fieldCodeCip && selectedMed.codeCip13) {
+                fieldCodeCip.value = selectedMed.codeCip13;
+            }
+
+            // Pré-remplir le prix de vente (prix BDPM + 30%)
+            if (fieldPrix && selectedMed.prixVenteSuggere) {
+                fieldPrix.value = selectedMed.prixVenteSuggere;
+            }
+
+            // Pré-remplir la description
+            if (fieldDescription && selectedMed.substanceActive) {
+                let desc = selectedMed.substanceActive;
+                if (selectedMed.dosage) desc += ' — ' + selectedMed.dosage;
+                if (selectedMed.formePharmaceutique) desc += '\nForme : ' + selectedMed.formePharmaceutique;
+                if (selectedMed.libellePresentation) desc += '\nPrésentation : ' + selectedMed.libellePresentation;
+                if (selectedMed.tauxRemboursement) desc += '\nRemboursement Sécu : ' + selectedMed.tauxRemboursement;
+                fieldDescription.value = desc;
+            }
+
+            // Pré-remplir la famille (substance active = bon proxy pour la famille)
+            if (fieldFamille && selectedMed.substanceActive) {
+                // Si c'est un TomSelect
+                const tomInstance = fieldFamille.tomselect;
+                if (tomInstance) {
+                    tomInstance.addOption({ value: selectedMed.substanceActive, text: selectedMed.substanceActive });
+                    tomInstance.setValue(selectedMed.substanceActive, true);
+                } else {
+                    fieldFamille.value = selectedMed.substanceActive;
+                }
+            }
+
+            // Feedback visuel
+            applyBtn.classList.replace('btn-success', 'btn-outline-success');
+            applyBtn.innerHTML = '<i class="bi bi-check2-all me-1"></i> Appliqué !';
+            setTimeout(() => {
+                applyBtn.classList.replace('btn-outline-success', 'btn-success');
+                applyBtn.innerHTML = '<i class="bi bi-check-circle me-1"></i> Utiliser ces données';
+            }, 2500);
+        });
+    })();
+
+    // ============================================================
+    // GESTION DES BOUTONS D'AJUSTEMENT DE STOCK
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnAdd = document.getElementById('btn-add-stock');
+        const btnRemove = document.getElementById('btn-remove-stock');
+        const adjustInput = document.getElementById('{{ form.ajustement_quantite.vars.id }}');
+        const adjustHelp = document.getElementById('ajustement-help');
+        const form = document.querySelector('form.needs-validation');
+
+        if (!btnAdd || !btnRemove || !adjustInput) {
+            console.error("Erreur: Éléments d'ajustement introuvables");
+            return;
+        }
+
+        let isAdding = true;
+
+        // Force l'input à ne pas accepter de négatifs au clavier
+        adjustInput.setAttribute('min', '0');
+        adjustInput.addEventListener('keydown', function(e) {
+            if (e.key === '-' || e.key === 'e') {
+                e.preventDefault();
+            }
+        });
+
+        // Quand on clique sur "Ajouter"
+        btnAdd.addEventListener('click', function () {
+            isAdding = true;
+            
+            // UI Boutons
+            btnAdd.className = 'btn btn-success flex-fill fw-bold text-white shadow-sm';
+            btnRemove.className = 'btn btn-outline-danger flex-fill fw-bold bg-white';
+            
+            // UI Input
+            adjustInput.classList.remove('text-danger', 'border-danger');
+            adjustInput.classList.add('text-success', 'border-success');
+            adjustHelp.textContent = 'Saisissez la quantité à ajouter au stock (+).';
+            
+            if (adjustInput.value && parseInt(adjustInput.value) < 0) {
+                adjustInput.value = Math.abs(parseInt(adjustInput.value));
+            }
+        });
+
+        // Quand on clique sur "Enlever"
+        btnRemove.addEventListener('click', function () {
+            isAdding = false;
+            
+            // UI Boutons
+            btnAdd.className = 'btn btn-outline-success flex-fill fw-bold bg-white';
+            btnRemove.className = 'btn btn-danger flex-fill fw-bold text-white shadow-sm';
+            
+            // UI Input
+            adjustInput.classList.remove('text-success', 'border-success');
+            adjustInput.classList.add('text-danger', 'border-danger');
+            adjustHelp.textContent = 'Saisissez la quantité à retirer du stock (-).';
+            
+            if (adjustInput.value && parseInt(adjustInput.value) < 0) {
+                adjustInput.value = Math.abs(parseInt(adjustInput.value));
+            }
+        });
+
+        // Empêcher la saisie de négatifs via copier-coller ou input direct
+        adjustInput.addEventListener('input', function() {
+            if (this.value && parseInt(this.value) < 0) {
+                this.value = Math.abs(parseInt(this.value));
+            }
+        });
+
+        // Au moment de soumettre le formulaire, appliquer le signe moins si nécessaire
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                if (adjustInput.value && parseInt(adjustInput.value) > 0) {
+                    if (!isAdding) {
+                        // On ajoute un champ caché temporaire pour la vraie soumission
+                        // pour éviter que l'utilisateur voie un - s'afficher avant rechargement
+                        const finalValue = -Math.abs(parseInt(adjustInput.value));
+                        adjustInput.value = finalValue;
+                    } else {
+                        adjustInput.value = Math.abs(parseInt(adjustInput.value));
                     }
                 }
             });

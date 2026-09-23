@@ -27,11 +27,14 @@ class AppFixtures extends Fixture
         // 0. UTILISATEURS — Comptes par défaut pour chaque rôle
         // =====================================================================
         $usersData = [
-            ['email' => 'admin@Jeffarma.fr',      'password' => 'admin123',      'roles' => ['ROLE_ADMIN']],
+            // Le Pharmacien a tous les droits (Direction)
             ['email' => 'pharmacien@Jeffarma.fr',  'password' => 'pharma123',     'roles' => ['ROLE_PHARMACIEN']],
-            ['email' => 'user@Jeffarma.fr',        'password' => 'user123',       'roles' => []],
-            // ── Gestionnaire de stock : accès limité au stock uniquement ──
+            
+            // Le Gestionnaire de stock (Inventaire, réapprovisionnement, ajustements)
             ['email' => 'stock@Jeffarma.fr',       'password' => 'stock123',      'roles' => ['ROLE_GESTIONNAIRE_STOCK']],
+            
+            // La Caissière / Vendeuse (Ventes, ordonnances, lecture seule produits)
+            ['email' => 'caisse@Jeffarma.fr',      'password' => 'caisse123',     'roles' => ['ROLE_CAISSIER']],
         ];
 
         foreach ($usersData as $data) {

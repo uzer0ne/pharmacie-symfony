@@ -47,11 +47,14 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
         $user = $token->getUser();
 
         // ── Redirection prioritaire selon le rôle ────────────────────────────
-        // IMPORTANT : ce check doit passer AVANT getTargetPath() pour éviter
-        // que le gestionnaire soit redirigé vers une URL interdite sauvegardée
-        // en session (ex: "/" qui requiert ROLE_PHARMACIEN).
-        if (in_array('ROLE_GESTIONNAIRE_STOCK', $user->getRoles(), true)) {
-            // On vide le target path pour éviter toute redirection parasite
+        $roles = $user->getRoles();
+
+        if (in_array('ROLE_CAISSIER', $roles, true)) {
+            $this->removeTargetPath($request->getSession(), $firewallName);
+            return new RedirectResponse($this->urlGenerator->generate('app_vente_new'));
+        }
+
+        if (in_array('ROLE_GESTIONNAIRE_STOCK', $roles, true)) {
             $this->removeTargetPath($request->getSession(), $firewallName);
             return new RedirectResponse($this->urlGenerator->generate('app_stock_reapprovisionnement'));
         }

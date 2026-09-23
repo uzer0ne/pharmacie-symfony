@@ -16,7 +16,7 @@ class Produit
     #[ORM\Column(name: 'Id_Produit', type: 'integer')]
     private ?int $idProduit = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $code_produit = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
@@ -58,6 +58,12 @@ class Produit
     #[ORM\OneToMany(mappedBy: "produit", targetEntity: LigneVente::class)]
     private Collection $ligneVentes;
 
+    /**
+     * @var Collection<int, MouvementStock>
+     */
+    #[ORM\OneToMany(mappedBy: 'produit', targetEntity: MouvementStock::class, orphanRemoval: true)]
+    private Collection $mouvementsStock;
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $famille = null;
 
@@ -72,7 +78,7 @@ class Produit
         $this->stock_alerte = 10;
         $this->actif = true;
         $this->ligneVentes = new ArrayCollection();
-
+        $this->mouvementsStock = new ArrayCollection();
     }
 
     // Methods removed
@@ -372,5 +378,33 @@ class Produit
         return $this;
     }
 
+    /**
+     * @return Collection<int, MouvementStock>
+     */
+    public function getMouvementsStock(): Collection
+    {
+        return $this->mouvementsStock;
+    }
 
+    public function addMouvementStock(MouvementStock $mouvementStock): static
+    {
+        if (!$this->mouvementsStock->contains($mouvementStock)) {
+            $this->mouvementsStock->add($mouvementStock);
+            $mouvementStock->setProduit($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMouvementStock(MouvementStock $mouvementStock): static
+    {
+        if ($this->mouvementsStock->removeElement($mouvementStock)) {
+            // set the owning side to null (unless already changed)
+            if ($mouvementStock->getProduit() === $this) {
+                $mouvementStock->setProduit(null);
+            }
+        }
+
+        return $this;
+    }
 }

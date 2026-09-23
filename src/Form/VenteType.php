@@ -44,22 +44,16 @@ class VenteType extends AbstractType
                 'choice_label' => function(Patient $patient) {
                     return $patient->getPrenomPatient() . ' ' . $patient->getNomPatient();
                 },
-                'placeholder' => 'Vente libre (sans patient)',
+                'placeholder' => 'Vente libre (sans ordonna)',
                 'label' => 'Patient (Optionnel)',
                 'required' => false,
                 'attr' => ['class' => 'form-select'],
             ])
-            ->add('ordonnance', EntityType::class, [
-                'class' => Ordonnance::class,
-                'choice_label' => function(Ordonnance $ordonnance) {
-                    return 'Ordonnance n°' . $ordonnance->getId() . ' du ' . $ordonnance->getDateOrdonnance()->format('d/m/Y');
-                },
-                'placeholder' => 'Aucune ordonnance liée',
-                'label' => 'Ordonnance (Optionnel)',
+            ->add('creer_ordonnance', \Symfony\Component\Form\Extension\Core\Type\CheckboxType::class, [
+                'mapped' => false,
+                'label' => 'Délivrance sur ordonnance (Applique le Tiers Payant et crée un historique)',
                 'required' => false,
-                'attr' => ['class' => 'form-select'],
-                // TODO: Ajouter une logique (JS ou query_builder) pour filtrer
-                // les ordonnances en fonction du patient sélectionné ci-dessus.
+                'attr' => ['class' => 'form-check-input']
             ])
 
             // ===== C'EST LA PARTIE LA PLUS IMPORTANTE =====

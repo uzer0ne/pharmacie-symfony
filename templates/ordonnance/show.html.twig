@@ -94,6 +94,53 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Historique des ventes (Délivrances) -->
+        <div class="card shadow-sm border-0 mb-4 d-print-none">
+            <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
+                <h5 class="card-title mb-0 text-dark fw-bold">
+                    <i class="bi bi-clock-history text-success me-2"></i> Historique des délivrances
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                {% if ordonnance.ventes|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="border-0 rounded-start">Date</th>
+                                    <th class="border-0 text-center">N° Vente</th>
+                                    <th class="border-0 text-end">Total TTC</th>
+                                    <th class="border-0 text-end text-info">Part Sécu</th>
+                                    <th class="border-0 text-end text-info">Part Mutuelle</th>
+                                    <th class="border-0 text-end text-success rounded-end">Reste à charge</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for vente in ordonnance.ventes %}
+                                    <tr>
+                                        <td>{{ vente.dateVente|date('d/m/Y H:i') }}</td>
+                                        <td class="text-center">
+                                            <a href="{{ path('app_vente_show', {'id': vente.id}) }}" class="badge bg-primary text-decoration-none">#{{ vente.id }}</a>
+                                        </td>
+                                        <td class="text-end fw-bold">{{ vente.montantTotal|number_format(2, ',', ' ') }} €</td>
+                                        <td class="text-end text-info">- {{ vente.montantSecu|number_format(2, ',', ' ') }} €</td>
+                                        <td class="text-end text-info">- {{ vente.montantMutuelle|number_format(2, ',', ' ') }} €</td>
+                                        <td class="text-end fw-bold text-success">{{ vente.resteAPayer|number_format(2, ',', ' ') }} €</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-basket d-block fs-3 mb-2 opacity-50"></i>
+                        Aucune vente associée à cette ordonnance pour le moment.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
     </div>
 
     <!-- Colonne Latérale: Relations -->

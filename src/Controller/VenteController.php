@@ -68,8 +68,16 @@ final class VenteController extends AbstractController
                         throw new \Exception('Stock insuffisant');
                     }
 
-                    // 2. Mettre à jour le stock du produit
+                    // 2. Mettre à jour le stock du produit et créer le mouvement de stock
                     $produit->setStockActuel($produit->getStockActuel() - $quantiteDemandee);
+
+                    $mouvement = new \App\Entity\MouvementStock();
+                    $mouvement->setProduit($produit);
+                    $mouvement->setQuantite(-$quantiteDemandee);
+                    $mouvement->setType('VENTE');
+                    $mouvement->setMotif('Vente en caisse');
+                    $mouvement->setUtilisateur($this->getUser());
+                    $entityManager->persist($mouvement);
 
                     // 3. "Bloquer" le prix de vente au moment de l'achat
                     $ligneVente->setPrixUnitaireVente($produit->getPrixProduit());
@@ -77,6 +85,83 @@ final class VenteController extends AbstractController
 
                 // 4. Calculer le montant total de la vente
                 $vente->calculerMontantTotal();
+
+                // 5. Calculer le Tiers Payant (Part Sécu, Part Mutuelle, Reste à payer)
+                $montantSecu = 0.0;
+                $montantMutuelle = 0.0;
+                $resteAPayer = 0.0;
+
+                $patient = $vente->getPatient();
+                
+                // Si la case "Créer une ordonnance" est cochée
+                $creerOrdonnance = $form->get('creer_ordonnance')->getData();
+                if ($creerOrdonnance) {
+                    if (!$patient) {
+                        $form->addError(new FormError('Vous devez sélectionner un patient pour créer une ordonnance.'));
+                        throw new \Exception('Patient manquant');
+                    }
+                    
+                    $nouvelleOrdonnance = new \App\Entity\Ordonnance();
+                    $nouvelleOrdonnance->setPatient($patient);
+                    $nouvelleOrdonnance->setDateOrdonnance(new \DateTimeImmutable());
+                    
+                    foreach ($vente->getLigneVentes() as $ligneVente) {
+                        $ligneOrd = new \App\Entity\LigneOrdonnance();
+                        $ligneOrd->setOrdonnance($nouvelleOrdonnance);
+                        $ligneOrd->setProduit($ligneVente->getProduit());
+                        $ligneOrd->setQuantite($ligneVente->getQuantite());
+                        $ligneOrd->setPosologie('Selon prescription');
+                        $ligneOrd->setDureeTraitement(30);
+                        $ligneOrd->setRenouvellementsAutorises(0);
+                        $entityManager->persist($ligneOrd);
+                    }
+                    
+                    $entityManager->persist($nouvelleOrdonnance);
+                    $vente->setOrdonnance($nouvelleOrdonnance);
+                }
+
+                $ordonnance = $vente->getOrdonnance();
+
+                $hasMutuelle = ($patient && $patient->getMutuelles()->count() > 0);
+
+                foreach ($vente->getLigneVentes() as $ligne) {
+                    $produit = $ligne->getProduit();
+                    $prixLigne = (float) $ligne->getPrixTotal();
+                    
+                    $partSecu = 0.0;
+                    $partMut = 0.0;
+                    $resteLigne = $prixLigne;
+
+                    // Le remboursement ne s'applique que s'il y a une ordonnance
+                    if ($ordonnance) {
+                        $tauxSecu = 0;
+                        if ($produit->getCodeCip()) {
+                            $medBdpm = $entityManager->getRepository(\App\Entity\MedicamentBdpm::class)
+                                                     ->findOneBy(['codeCip13' => $produit->getCodeCip()]);
+                            if ($medBdpm && $medBdpm->getTauxRemboursement()) {
+                                $tauxSecu = (float) str_replace('%', '', $medBdpm->getTauxRemboursement());
+                            }
+                        }
+
+                        $partSecu = round($prixLigne * ($tauxSecu / 100), 2);
+                        $resteLigne = $prixLigne - $partSecu;
+
+                        // Si le patient a une mutuelle et que le médicament est remboursable, 
+                        // on simule que la mutuelle prend en charge le ticket modérateur
+                        if ($hasMutuelle && $tauxSecu > 0) {
+                            $partMut = $resteLigne;
+                            $resteLigne = 0.0;
+                        }
+                    }
+
+                    $montantSecu += $partSecu;
+                    $montantMutuelle += $partMut;
+                    $resteAPayer += $resteLigne;
+                }
+
+                $vente->setMontantSecu(number_format($montantSecu, 2, '.', ''));
+                $vente->setMontantMutuelle(number_format($montantMutuelle, 2, '.', ''));
+                $vente->setResteAPayer(number_format($resteAPayer, 2, '.', ''));
                 // --- Fin de la logique métier ---
 
                 $entityManager->persist($vente); // Persiste la Vente
@@ -90,7 +175,7 @@ final class VenteController extends AbstractController
             } catch (\Exception $e) {
                 // Si une erreur (stock...) se produit, on ne sauvegarde rien
                 // et on affiche le message d'erreur sur le formulaire.
-                if ($e->getMessage() !== 'Stock insuffisant' && $e->getMessage() !== 'Vente vide') {
+                if (!in_array($e->getMessage(), ['Stock insuffisant', 'Vente vide', 'Patient manquant'])) {
                     $this->addFlash('danger', 'Erreur inattendue: ' . $e->getMessage());
                 }
             }
@@ -201,20 +286,14 @@ final class VenteController extends AbstractController
     {
         if ($this->isCsrfTokenValid('delete'.$vente->getId(), $request->getPayload()->getString('_token'))) {
             
-            // --- Logique métier (Restitution des stocks) ---
-            // Avant de supprimer la vente, on remet tous les produits en stock
-            foreach ($vente->getLigneVentes() as $ligne) {
-                $produit = $ligne->getProduit();
-                if ($produit) {
-                    $produit->setStockActuel($produit->getStockActuel() + $ligne->getQuantite());
-                }
-            }
-            // --- Fin de la logique ---
-
+            // --- Logique métier demandée par l'utilisateur ---
+            // Lors de la suppression d'une vente entière, le stock NE DOIT PAS être restitué.
+            // La vente est effacée de l'historique mais les produits restent décrémentés du stock.
+            
             $entityManager->remove($vente);
             $entityManager->flush();
             
-            $this->addFlash('success', 'Vente supprimée. Les stocks des produits ont été réajustés.');
+            $this->addFlash('success', 'Vente supprimée de l\'historique (les stocks restent inchangés).');
         }
 
         return $this->redirectToRoute('app_vente_index', [], Response::HTTP_SEE_OTHER);

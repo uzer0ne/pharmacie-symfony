@@ -34,6 +34,7 @@ class LigneVenteType extends AbstractType
                         'data-dosage' => $produit->getDosageProduit(),
                         'data-famille' => $produit->getFamille() ?? 'Non définie',
                         'data-description' => $produit->getDescription() ?? 'Aucune description',
+                        'data-prix' => $produit->getPrixProduit() ?? 0,
                     ];
                 },
                 'label' => 'Produit',
