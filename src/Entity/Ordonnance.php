@@ -21,6 +21,9 @@ class Ordonnance
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private ?\DateTimeImmutable $dateOrdonnance = null;
 
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $dateFin = null;
+
     #[ORM\ManyToOne(targetEntity: Patient::class, inversedBy: 'ordonnances')]
     #[ORM\JoinColumn(name: 'Id_Patient', referencedColumnName: 'Id_Patient', nullable: false)]
     private ?Patient $patient = null;
@@ -61,6 +64,17 @@ class Ordonnance
     public function setDateOrdonnance(\DateTimeImmutable $dateOrdonnance): self
     {
         $this->dateOrdonnance = $dateOrdonnance;
+        return $this;
+    }
+
+    public function getDateFin(): ?\DateTimeImmutable
+    {
+        return $this->dateFin;
+    }
+
+    public function setDateFin(?\DateTimeImmutable $dateFin): self
+    {
+        $this->dateFin = $dateFin;
         return $this;
     }
 

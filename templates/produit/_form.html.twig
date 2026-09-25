@@ -122,6 +122,47 @@
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
                 <h5 class="card-title mb-0 text-dark fw-bold">
+                    <i class="bi bi-geo-alt text-primary me-2"></i> Emplacement physique
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            {{ form_widget(form.empZone, {'attr': {'class': 'form-select'}}) }}
+                            {{ form_label(form.empZone) }}
+                            {{ form_errors(form.empZone) }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            {{ form_widget(form.empColonne, {'attr': {'class': 'form-control', 'placeholder': 'Baie'}}) }}
+                            {{ form_label(form.empColonne) }}
+                            {{ form_errors(form.empColonne) }}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            {{ form_widget(form.empNiveau, {'attr': {'class': 'form-control', 'placeholder': 'Étagère'}}) }}
+                            {{ form_label(form.empNiveau) }}
+                            {{ form_errors(form.empNiveau) }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            {{ form_widget(form.empPosition, {'attr': {'class': 'form-control', 'placeholder': 'Position'}}) }}
+                            {{ form_label(form.empPosition) }}
+                            {{ form_errors(form.empPosition) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
+                <h5 class="card-title mb-0 text-dark fw-bold">
                     <i class="bi bi-calendar3 text-primary me-2"></i> Cycle de vie
                 </h5>
             </div>
@@ -180,7 +221,7 @@
             <div class="card-body p-4">
                 <div class="form-floating mb-3">
                     {{ form_widget(form.stock_actuel, {'attr': {'class': 'form-control', 'placeholder': 'Stock initial'}}) }}
-                    {{ form_label(form.stock_actuel, 'Stock actuel *') }}
+                    {{ form_label(form.stock_actuel, 'Stock *') }}
                     {{ form_errors(form.stock_actuel) }}
                 </div>
                 <div class="form-floating mb-3">
@@ -190,7 +231,7 @@
                 </div>
                 <div class="form-floating mb-3">
                     {{ form_widget(form.stock_minimum, {'attr': {'class': 'form-control border-danger', 'placeholder': 'Seuil critique'}}) }}
-                    {{ form_label(form.stock_minimum, 'Seuil critique (Rupture) *') }}
+                    {{ form_label(form.stock_minimum, 'Seuil critique *') }}
                     {{ form_errors(form.stock_minimum) }}
                 </div>
                 <hr class="my-4">

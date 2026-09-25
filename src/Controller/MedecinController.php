@@ -12,6 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/medecin')]
 final class MedecinController extends AbstractController
@@ -26,7 +27,7 @@ final class MedecinController extends AbstractController
         $medecins = $paginator->paginate(
             $query,
             $request->query->getInt('page', 1),
-            15
+            10
         );
 
         return $this->render('medecin/index.html.twig', [
@@ -81,6 +82,7 @@ final class MedecinController extends AbstractController
     }
 
     #[Route('/{idMedecin}', name: 'app_medecin_delete', methods: ['POST'])]
+    #[IsGranted('ROLE_PHARMACIEN')]
     public function delete(Request $request, #[MapEntity(mapping: ['idMedecin' => 'idMedecin'])] Medecin $medecin, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$medecin->getIdMedecin(), $request->getPayload()->getString('_token'))) {

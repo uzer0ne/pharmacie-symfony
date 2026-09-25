@@ -35,6 +35,10 @@ class LigneVenteType extends AbstractType
                         'data-famille' => $produit->getFamille() ?? 'Non définie',
                         'data-description' => $produit->getDescription() ?? 'Aucune description',
                         'data-prix' => $produit->getPrixProduit() ?? 0,
+                        'data-zone' => $produit->getEmpZone() ?? '',
+                        'data-colonne' => $produit->getEmpColonne() ?? '',
+                        'data-niveau' => $produit->getEmpNiveau() ?? '',
+                        'data-position' => $produit->getEmpPosition() ?? '',
                     ];
                 },
                 'label' => 'Produit',

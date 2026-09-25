@@ -33,9 +33,38 @@ class ProduitType extends AbstractType
             ])
             ->add('nom_produit')
             ->add('famille', TextType::class, [
-                'label' => 'Famille de produit',
+                'label' => 'Famille Thérapeutique',
                 'required' => false,
-                'attr' => ['placeholder' => 'Ex: Antalgique, Antibiotique...']
+                'attr' => ['placeholder' => 'Ex: Antibiotique, Cardiologie...']
+            ])
+            ->add('empZone', \Symfony\Component\Form\Extension\Core\Type\ChoiceType::class, [
+                'label' => 'Zone (Ex: RX, OTC, FRIDGE)',
+                'required' => false,
+                'choices' => [
+                    'RX - Ordonnancier' => 'RX',
+                    'OTC - Comptoir' => 'OTC',
+                    'FRIDGE - Frigo' => 'FRIDGE',
+                    'MAT - Matériel' => 'MAT',
+                    'STOCK - Réserve' => 'STOCK',
+                    'PARA - Parapharmacie' => 'PARA',
+                    'SAFE - Coffre' => 'SAFE'
+                ],
+                'placeholder' => 'Choisir une zone...'
+            ])
+            ->add('empColonne', TextType::class, [
+                'label' => 'Baie / Colonne (Ex: 01, 02)',
+                'required' => false,
+                'attr' => ['placeholder' => 'ex: 03']
+            ])
+            ->add('empNiveau', TextType::class, [
+                'label' => 'Étagère (Ex: A, B, C)',
+                'required' => false,
+                'attr' => ['placeholder' => 'ex: C']
+            ])
+            ->add('empPosition', TextType::class, [
+                'label' => 'Position sur le niveau (Ex: 01, 02)',
+                'required' => false,
+                'attr' => ['placeholder' => 'ex: 02']
             ])
             ->add('description', \Symfony\Component\Form\Extension\Core\Type\TextareaType::class, [
                 'label' => 'Description & Indications',
@@ -67,7 +96,7 @@ class ProduitType extends AbstractType
             ])
             // ⭐ NOUVEAUX CHAMPS STOCKS
             ->add('stock_actuel', IntegerType::class, [
-                'label' => 'Stock actuel',
+                'label' => 'Stock',
                 'disabled' => true,
                 'help' => 'Calculé via l\'historique des mouvements.'
             ])

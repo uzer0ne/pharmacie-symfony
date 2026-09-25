@@ -179,7 +179,11 @@ final class ProduitController extends AbstractController
             'id' => $produit->getId(), // Assurez-vous d'avoir un getter getId()
             'nom' => $produit->getNomProduit(),
             'prix' => $produit->getPrixProduit(),
-            'stock' => $produit->getStockActuel()
+            'stock' => $produit->getStockActuel(),
+            'zone' => $produit->getEmpZone(),
+            'colonne' => $produit->getEmpColonne(),
+            'niveau' => $produit->getEmpNiveau(),
+            'position' => $produit->getEmpPosition()
         ]);
     }
 }

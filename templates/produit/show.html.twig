@@ -80,10 +80,137 @@
 
 <div class="row mt-4">
     <div class="col-12">
+        <div class="card shadow-sm border-0 mb-4" id="locator-card">
+            <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0 text-dark fw-bold">
+                    <i class="bi bi-geo-alt-fill text-primary me-2"></i> Emplacement Physique : Smart Locator
+                </h5>
+            </div>
+            <div class="card-body p-4 bg-light">
+                
+                <style>
+                    @keyframes bounce-pin { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-25%); } }
+                    .animate-bounce-pin { animation: bounce-pin 1s infinite ease-in-out; }
+                    @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(var(--pulse-color), 0.7); } 70% { box-shadow: 0 0 0 10px rgba(var(--pulse-color), 0); } 100% { box-shadow: 0 0 0 0 rgba(var(--pulse-color), 0); } }
+                    .highlight-active { position: relative; z-index: 10; border: 3px solid rgb(var(--pulse-color)) !important; animation: pulse-ring 1.5s infinite; }
+                    
+                    .zone-badge { padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 0.85rem; background: #f8f9fa; color: #6c757d; border: 1px solid #dee2e6; text-align: center; }
+                    .zone-badge.active { background: rgb(var(--pulse-color)); color: white; border-color: rgb(var(--pulse-color)); box-shadow: 0 4px 6px -1px rgba(var(--pulse-color), 0.3); }
+
+                    .locator-grid { display: grid; gap: 6px; margin-top: 1rem; }
+                    .grid-cell { height: 45px; position: relative; transition: all 0.3s; }
+
+                    /* THEME RX / OTC (Tiroirs) */
+                    .zone-theme-rx .grid-cell, .zone-theme-otc .grid-cell { 
+                        background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%); 
+                        border: 1px solid #ced4da; border-bottom: 2px solid #adb5bd; border-radius: 3px; 
+                        box-shadow: inset 0 1px 0 rgba(255,255,255,1), 0 1px 2px rgba(0,0,0,0.05); 
+                    }
+                    .zone-theme-rx .cell-label-slot, .zone-theme-otc .cell-label-slot { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); width: 50%; height: 8px; background-color: #e9ecef; border: 1px solid #dee2e6; border-radius: 1px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); }
+                    .zone-theme-rx .cell-handle, .zone-theme-otc .cell-handle { position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); width: 40%; height: 6px; background: linear-gradient(180deg, #e9ecef 0%, #ced4da 100%); border: 1px solid #adb5bd; border-bottom: 2px solid #868e96; border-radius: 2px; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
+
+                    /* THEME PARA / MAT / STOCK (Étagères bois/metal) */
+                    .zone-theme-para .grid-cell, .zone-theme-mat .grid-cell, .zone-theme-stock .grid-cell {
+                        background: #fdfbf7; border: none; border-bottom: 6px solid #d4c5b0; border-radius: 0; margin-bottom: 4px;
+                    }
+                    .zone-theme-para .cell-label-slot, .zone-theme-para .cell-handle, .zone-theme-mat .cell-label-slot, .zone-theme-mat .cell-handle, .zone-theme-stock .cell-label-slot, .zone-theme-stock .cell-handle { display: none; }
+
+                    /* THEME FRIDGE */
+                    .zone-theme-fridge .grid-cell {
+                        background: rgba(224, 247, 250, 0.4); border: 1px solid rgba(0, 188, 212, 0.3); border-bottom: 4px solid rgba(0, 188, 212, 0.6); border-radius: 2px;
+                    }
+                    .zone-theme-fridge .cell-label-slot, .zone-theme-fridge .cell-handle { display: none; }
+                    .zone-theme-fridge { background-color: #f0fbfe !important; border-color: #b2ebf2 !important; }
+
+                    /* THEME SAFE */
+                    .zone-theme-safe .grid-cell {
+                        background: #495057; border: 2px solid #343a40; border-bottom: 4px solid #212529; color: white;
+                    }
+                    .zone-theme-safe .cell-label-slot, .zone-theme-safe .cell-handle { display: none; }
+                    .zone-theme-safe { background-color: #e9ecef !important; border-color: #adb5bd !important; border-width: 4px !important; }
+
+                    .col-label { text-align: center; font-weight: 600; color: #6c757d; font-size: 0.8rem; padding-bottom: 4px; }
+                    .pin-icon { position: absolute; top: -15px; right: -15px; background: rgb(var(--pulse-color)); color: white; border-radius: 50%; width: 32px; height: 32px; display: none; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); z-index: 20; }
+                    .highlight-active .pin-icon { display: flex; }
+                </style>
+
+                {% set zone = produit.empZone %}
+                {% set col = produit.empColonne %}
+                {% set row = produit.empNiveau %}
+                {% set pos = produit.empPosition %}
+                {% set famille = produit.famille|lower %}
+                
+                {% set pulse_color = '108, 117, 125' %} {# Default grey #}
+                {% if zone == 'FRIDGE' %}{% set pulse_color = '6, 182, 212' %}{% endif %}
+                {% if zone == 'SAFE' %}{% set pulse_color = '239, 68, 68' %}{% endif %}
+                {% if zone in ['PARA', 'STOCK', 'MAT'] %}{% set pulse_color = '34, 197, 94' %}{% endif %}
+                {% if zone in ['RX', 'OTC'] %}
+                    {% if 'antibio' in famille or 'analg' in famille %}{% set pulse_color = '59, 130, 246' %}
+                    {% elseif 'cardio' in famille or 'diab' in famille %}{% set pulse_color = '139, 92, 246' %}
+                    {% else %}{% set pulse_color = '13, 110, 253' %}
+                    {% endif %}
+                {% endif %}
+
+                {% if not zone %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-geo-alt fs-1 d-block mb-3 opacity-25"></i>
+                        Emplacement non défini pour ce produit.
+                        <a href="{{ path('app_produit_edit', {'idProduit': produit.id}) }}" class="btn btn-sm btn-outline-primary mt-2">Définir l'emplacement</a>
+                    </div>
+                {% else %}
+                    <!-- Macro Zones Top Bar -->
+                    <div class="d-flex flex-wrap gap-2 justify-content-center mb-4" style="--pulse-color: {{ pulse_color }};">
+                        <div class="zone-badge {% if zone == 'RX' %}active{% endif %}"><i class="bi bi-prescription me-1"></i> RX (Ordonnances)</div>
+                        <div class="zone-badge {% if zone == 'OTC' %}active{% endif %}"><i class="bi bi-bag-plus me-1"></i> OTC (Comptoir)</div>
+                        <div class="zone-badge {% if zone == 'PARA' %}active{% endif %}"><i class="bi bi-shop me-1"></i> PARA (Libre accès)</div>
+                        <div class="zone-badge {% if zone == 'FRIDGE' %}active{% endif %}"><i class="bi bi-snow me-1"></i> FRIDGE (Frigo)</div>
+                        <div class="zone-badge {% if zone == 'SAFE' %}active{% endif %}"><i class="bi bi-safe me-1"></i> SAFE (Coffre)</div>
+                        <div class="zone-badge {% if zone == 'MAT' %}active{% endif %}"><i class="bi bi-bandaid me-1"></i> MAT (Matériel)</div>
+                        <div class="zone-badge {% if zone == 'STOCK' %}active{% endif %}"><i class="bi bi-box-seam me-1"></i> STOCK (Réserve)</div>
+                    </div>
+
+                    <!-- Visual Detail of the current zone -->
+                    <div class="bg-white border rounded p-4 shadow-sm zone-theme-{{ zone|lower }}">
+                        <h6 class="fw-bold mb-3 border-bottom pb-3 text-dark d-flex align-items-center justify-content-between">
+                            <span><i class="bi bi-geo-fill me-2" style="color: rgb({{ pulse_color }})"></i> Zone {{ zone }} {% if col and row %}<span class="ms-2 badge bg-secondary">Baie {{ col }}</span> <span class="badge bg-secondary">Étagère {{ row }}</span> {% if pos %}<span class="badge bg-secondary">Pos {{ pos }}</span>{% endif %}{% endif %}</span>
+                        </h6>
+                        
+                        <div class="locator-grid mx-auto" style="max-width: 800px; grid-template-columns: 20px repeat(8, 1fr);">
+                            <div></div> {# Coin en haut à gauche vide #}
+                            {% for c in ['01','02','03','04','05','06','07','08'] %}
+                                <div class="col-label">{{ c }}</div>
+                            {% endfor %}
+                            
+                            <div class="col-span-9 d-grid gap-1 align-items-center" style="grid-column: span 9; grid-template-columns: 20px repeat(8, 1fr);">
+                                {% for r in ['F','E','D','C','B','A'] %}
+                                    <div class="text-center fw-bold text-muted" style="font-size: 0.8rem;">{{ r }}</div>
+                                    {% for c in ['01','02','03','04','05','06','07','08'] %}
+                                        {% set isActive = (col == c and row == r) %}
+                                        <div class="grid-cell {% if isActive %}highlight-active{% endif %}" 
+                                             style="{% if isActive %}--pulse-color: {{ pulse_color }};{% endif %}">
+                                            <div class="cell-label-slot"></div>
+                                            <div class="cell-handle"></div>
+                                            <div class="pin-icon animate-bounce-pin">
+                                                <i class="bi bi-geo-alt-fill"></i>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
         <div class="card shadow-sm border-0">
             <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
                 <h5 class="card-title mb-0 text-dark fw-bold">Historique des mouvements de stock</h5>
-                <span class="badge bg-primary fs-6">Stock actuel : {{ produit.stockActuel }}</span>
+                <span class="badge bg-primary fs-6">Stock : {{ produit.stockActuel }}</span>
             </div>
             <div class="card-body p-0">
                 {% if produit.mouvementsStock|length > 0 %}

@@ -14,6 +14,8 @@ class MedecinType extends AbstractType
         $builder
             ->add('nom_medecin')
             ->add('prenom_medecin')
+            ->add('specialite')
+            ->add('numero_rpps')
             ->add('contact_medecin')
             ->add('adresse_medecin')
         ;

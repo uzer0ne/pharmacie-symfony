@@ -31,6 +31,7 @@ security:
         main:
             lazy: true
             provider: app_user_provider
+            user_checker: App\Security\UserChecker
 
             # Authenticator personnalisé (gère le formulaire de login)
             custom_authenticator: App\Security\LoginFormAuthenticator

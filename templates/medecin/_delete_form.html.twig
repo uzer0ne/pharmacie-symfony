@@ -1,3 +1,4 @@
+{% if is_granted('ROLE_PHARMACIEN') %}
 <form method="post" action="{{ path('app_medecin_delete', {'idMedecin': medecin.id}) }}"
       class="d-inline-block"
       data-controller="modal-form"
@@ -9,3 +10,4 @@
         <i class="bi bi-trash me-1"></i> Supprimer
     </button>
 </form>
+{% endif %}

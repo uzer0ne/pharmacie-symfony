@@ -1,0 +1,141 @@
+{{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
+
+<div class="row g-4">
+    <!-- Informations Personnelles -->
+    <div class="col-md-12">
+        <h5 class="mb-3 text-dark fw-bold border-bottom pb-2">
+            <i class="bi bi-person-badge text-primary me-2"></i> Identité de l'employé
+        </h5>
+    </div>
+
+    <div class="col-md-6">
+        <div class="form-floating">
+            {{ form_widget(form.prenom, {'attr': {'class': 'form-control', 'placeholder': 'Prénom'}}) }}
+            <label for="{{ form.prenom.vars.id }}">Prénom</label>
+            {{ form_errors(form.prenom) }}
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="form-floating">
+            {{ form_widget(form.nom, {'attr': {'class': 'form-control fw-bold text-dark', 'placeholder': 'Nom'}}) }}
+            <label for="{{ form.nom.vars.id }}">Nom de famille</label>
+            {{ form_errors(form.nom) }}
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="form-floating">
+            {{ form_widget(form.email, {'attr': {'class': 'form-control', 'placeholder': 'Email'}}) }}
+            <label for="{{ form.email.vars.id }}">Adresse email (Identifiant de connexion)</label>
+            {{ form_errors(form.email) }}
+        </div>
+    </div>
+
+    <!-- Droits et Sécurité -->
+    <div class="col-md-12 mt-5">
+        <h5 class="mb-3 text-dark fw-bold border-bottom pb-2">
+            <i class="bi bi-shield-lock text-primary me-2"></i> Droits d'accès & Sécurité
+        </h5>
+    </div>
+
+    <div class="col-md-12">
+        <label class="form-label fw-semibold text-muted mb-3">Sélectionner les rôles et permissions</label>
+        
+        <div class="list-group shadow-sm border-0">
+            {% for child in form.roles %}
+                <label class="list-group-item list-group-item-action d-flex gap-3 py-3 border mb-2 rounded" style="cursor: pointer;">
+                    <div class="pt-1">
+                        {{ form_widget(child, {'attr': {'class': 'form-check-input fs-5'}}) }}
+                    </div>
+                    <div>
+                        <h6 class="mb-1 fw-bold text-dark">{{ child.vars.label }}</h6>
+                        <p class="mb-0 text-muted small" style="line-height: 1.4;">
+                            {% if child.vars.value == 'ROLE_PHARMACIEN' %}
+                                <i class="bi bi-star-fill text-warning me-1"></i> <strong>Le patron de l'officine.</strong> Hérite automatiquement de tous les autres droits. Accès exclusif au Tableau de bord et à la gestion des employés (ajout, suppression, modification). Autorisé à supprimer définitivement des dossiers (patients, médecins, etc.).
+                            {% elseif child.vars.value == 'ROLE_GESTIONNAIRE_STOCK' %}
+                                <i class="bi bi-box-seam text-info me-1"></i> <strong>L'expert de l'arrière-boutique.</strong> A tous les droits pour créer et modifier les produits du catalogue, gérer le réassort du stock et consulter l'historique complet des mouvements de médicaments. Accès bloqué à la caisse et aux dossiers médicaux.
+                            {% elseif child.vars.value == 'ROLE_CAISSIER' %}
+                                <i class="bi bi-cart text-success me-1"></i> <strong>Le vendeur au comptoir.</strong> Effectué des ventes, scanner les produits, créer des ordonnances et gérer le fichier des patients/mutuelles. Accès en lecture seule au catalogue. Suppression de données strictement interdite.
+                            {% endif %}
+                        </p>
+                    </div>
+                </label>
+            {% endfor %}
+        </div>
+        {{ form_errors(form.roles) }}
+    </div>
+
+    <div class="col-md-12 mt-4">
+        <label class="form-label fw-semibold text-muted">Mot de passe</label>
+        <div class="input-group">
+            <span class="input-group-text bg-light"><i class="bi bi-key"></i></span>
+            {{ form_widget(form.plainPassword, {'attr': {'class': 'form-control', 'placeholder': 'Définir un mot de passe...'}}) }}
+        </div>
+        {{ form_errors(form.plainPassword) }}
+        
+        {% if form.vars.value.id %}
+            <div class="form-text text-warning mt-2">
+                <i class="bi bi-exclamation-triangle"></i> Laissez ce champ vide si vous ne souhaitez pas modifier le mot de passe actuel.
+            </div>
+        {% else %}
+            <div class="form-text text-muted mt-2">
+                <i class="bi bi-info-circle"></i> Si vous laissez vide, le mot de passe par défaut sera "password123".
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="mt-5 pt-3 border-top text-end">
+    <button class="btn btn-primary px-5 py-2 shadow-sm rounded-pill fw-bold">
+        <i class="bi bi-check-circle me-2"></i> {{ button_label|default('Enregistrer') }}
+    </button>
+</div>
+{{ form_end(form) }}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Les checkboxes générées par Symfony ont des IDs du type "user_roles_0", "user_roles_1", etc.
+    // On va plutôt les repérer par leur valeur (ROLE_PHARMACIEN, etc.)
+    const checkboxes = document.querySelectorAll('input[type="checkbox"][name*="[roles]"]');
+    
+    let pharmacienCheckbox = null;
+    let otherCheckboxes = [];
+
+    checkboxes.forEach(cb => {
+        if (cb.value === 'ROLE_PHARMACIEN') {
+            pharmacienCheckbox = cb;
+        } else {
+            otherCheckboxes.push(cb);
+        }
+    });
+
+    if (pharmacienCheckbox) {
+        function updateRolesLogic() {
+            if (pharmacienCheckbox.checked) {
+                // Si le Pharmacien est coché, on décoche et on désactive les autres
+                otherCheckboxes.forEach(cb => {
+                    cb.checked = false;
+                    cb.disabled = true;
+                    // On grise un peu la carte parent pour montrer que c'est désactivé
+                    const parentCard = cb.closest('.list-group-item');
+                    if(parentCard) parentCard.style.opacity = '0.5';
+                });
+            } else {
+                // Sinon on réactive les autres
+                otherCheckboxes.forEach(cb => {
+                    cb.disabled = false;
+                    const parentCard = cb.closest('.list-group-item');
+                    if(parentCard) parentCard.style.opacity = '1';
+                });
+            }
+        }
+
+        // On écoute le changement
+        pharmacienCheckbox.addEventListener('change', updateRolesLogic);
+        
+        // On lance la fonction au chargement pour gérer l'état initial (ex: en modification)
+        updateRolesLogic();
+    }
+});
+</script>

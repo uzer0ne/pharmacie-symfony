@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Profil Utilisateur{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 page-title">
+            <i class="bi bi-person-badge text-primary me-2"></i> {{ user.prenom }} {{ user.nom }}
+        </h1>
+        <p class="page-subtitle mb-0">Détails du compte employé</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ path('app_user_index') }}" class="btn btn-outline-secondary shadow-sm">
+            <i class="bi bi-arrow-left me-1"></i> Retour
+        </a>
+        <a href="{{ path('app_user_edit', {'id': user.id}) }}" class="btn btn-warning shadow-sm">
+            <i class="bi bi-pencil me-1"></i> Modifier
+        </a>
+        {{ include('user/_delete_form.html.twig') }}
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+        <dl class="row mb-0">
+            <dt class="col-sm-3 text-muted">Nom complet</dt>
+            <dd class="col-sm-9 fw-bold">{{ user.prenom }} {{ user.nom }}</dd>
+
+            <dt class="col-sm-3 text-muted mt-3">Email</dt>
+            <dd class="col-sm-9 mt-3">{{ user.email }}</dd>
+
+            <dt class="col-sm-3 text-muted mt-3">Rôle</dt>
+            <dd class="col-sm-9 mt-3">
+                {% if 'ROLE_PHARMACIEN' in user.roles %}
+                    <span class="badge" style="background-color: #ef4444; color: white;">Pharmacien</span>
+                {% elseif 'ROLE_GESTIONNAIRE_STOCK' in user.roles %}
+                    <span class="badge" style="background-color: #f59e0b; color: white;">Logisticien</span>
+                {% elseif 'ROLE_CAISSIER' in user.roles %}
+                    <span class="badge" style="background-color: #10b981; color: white;">Vendeur</span>
+                {% else %}
+                    <span class="badge bg-secondary">Utilisateur</span>
+                {% endif %}
+            </dd>
+        </dl>
+    </div>
+</div>
+{% endblock %}

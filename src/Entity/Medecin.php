@@ -28,6 +28,12 @@ class Medecin
     #[ORM\Column(length: 255)]
     private ?string $adresse_medecin = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $specialite = null;
+
+    #[ORM\Column(length: 11, nullable: true)]
+    private ?string $numero_rpps = null;
+
     #[ORM\OneToMany(mappedBy: 'medecin', targetEntity: Ordonnance::class)]
     private Collection $ordonnances;
 
@@ -86,6 +92,28 @@ class Medecin
     {
         $this->adresse_medecin = $adresse_medecin;
 
+        return $this;
+    }
+
+    public function getSpecialite(): ?string
+    {
+        return $this->specialite;
+    }
+
+    public function setSpecialite(?string $specialite): static
+    {
+        $this->specialite = $specialite;
+        return $this;
+    }
+
+    public function getNumeroRpps(): ?string
+    {
+        return $this->numero_rpps;
+    }
+
+    public function setNumeroRpps(?string $numero_rpps): static
+    {
+        $this->numero_rpps = $numero_rpps;
         return $this;
     }
 }

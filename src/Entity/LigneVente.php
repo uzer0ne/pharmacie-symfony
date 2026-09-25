@@ -32,6 +32,9 @@ class LigneVente
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
     private ?string $prix_unitaire_vente = '0.00';
 
+    #[ORM\Column(length: 10, nullable: true)]
+    private ?string $taux_remboursement = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -81,6 +84,18 @@ class LigneVente
     public function setPrixUnitaireVente(string $prix_unitaire_vente): static
     {
         $this->prix_unitaire_vente = $prix_unitaire_vente;
+
+        return $this;
+    }
+
+    public function getTauxRemboursement(): ?string
+    {
+        return $this->taux_remboursement;
+    }
+
+    public function setTauxRemboursement(?string $taux_remboursement): static
+    {
+        $this->taux_remboursement = $taux_remboursement;
 
         return $this;
     }

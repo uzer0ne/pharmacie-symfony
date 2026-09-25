@@ -89,10 +89,11 @@
                 {# Avatar initiale #}
                 <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold"
                      style="width: 34px; height: 34px; font-size: 0.85rem;">
-                    {{ app.user.userIdentifier|slice(0, 1)|upper }}
+                    {% set displayName = (app.user.prenom and app.user.nom) ? (app.user.prenom ~ ' ' ~ app.user.nom) : app.user.userIdentifier %}
+                    {{ displayName|slice(0, 1)|upper }}
                 </div>
                 <div class="d-none d-sm-block text-start lh-sm">
-                    <div class="fw-semibold text-dark" style="font-size: 0.85rem;">{{ app.user.userIdentifier }}</div>
+                    <div class="fw-semibold text-dark" style="font-size: 0.85rem;">{{ displayName }}</div>
                     {# Badge de rôle lisible #}
                     {% if 'ROLE_PHARMACIEN' in app.user.roles %}
                         <span class="badge badge-role-pharma" style="font-size: 0.65rem;">Pharmacien</span>
@@ -108,7 +109,8 @@
             </button>
             <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-1" aria-labelledby="userDropdown" style="min-width: 200px;">
                 <li class="px-3 py-2">
-                    <div class="fw-semibold text-dark">{{ app.user.userIdentifier }}</div>
+                    {% set displayName = (app.user.prenom and app.user.nom) ? (app.user.prenom ~ ' ' ~ app.user.nom) : app.user.userIdentifier %}
+                    <div class="fw-semibold text-dark">{{ displayName }}</div>
                     {% if 'ROLE_PHARMACIEN' in app.user.roles %}
                         <small class="text-muted">Pharmacien référent</small>
                     {% elseif 'ROLE_GESTIONNAIRE_STOCK' in app.user.roles %}

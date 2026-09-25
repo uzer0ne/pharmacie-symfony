@@ -46,6 +46,18 @@ class Vente
     #[ORM\OneToMany(mappedBy: 'vente', targetEntity: LigneVente::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $ligneVentes;
 
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $details_honoraires = null;
+
+    #[ORM\Column(length: 20)]
+    private ?string $statut = 'EN_ATTENTE';
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    private ?string $montant_encaisse = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    private ?string $monnaie_rendue = null;
+
     // TODO: Ajouter la liaison vers l'Utilisateur (le vendeur) quand l'entité User existera
     // #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'ventes')]
     // #[ORM\JoinColumn(name: 'Id_User', referencedColumnName: 'Id_User', nullable: false)]
@@ -180,7 +192,59 @@ class Vente
         foreach ($this->ligneVentes as $ligne) {
             $total += (float) $ligne->getPrixTotal();
         }
+        
+        // Ajouter les honoraires au total si présents
+        if (is_array($this->details_honoraires)) {
+            foreach ($this->details_honoraires as $h) {
+                $total += (float) $h['montant'];
+            }
+        }
+        
         $this->montant_total = (string) $total;
+        return $this;
+    }
+
+    public function getDetailsHonoraires(): ?array
+    {
+        return $this->details_honoraires;
+    }
+
+    public function setDetailsHonoraires(?array $details_honoraires): static
+    {
+        $this->details_honoraires = $details_honoraires;
+        return $this;
+    }
+
+    public function getStatut(): ?string
+    {
+        return $this->statut;
+    }
+
+    public function setStatut(string $statut): static
+    {
+        $this->statut = $statut;
+        return $this;
+    }
+
+    public function getMontantEncaisse(): ?string
+    {
+        return $this->montant_encaisse;
+    }
+
+    public function setMontantEncaisse(?string $montant_encaisse): static
+    {
+        $this->montant_encaisse = $montant_encaisse;
+        return $this;
+    }
+
+    public function getMonnaieRendue(): ?string
+    {
+        return $this->monnaie_rendue;
+    }
+
+    public function setMonnaieRendue(?string $monnaie_rendue): static
+    {
+        $this->monnaie_rendue = $monnaie_rendue;
         return $this;
     }
 }

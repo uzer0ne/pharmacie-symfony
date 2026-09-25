@@ -13,6 +13,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/patient' )]
 class PatientController extends AbstractController
@@ -84,6 +85,7 @@ class PatientController extends AbstractController
     }
 
     #[Route('/{idPatient}', name: 'app_patient_delete', methods: ['POST'])]
+    #[IsGranted('ROLE_PHARMACIEN')]
     public function delete(Request $request, #[MapEntity(mapping: ['idPatient' => 'idPatient'])] Patient $patient, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$patient->getIdPatient(), $request->request->get('_token'))) {

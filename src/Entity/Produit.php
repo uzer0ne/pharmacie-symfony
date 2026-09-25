@@ -50,6 +50,18 @@ class Produit
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $code_cip = null;
 
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $empZone = null;
+
+    #[ORM\Column(length: 10, nullable: true)]
+    private ?string $empColonne = null;
+
+    #[ORM\Column(length: 10, nullable: true)]
+    private ?string $empNiveau = null;
+
+    #[ORM\Column(length: 10, nullable: true)]
+    private ?string $empPosition = null;
+
     #[ORM\Column(type: Types::BOOLEAN)]
     private bool $actif = true;
 
@@ -375,6 +387,50 @@ class Produit
     {
         $this->description = $description;
 
+        return $this;
+    }
+
+    public function getEmpZone(): ?string
+    {
+        return $this->empZone;
+    }
+
+    public function setEmpZone(?string $empZone): static
+    {
+        $this->empZone = $empZone;
+        return $this;
+    }
+
+    public function getEmpColonne(): ?string
+    {
+        return $this->empColonne;
+    }
+
+    public function setEmpColonne(?string $empColonne): static
+    {
+        $this->empColonne = $empColonne;
+        return $this;
+    }
+
+    public function getEmpNiveau(): ?string
+    {
+        return $this->empNiveau;
+    }
+
+    public function setEmpNiveau(?string $empNiveau): static
+    {
+        $this->empNiveau = $empNiveau;
+        return $this;
+    }
+
+    public function getEmpPosition(): ?string
+    {
+        return $this->empPosition;
+    }
+
+    public function setEmpPosition(?string $empPosition): static
+    {
+        $this->empPosition = $empPosition;
         return $this;
     }
 

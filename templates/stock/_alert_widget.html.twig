@@ -1,0 +1,11 @@
+{% if count > 0 %}
+<li class="nav-item">
+    <a class="nav-link {% if app.request.get('_route') starts with 'app_stock' %}active{% endif %}"
+       href="{{ path('app_stock_reapprovisionnement') }}"
+       data-action="click->sidebar#closeOnMobile">
+        <i class="bi bi-exclamation-triangle me-2 {% if app.request.get('_route') starts with 'app_stock' %}text-white{% else %}text-danger{% endif %}"></i>
+        Alertes Stock
+        <span class="badge bg-danger rounded-pill float-end">{{ count }}</span>
+    </a>
+</li>
+{% endif %}

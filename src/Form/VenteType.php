@@ -55,6 +55,29 @@ class VenteType extends AbstractType
                 'required' => false,
                 'attr' => ['class' => 'form-check-input']
             ])
+            ->add('date_ordonnance', DateType::class, [
+                'mapped' => false,
+                'label' => 'Date de prescription',
+                'widget' => 'single_text',
+                'required' => false,
+            ])
+            ->add('date_fin_ordonnance', DateType::class, [
+                'mapped' => false,
+                'label' => 'Fin de validité',
+                'widget' => 'single_text',
+                'required' => false,
+            ])
+            ->add('medecin', EntityType::class, [
+                'class' => \App\Entity\Medecin::class,
+                'choice_label' => function(\App\Entity\Medecin $medecin) {
+                    return 'Dr. ' . $medecin->getPrenomMedecin() . ' ' . $medecin->getNomMedecin() . ' (' . $medecin->getSpecialite() . ')';
+                },
+                'placeholder' => 'Sélectionnez un médecin prescripteur...',
+                'label' => 'Médecin Prescripteur (Requis si ordonnance)',
+                'required' => false,
+                'mapped' => false,
+                'attr' => ['class' => 'form-select']
+            ])
 
             // ===== C'EST LA PARTIE LA PLUS IMPORTANTE =====
             ->add('ligneVentes', CollectionType::class, [

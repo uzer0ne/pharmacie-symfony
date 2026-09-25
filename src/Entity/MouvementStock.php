@@ -31,7 +31,7 @@ class MouvementStock
     private ?\DateTimeInterface $dateMouvement = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: true)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?User $utilisateur = null;
 
     public function __construct()

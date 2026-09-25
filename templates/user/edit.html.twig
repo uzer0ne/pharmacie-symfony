@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier l'utilisateur{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 page-title">
+            <i class="bi bi-person-gear text-primary me-2"></i> Modifier l'utilisateur
+        </h1>
+        <p class="page-subtitle mb-0">Mettre à jour les informations de {{ user.prenom }} {{ user.nom }}</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ path('app_user_index') }}" class="btn btn-outline-secondary shadow-sm">
+            <i class="bi bi-arrow-left me-1"></i> Retour
+        </a>
+        {{ include('user/_delete_form.html.twig') }}
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+        {{ include('user/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
+    </div>
+</div>
+{% endblock %}

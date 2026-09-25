@@ -21,4 +21,13 @@ class StockController extends AbstractController
             'date' => new \DateTime(), // Pour afficher la date sur le bon de commande
         ]);
     }
+
+    public function alertWidget(ProduitRepository $produitRepository): Response
+    {
+        $count = count($produitRepository->findProduitsACommander());
+        
+        return $this->render('stock/_alert_widget.html.twig', [
+            'count' => $count,
+        ]);
+    }
 }

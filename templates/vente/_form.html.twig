@@ -91,7 +91,10 @@
                     </div>
                     <div class="card-body p-4 bg-light rounded-bottom">
                         <h5 id="id-card-nom" class="fw-bold text-dark mb-1">Nom du produit</h5>
-                        <p id="id-card-famille" class="text-muted small mb-3 text-uppercase fw-semibold" style="letter-spacing: 0.5px;">Famille</p>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <p id="id-card-famille" class="text-muted small mb-0 text-uppercase fw-semibold" style="letter-spacing: 0.5px;">Famille</p>
+                            <span class="badge bg-secondary rounded-pill px-3 py-2"><i class="bi bi-geo-alt-fill me-1"></i> <span id="id-card-location-text">Emplacement</span></span>
+                        </div>
                         
                         <div class="row mb-3 g-3">
                             <div class="col-md-6">
@@ -108,11 +111,76 @@
                             </div>
                         </div>
 
-                        <p id="id-card-description" class="small text-secondary mb-0 border-top pt-3">
+                        <p id="id-card-description" class="small text-secondary mb-3 border-top pt-3">
                             Description du produit...
                         </p>
+                        
+                        <!-- VISUAL LOCATOR -->
+                        <div id="pos-locator-container" class="mt-3 pt-3 border-top d-none">
+                            <h6 class="fw-bold mb-3 text-dark d-flex align-items-center" style="font-size: 0.9rem;">
+                                <i class="bi bi-geo-fill text-primary me-2" id="pos-zone-icon"></i>
+                                <span id="pos-zone-title">Zone Inconnue</span>
+                            </h6>
+                            
+                            <div id="pos-locator-grid-container" class="bg-white border rounded p-2 mb-2 shadow-sm">
+                                <div class="drawer-grid" style="display: grid; grid-template-columns: 20px repeat(8, 1fr); gap: 4px;">
+                                    <div></div>
+                                    {% for c in ['01','02','03','04','05','06','07','08'] %}
+                                        <div class="text-center fw-bold text-muted" style="font-size: 0.7rem;">{{ c }}</div>
+                                    {% endfor %}
+                                    
+                                    <div class="col-span-9 d-grid align-items-center" style="grid-column: span 9; grid-template-columns: 20px repeat(8, 1fr); gap: 4px;">
+                                        {% for r in ['F','E','D','C','B','A'] %}
+                                            <div class="text-center fw-bold text-muted" style="font-size: 0.7rem;">{{ r }}</div>
+                                            {% for c in ['01','02','03','04','05','06','07','08'] %}
+                                                <div class="pos-grid-cell" id="pos-drawer-{{ c }}-{{ r }}" style="height: 25px; position: relative; transition: all 0.3s;">
+                                                    <div class="pos-cell-label-slot"></div>
+                                                    <div class="pos-cell-handle"></div>
+                                                    <div class="pos-pin-icon" style="position: absolute; top: -10px; right: -10px; background: rgb(var(--pulse-color, 13, 110, 253)); color: white; border-radius: 50%; width: 20px; height: 20px; display: none; align-items: center; justify-content: center; font-size: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 20;">
+                                                        <i class="bi bi-geo-alt-fill"></i>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
+
+                <style>
+                    @keyframes pos-pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(var(--pulse-color), 0.7); } 70% { box-shadow: 0 0 0 8px rgba(var(--pulse-color), 0); } 100% { box-shadow: 0 0 0 0 rgba(var(--pulse-color), 0); } }
+                    .pos-highlight-active { position: relative; z-index: 10; border: 2px solid rgb(var(--pulse-color)) !important; animation: pos-pulse-ring 1.5s infinite; }
+                    .pos-highlight-active .pos-pin-icon { display: flex !important; }
+
+                    /* THEMES */
+                    .pos-theme-rx .pos-grid-cell, .pos-theme-otc .pos-grid-cell { 
+                        background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%); 
+                        border: 1px solid #ced4da; border-bottom: 2px solid #adb5bd; border-radius: 2px; 
+                        box-shadow: inset 0 1px 0 rgba(255,255,255,1), 0 1px 1px rgba(0,0,0,0.05); 
+                    }
+                    .pos-theme-rx .pos-cell-label-slot, .pos-theme-otc .pos-cell-label-slot { position: absolute; top: 3px; left: 50%; transform: translateX(-50%); width: 60%; height: 5px; background-color: #e9ecef; border: 1px solid #dee2e6; border-radius: 1px; box-shadow: inset 0 1px 1px rgba(0,0,0,0.05); }
+                    .pos-theme-rx .pos-cell-handle, .pos-theme-otc .pos-cell-handle { position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); width: 50%; height: 4px; background: linear-gradient(180deg, #e9ecef 0%, #ced4da 100%); border: 1px solid #adb5bd; border-bottom: 2px solid #868e96; border-radius: 1px; }
+
+                    .pos-theme-para .pos-grid-cell, .pos-theme-mat .pos-grid-cell, .pos-theme-stock .pos-grid-cell {
+                        background: #fdfbf7; border: none; border-bottom: 4px solid #d4c5b0; border-radius: 0; margin-bottom: 2px;
+                    }
+                    .pos-theme-para .pos-cell-label-slot, .pos-theme-para .pos-cell-handle, .pos-theme-mat .pos-cell-label-slot, .pos-theme-mat .pos-cell-handle, .pos-theme-stock .pos-cell-label-slot, .pos-theme-stock .pos-cell-handle { display: none; }
+
+                    .pos-theme-fridge .pos-grid-cell {
+                        background: rgba(224, 247, 250, 0.4); border: 1px solid rgba(0, 188, 212, 0.3); border-bottom: 3px solid rgba(0, 188, 212, 0.6); border-radius: 2px;
+                    }
+                    .pos-theme-fridge .pos-cell-label-slot, .pos-theme-fridge .pos-cell-handle { display: none; }
+                    .pos-theme-fridge { background-color: #f0fbfe !important; border-color: #b2ebf2 !important; }
+
+                    .pos-theme-safe .pos-grid-cell {
+                        background: #495057; border: 1px solid #343a40; border-bottom: 3px solid #212529; color: white;
+                    }
+                    .pos-theme-safe .pos-cell-label-slot, .pos-theme-safe .pos-cell-handle { display: none; }
+                    .pos-theme-safe { background-color: #e9ecef !important; border-color: #adb5bd !important; border-width: 3px !important; }
+                </style>
 
                 <!-- FORMULAIRE SYMFONY CACHÉ (C'est ce qui sera envoyé au serveur) -->
                 <div id="ligne-ventes-list" class="d-none collection-ligne-ventes" data-index="{{ form.ligneVentes|length }}">
@@ -180,6 +248,24 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <div id="medecin-container" class="mt-3 p-3 border border-warning border-opacity-50 rounded bg-warning bg-opacity-10 d-none">
+                        <div class="mb-3">
+                            {{ form_label(form.medecin, 'Sélectionner le Médecin Prescripteur', {'label_attr': {'class': 'fw-bold text-dark mb-2'}}) }}
+                            {{ form_widget(form.medecin, {'attr': {'class': 'form-select'}}) }}
+                            {{ form_errors(form.medecin) }}
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form_label(form.date_ordonnance, null, {'label_attr': {'class': 'fw-bold text-dark mb-1'}}) }}
+                                {{ form_widget(form.date_ordonnance, {'attr': {'class': 'form-control'}}) }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form_label(form.date_fin_ordonnance, null, {'label_attr': {'class': 'fw-bold text-dark mb-1'}}) }}
+                                {{ form_widget(form.date_fin_ordonnance, {'attr': {'class': 'form-control'}}) }}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -194,6 +280,24 @@
 <div id="ligne-vente-prototype-wrapper" class="d-none" data-prototype="{{ form_widget(form.ligneVentes.vars.prototype)|e('html_attr') }}"></div>
 
 <script>
+    // === GESTION DE L'AFFICHAGE DU MEDECIN ===
+    document.addEventListener('DOMContentLoaded', function() {
+        const ordonnanceCheckbox = document.querySelector('input[type="checkbox"][id$="_creer_ordonnance"]');
+        const medecinContainer = document.getElementById('medecin-container');
+        
+        if (ordonnanceCheckbox && medecinContainer) {
+            function toggleMedecin() {
+                if (ordonnanceCheckbox.checked) {
+                    medecinContainer.classList.remove('d-none');
+                } else {
+                    medecinContainer.classList.add('d-none');
+                }
+            }
+            ordonnanceCheckbox.addEventListener('change', toggleMedecin);
+            toggleMedecin(); // Initial check
+        }
+    });
+
     // === MISE À JOUR DU RÉSUMÉ (PANIER UNIQUE) ===
     function updateOrderSummary() {
         const list = document.querySelector('#ligne-ventes-list');
@@ -321,12 +425,33 @@
                         const stock = optionEl.getAttribute('data-stock') || '0';
                         const dosage = optionEl.getAttribute('data-dosage') || '';
                         const prix = optionEl.getAttribute('data-prix') || '0';
+                        const zone = optionEl.getAttribute('data-zone') || '';
+                        const colonne = optionEl.getAttribute('data-colonne') || '';
+                        const niveau = optionEl.getAttribute('data-niveau') || '';
+                        const position = optionEl.getAttribute('data-position') || '';
                         
                         let stockBadgeClass = parseInt(stock) > 10 ? 'bg-success' : (parseInt(stock) > 0 ? 'bg-warning text-dark' : 'bg-danger');
+                        
+                        let locationBadge = '';
+                        if (zone) {
+                            let locText = zone;
+                            if ((zone === 'RX' || zone === 'OTC') && colonne) locText = `${zone}-${colonne}${niveau ? '-' + niveau : ''}${position ? '-' + position : ''}`;
+                            else if (zone === 'FRIDGE') locText = 'Frigo';
+                            else if (zone === 'SAFE') locText = 'Coffre';
+                            else if (zone === 'PARA' || zone === 'STOCK' || zone === 'MAT') locText = 'Étagère';
+                            
+                            let locColor = 'bg-secondary';
+                            if (zone === 'FRIDGE') locColor = 'bg-info text-dark';
+                            else if (zone === 'SAFE') locColor = 'bg-danger';
+                            else if (zone === 'RX' || zone === 'OTC') locColor = 'bg-primary';
+                            else if (zone === 'PARA' || zone === 'STOCK' || zone === 'MAT') locColor = 'bg-success';
+                            
+                            locationBadge = `<span class="badge ${locColor} ms-2"><i class="bi bi-geo-alt-fill"></i> ${locText}</span>`;
+                        }
 
                         return '<div class="option d-flex justify-content-between align-items-center w-100">' +
                                '<div>' +
-                                 '<div class="nom">' + escape(data.text.split('-')[0]) + '</div>' +
+                                 '<div class="nom">' + escape(data.text.split('-')[0]) + locationBadge + '</div>' +
                                  '<div class="details">Dosage: ' + escape(dosage) + ' | Prix: ' + parseFloat(prix).toFixed(2) + ' €</div>' +
                                '</div>' +
                                '<span class="stock-badge ' + stockBadgeClass + '">Stock: ' + escape(stock) + '</span>' +
@@ -352,10 +477,27 @@
                         const famille = optionEl.getAttribute('data-famille') || 'Non définie';
                         const description = optionEl.getAttribute('data-description') || 'Aucune description fournie pour ce produit.';
                         const stock = optionEl.getAttribute('data-stock') || '0';
+                        const zone = optionEl.getAttribute('data-zone') || '';
+                        const colonne = optionEl.getAttribute('data-colonne') || '';
+                        const niveau = optionEl.getAttribute('data-niveau') || '';
+                        const position = optionEl.getAttribute('data-position') || '';
 
                         document.getElementById('id-card-nom').textContent = nom;
-                        document.getElementById('id-card-dosage').textContent = dosage;
                         document.getElementById('id-card-famille').textContent = famille;
+                        
+                        let locText = 'Emplacement non défini';
+                        if (zone === 'FRIDGE') locText = 'Réfrigérateur';
+                        else if (zone === 'SAFE') locText = 'Coffre-fort';
+                        else if (zone === 'PARA' || zone === 'STOCK' || zone === 'MAT') locText = 'Étagères';
+                        else if ((zone === 'RX' || zone === 'OTC') && colonne) {
+                            locText = `${zone}-${colonne}${niveau ? '-' + niveau : ''}${position ? '-' + position : ''}`;
+                        } else if (zone) {
+                            locText = zone;
+                        }
+                        
+                        document.getElementById('id-card-location-text').textContent = locText;
+                        
+                        document.getElementById('id-card-dosage').textContent = dosage;
                         document.getElementById('id-card-description').textContent = description;
                         document.getElementById('id-card-stock').textContent = stock;
                         
@@ -364,6 +506,53 @@
                         const stockEl = document.getElementById('id-card-stock');
                         if(parseInt(stock) < 5) stockEl.className = "text-danger fs-5 fw-bold";
                         else stockEl.className = "text-success fs-5 fw-bold";
+                        
+                        // ===== SMART LOCATOR LOGIC =====
+                        // Clear previous highlights
+                        document.querySelectorAll('.pos-highlight-active').forEach(el => {
+                            el.classList.remove('pos-highlight-active');
+                            el.style.setProperty('--pulse-color', '');
+                        });
+                        
+                        // Clear previous themes
+                        const gridContainer = document.getElementById('pos-locator-grid-container');
+                        gridContainer.className = 'bg-white border rounded p-2 mb-2 shadow-sm';
+                        
+                        if (zone) {
+                            document.getElementById('pos-locator-container').classList.remove('d-none');
+                            document.getElementById('pos-zone-title').textContent = 'Zone ' + zone + (colonne ? ` - Baie ${colonne}` : '') + (niveau ? ` - Étagère ${niveau}` : '') + (position ? ` - Pos ${position}` : '');
+                            
+                            // Apply CSS theme to grid
+                            gridContainer.classList.add('pos-theme-' + zone.toLowerCase());
+                            
+                            let pulseColor = '108, 117, 125';
+                            let iconClass = 'bi-geo-fill';
+                            let famLower = famille.toLowerCase();
+                            
+                            if (zone === 'FRIDGE') { pulseColor = '6, 182, 212'; iconClass = 'bi-snow'; }
+                            else if (zone === 'SAFE') { pulseColor = '239, 68, 68'; iconClass = 'bi-safe'; }
+                            else if (zone === 'PARA' || zone === 'STOCK' || zone === 'MAT') { pulseColor = '34, 197, 94'; iconClass = 'bi-shop'; }
+                            else if (zone === 'RX' || zone === 'OTC') {
+                                if (famLower.includes('antibio') || famLower.includes('analg')) pulseColor = '59, 130, 246';
+                                else if (famLower.includes('cardio') || famLower.includes('diab')) pulseColor = '139, 92, 246';
+                                else pulseColor = '13, 110, 253';
+                                iconClass = (zone === 'RX') ? 'bi-prescription' : 'bi-bag-plus';
+                            }
+                            
+                            document.getElementById('pos-zone-icon').className = 'me-2 ' + iconClass;
+                            document.getElementById('pos-zone-icon').style.color = `rgb(${pulseColor})`;
+                            
+                            // Highlight the specific cell
+                            if (colonne && niveau) {
+                                let targetEl = document.getElementById(`pos-drawer-${colonne}-${niveau}`);
+                                if (targetEl) {
+                                    targetEl.style.setProperty('--pulse-color', pulseColor);
+                                    targetEl.classList.add('pos-highlight-active');
+                                }
+                            }
+                        } else {
+                            document.getElementById('pos-locator-container').classList.add('d-none');
+                        }
                     }
                 }
             });

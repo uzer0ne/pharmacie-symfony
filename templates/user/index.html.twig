@@ -1,0 +1,69 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Utilisateurs{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 page-title">
+            <i class="bi bi-people-fill text-primary me-2"></i> Gestion des Utilisateurs
+        </h1>
+        <p class="page-subtitle mb-0">Comptes et droits d'accès du personnel</p>
+    </div>
+    <div>
+        <a href="{{ path('app_user_new') }}" class="btn btn-primary shadow-sm">
+            <i class="bi bi-person-plus me-1"></i> Nouvel Utilisateur
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4 border-0">Nom & Prénom</th>
+                        <th class="border-0">Email</th>
+                        <th class="border-0">Rôle</th>
+                        <th class="border-0 text-center pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="fw-bold text-dark">{{ user.prenom }} {{ user.nom }}</div>
+                        </td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            {% if 'ROLE_PHARMACIEN' in user.roles %}
+                                <span class="badge" style="background-color: #ef4444; color: white;">Pharmacien</span>
+                            {% elseif 'ROLE_GESTIONNAIRE_STOCK' in user.roles %}
+                                <span class="badge" style="background-color: #f59e0b; color: white;">Logisticien</span>
+                            {% elseif 'ROLE_CAISSIER' in user.roles %}
+                                <span class="badge" style="background-color: #10b981; color: white;">Vendeur</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Utilisateur</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center pe-4">
+                            <a href="{{ path('app_user_show', {'id': user.id}) }}" class="btn btn-sm btn-outline-primary" title="Voir">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{{ path('app_user_edit', {'id': user.id}) }}" class="btn btn-sm btn-outline-warning" title="Modifier">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center py-4 text-muted">Aucun utilisateur trouvé</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

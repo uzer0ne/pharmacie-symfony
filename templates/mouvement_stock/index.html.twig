@@ -20,7 +20,7 @@
                     <tr>
                         <th class="ps-4">Date</th>
                         <th>Produit (CIP)</th>
-                        <th>Type</th>
+                        <th>Transaction</th>
                         <th class="text-center">Quantité</th>
                         <th>Motif</th>
                         <th class="pe-4">Utilisateur</th>
@@ -49,7 +49,7 @@
                             <td>{{ mouvement.motif }}</td>
                             <td class="pe-4 text-muted small">
                                 {% if mouvement.utilisateur %}
-                                    <i class="bi bi-person-circle me-1"></i> {{ mouvement.utilisateur.userIdentifier }}
+                                    <i class="bi bi-person-circle me-1"></i> {{ mouvement.utilisateur.prenom }} {{ mouvement.utilisateur.nom }}
                                 {% else %}
                                     <span class="text-secondary"><i class="bi bi-cpu me-1"></i> Système</span>
                                 {% endif %}

@@ -24,6 +24,20 @@
                             {{ form_errors(form.nom_medecin) }}
                         </div>
                     </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            {{ form_widget(form.specialite, {'attr': {'class': 'form-control', 'placeholder': 'Généraliste, Dentiste...'}}) }}
+                            {{ form_label(form.specialite, 'Spécialité') }}
+                            {{ form_errors(form.specialite) }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            {{ form_widget(form.numero_rpps, {'attr': {'class': 'form-control', 'placeholder': 'N° RPPS'}}) }}
+                            {{ form_label(form.numero_rpps, 'N° RPPS (11 chiffres)') }}
+                            {{ form_errors(form.numero_rpps) }}
+                        </div>
+                    </div>
                 </div>
 
                 <hr class="my-4">

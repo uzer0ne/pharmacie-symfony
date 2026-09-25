@@ -1,141 +1,211 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Détail Vente n°{{ vente.id }} - Jeffarma{% endblock %}
+{% block title %}Facture n°{{ vente.id }} - Jeffarma{% endblock %}
 
 {% block body %}
-<!-- En-tête de page -->
 <div class="d-flex justify-content-between align-items-center mb-4 d-print-none">
     <div>
         <h1 class="h2 page-title">
             <i class="bi bi-receipt-cutoff text-success me-2"></i> Facture n°{{ vente.id }}
         </h1>
-        <p class="page-subtitle mb-0">Transaction du {{ vente.dateVente|date('d/m/Y à H:i') }}</p>
+        <p class="page-subtitle mb-0">Transaction du {{ vente.dateVente|date('d/m/Y') }}</p>
     </div>
     <div class="d-flex gap-2">
         <a href="{{ path('app_vente_index') }}" class="btn btn-outline-secondary shadow-sm">
             <i class="bi bi-arrow-left me-1"></i> Retour
         </a>
-        <button onclick="window.print()" class="btn btn-light border shadow-sm text-dark">
-            <i class="bi bi-printer me-1"></i> Imprimer
+        <button onclick="window.print()" class="btn btn-light border shadow-sm text-dark fw-bold">
+            <i class="bi bi-printer me-1"></i> Imprimer le Ticket
         </button>
-        <a href="{{ path('app_vente_edit', {'id': vente.id}) }}" class="btn btn-warning shadow-sm">
-            <i class="bi bi-pencil-square me-1"></i> Modifier
-        </a>
     </div>
 </div>
 
-<!-- Reçu de vente -->
 <div class="row justify-content-center">
-    <div class="col-lg-10">
-        <div class="card shadow-sm border-0" id="recu-vente">
-            <div class="card-header bg-white border-bottom py-4 px-5">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h4 class="mb-0 text-dark fw-bold"><i class="bi bi-shop text-primary me-2"></i> Jeffarma</h4>
-                        <p class="text-muted mb-0 small mt-1">Reçu n°{{ vente.id }}</p>
-                    </div>
-                    <div class="text-end text-muted">
-                        <p class="mb-0"><i class="bi bi-calendar3 me-1"></i> {{ vente.dateVente|date('d/m/Y H:i') }}</p>
-                        <p class="mb-0 mt-1"><i class="bi bi-person me-1"></i> 
-                            {% if vente.patient %}
-                                {{ vente.patient.prenomPatient }} {{ vente.patient.nomPatient }}
-                            {% else %}
-                                Vente libre
-                            {% endif %}
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card-body p-5">
-                {% if vente.ordonnance %}
-                    <div class="alert bg-primary bg-opacity-10 border-0 text-primary mb-4">
-                        <i class="bi bi-file-medical-fill me-2"></i> <strong>Ordonnance rattachée :</strong> n°{{ vente.ordonnance.id }} (Prescrite le {{ vente.ordonnance.dateOrdonnance|date('d/m/Y') }})
-                    </div>
+    <div class="col-12 col-md-8 col-lg-5 col-xl-4">
+        <!-- TICKET DE CAISSE -->
+        <div class="ticket-container bg-white shadow p-4 mx-auto mb-5" id="recu-vente">
+            
+            <div class="ticket-header text-center mb-1">
+                <div>PHARMACIE JEFFARMA</div>
+                <div>TEL : 01 23 45 67 89 &nbsp; OP : {{ app.user ? app.user.userIdentifier : 'Système' }}</div>
+                {% if vente.ordonnance and vente.ordonnance.medecin %}
+                    <div class="mt-1">ID {{ vente.ordonnance.medecin.id }} RPPS {{ vente.ordonnance.medecin.numeroRpps ?? '00000000000' }}</div>
+                    <div>Dr. {{ vente.ordonnance.medecin.nomMedecin|upper }}</div>
                 {% endif %}
-
-                <h5 class="text-dark fw-bold mb-4 border-bottom pb-2">Produits vendus</h5>
-                <div class="table-responsive">
-                    <table class="table table-borderless align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="ps-3 border-0 rounded-start">Désignation</th>
-                                <th class="border-0 text-end">P.U TTC</th>
-                                <th class="border-0 text-center">Qté</th>
-                                <th class="border-0 text-end rounded-end pe-3">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for ligne in vente.ligneVentes %}
-                                <tr>
-                                    <td class="ps-3">
-                                        <div class="fw-bold text-dark">{{ ligne.produit.nomProduit }}</div>
-                                        <small class="text-muted font-monospace">{{ ligne.produit.codeProduit }}</small>
-                                    </td>
-                                    <td class="text-end">{{ ligne.prixUnitaireVente|number_format(2, ',', ' ') }} €</td>
-                                    <td class="text-center">
-                                        <span class="badge bg-light text-dark border px-2 py-1">{{ ligne.quantite }}</span>
-                                    </td>
-                                    <td class="text-end fw-bold pe-3">{{ (ligne.prixUnitaireVente * ligne.quantite)|number_format(2, ',', ' ') }} €</td>
-                                </tr>
-                            {% else %}
-                                <tr>
-                                    <td colspan="4" class="text-center text-danger py-4">
-                                        <i class="bi bi-exclamation-triangle"></i> Cette vente ne contient aucun produit.
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-
-                <hr class="my-4">
-
-                <div class="row">
-                    <div class="col-md-6 offset-md-6">
-                        <div class="bg-light rounded p-4 border border-success border-opacity-25">
-                            
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h6 class="mb-0 text-muted">Total Net TTC</h6>
-                                <h5 class="mb-0 text-dark fw-bold">{{ vente.montantTotal|number_format(2, ',', ' ') }} €</h5>
-                            </div>
-
-                            {% if vente.ordonnance and (vente.montantSecu > 0 or vente.montantMutuelle > 0) %}
-                                <div class="d-flex justify-content-between align-items-center mb-2 text-info">
-                                    <span class="small">Assurance Maladie</span>
-                                    <span class="small fw-bold">- {{ vente.montantSecu|number_format(2, ',', ' ') }} €</span>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mb-3 text-info">
-                                    <span class="small">Mutuelle</span>
-                                    <span class="small fw-bold">- {{ vente.montantMutuelle|number_format(2, ',', ' ') }} €</span>
-                                </div>
-                                <hr class="my-2 border-success">
-                                <div class="d-flex justify-content-between align-items-center mt-2">
-                                    <h5 class="mb-0 text-success">Reste à charge patient</h5>
-                                    <h2 class="mb-0 text-success fw-bold">{{ vente.resteAPayer|number_format(2, ',', ' ') }} €</h2>
-                                </div>
-                            {% else %}
-                                <hr class="my-2 border-success">
-                                <div class="d-flex justify-content-between align-items-center mt-2">
-                                    <h5 class="mb-0 text-success">Reste à charge patient</h5>
-                                    <h2 class="mb-0 text-success fw-bold">{{ vente.montantTotal|number_format(2, ',', ' ') }} €</h2>
-                                </div>
-                            {% endif %}
-
-                        </div>
-                    </div>
-                </div>
-                
-                
             </div>
+
+            <div class="ticket-meta mb-1 border-bottom border-dark border-1 pb-1 border-dashed">
+                <div>021 reg.1 FACTURE No.{{ "%09d"|format(vente.id) }}</div>
+                <div>{{ vente.dateVente|date('d/m/y H:i') }}{% if vente.ordonnance %}, ord. {{ vente.ordonnance.dateOrdonnance|date('d/m/y') }}{% endif %}</div>
+                {% if vente.patient %}
+                    <div class="mt-1 text-uppercase">{{ vente.patient.nomPatient }} {{ vente.patient.prenomPatient }}</div>
+                    <div>CV TP + 0{{ vente.patient.dateNaissance|date('y') }}{{ vente.patient.dateNaissance|date('m') }}9999{{ vente.patient.idPatient }}</div>
+                {% endif %}
+            </div>
+
+            <table class="table table-borderless table-sm ticket-table mb-1" style="table-layout: fixed; width: 100%; font-size: 0.6rem;">
+                <thead>
+                    <tr class="border-bottom border-dark border-1 border-dashed" style="font-weight: normal;">
+                        <th class="ps-0 pb-1" style="width: 5%; font-weight: normal;">Qté</th>
+                        <th class="pb-1" style="width: 32%; padding-left: 2px; font-weight: normal;">Libellé</th>
+                        <th class="text-center pb-1" style="width: 22%; font-weight: normal;">Identifiant</th>
+                        <th class="text-end pb-1" style="width: 12%; font-weight: normal;">PU</th>
+                        <th class="text-end pb-1" style="width: 20%; padding-right: 5px; font-weight: normal;">BaseSS HD</th>
+                        <th class="text-end pe-0 pb-1" style="width: 9%; font-weight: normal;">TxR</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ligne in vente.ligneVentes %}
+                        {% set isRemboursable = ligne.produit.codeCip is not empty %}
+                        {% set baseSS = isRemboursable ? ligne.prixUnitaireVente : '-' %}
+                        {% set txR = ligne.tauxRemboursement ? ligne.tauxRemboursement|replace({' ': ''}) : (isRemboursable ? '65%' : '-') %}
+                        
+                        <tr>
+                            <td class="ps-0 align-top">{{ ligne.quantite }}</td>
+                            <td class="align-top" style="padding-left: 2px;">
+                                {% set parts = ligne.produit.nomProduit|split(',') %}
+                                {% set baseName = parts|first|lower|capitalize|replace({' mg': 'mg', ' g': 'g', ' ml': 'ml', ' µg': 'µg', ' ui': 'UI', ' u.i.': 'UI', ' m.': 'mg'}) %}
+                                {% set shortForm = '' %}
+                                {% if parts|length > 1 %}
+                                    {% set formStr = parts|last|lower %}
+                                    {% if 'comprimé' in formStr %}{% set shortForm = ' cpr' %}
+                                    {% elseif 'gélule' in formStr or 'gelule' in formStr %}{% set shortForm = ' gel' %}
+                                    {% elseif 'capsule' in formStr %}{% set shortForm = ' caps' %}
+                                    {% elseif 'pommade' in formStr or 'crème' in formStr %}{% set shortForm = ' pomm' %}
+                                    {% elseif 'sirop' in formStr %}{% set shortForm = ' srp' %}
+                                    {% elseif 'sachet' in formStr %}{% set shortForm = ' sch' %}
+                                    {% elseif 'ampoule' in formStr %}{% set shortForm = ' amp' %}
+                                    {% elseif 'solution' in formStr or 'gouttes' in formStr %}{% set shortForm = ' sol' %}
+                                    {% endif %}
+                                {% endif %}
+                                <div style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; line-height: 1.15;">
+                                    {{ baseName }}{{ shortForm }}
+                                </div>
+                                {% if ligne.produit.codeProduit %}
+                                <div class="text-muted" style="font-size: 0.9em;">({{ ligne.produit.codeProduit }})</div>
+                                {% endif %}
+                            </td>
+                            <td class="text-center align-top">{{ ligne.produit.codeCip ?? '-' }}</td>
+                            <td class="text-end align-top" style="padding-right: 5px;">{{ ligne.prixUnitaireVente|number_format(2, ',', '') }}</td>
+                            <td class="text-end align-top" style="white-space: nowrap; padding-right: 5px;">
+                                {% if isRemboursable and vente.ordonnance %}
+                                    {{ baseSS|number_format(2, ',', '') }} &nbsp; 1,02
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-0 align-top" style="white-space: nowrap;">
+                                {% if vente.ordonnance %}
+                                    {{ txR }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    <!-- Autres honoraires (HDR, HDA, etc.) -->
+                    {% if vente.detailsHonoraires %}
+                        {% for honoraire in vente.detailsHonoraires %}
+                            {% if honoraire.libelle != 'HONORAIRE DE DISPENSATION' %}
+                            <tr>
+                                <td class="ps-0 align-top">{{ honoraire.qte }}</td>
+                                <td class="align-top" style="padding-left: 2px;">
+                                    <div style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; line-height: 1.15;">
+                                        {{ honoraire.libelle|lower|capitalize }}
+                                    </div>
+                                </td>
+                                <td class="text-center align-top">-</td>
+                                <td class="text-end align-top">-</td>
+                                <td class="text-end align-top" style="padding-right: 5px;">{{ (honoraire.montant / honoraire.qte)|number_format(2, ',', '') }}</td>
+                                <td class="text-end pe-0 align-top" style="white-space: nowrap;">{{ honoraire.txR|replace({' ': ''}) }}</td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+
+            <div class="ticket-totals border-top border-dark border-1 pt-1 border-dashed mt-1">
+                <div class="row g-0">
+                    <div class="col-6">MONTANT TOTAL :</div>
+                    <div class="col-6 text-end">{{ vente.montantTotal|number_format(2, ',', '') }} EUR</div>
+                </div>
+                
+                <div class="row g-0 mt-1">
+                    <div class="col-6">MONTANT ASSURE :</div>
+                    <div class="col-6 text-end">{{ vente.resteAPayer|number_format(2, ',', '') }} EUR</div>
+                    
+                    {% if vente.ordonnance %}
+                    <div class="col-6">MONTANT RO :</div>
+                    <div class="col-6 text-end">{{ vente.montantSecu|number_format(2, ',', '') }} EUR</div>
+                    
+                    <div class="col-6">MONTANT RC :</div>
+                    <div class="col-6 text-end">{{ vente.montantMutuelle|number_format(2, ',', '') }} EUR</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            
+            
         </div>
     </div>
 </div>
 
 <style>
+/* Style d'écran pour ressembler à un ticket */
+.ticket-container {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.65rem;
+    color: #000;
+    line-height: 1.3;
+    background-color: #fdfdfd;
+    max-width: 420px; /* Élargi pour être bien lisible sur PC */
+    margin: 0 auto;
+}
+
+.border-dashed {
+    border-style: dashed !important;
+}
+
+.ticket-table th, .ticket-table td {
+    padding: 0.1rem 0;
+}
+
+.text-truncate-multiline {
+    /* Suppression du truncate strict pour éviter les chevauchements bizarres */
+    word-break: break-word;
+}
+
+/* Style spécifique pour l'impression (Imprimante thermique) */
 @media print {
-    body { background-color: white !important; }
-    .card { box-shadow: none !important; border: 1px solid #dee2e6 !important; }
+    @page {
+        margin: 0;
+        size: 80mm auto; /* Forcé à 80mm pour l'imprimante thermique */
+    }
+    body * {
+        visibility: hidden;
+    }
+    body {
+        background-color: white !important;
+        margin: 0;
+        padding: 0;
+    }
+    .ticket-container {
+        font-size: 0.65rem !important; /* Même taille qu'à l'écran */
+        max-width: 80mm;
+        padding: 5mm !important;
+    }
+    #recu-vente, #recu-vente * {
+        visibility: visible;
+    }
+    #recu-vente {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 80mm;
+        margin: 0;
+        box-shadow: none !important;
+    }
 }
 </style>
 {% endblock %}

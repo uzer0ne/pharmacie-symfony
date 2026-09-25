@@ -35,7 +35,14 @@
                 <tbody>
                     {% for vente in ventes %}
                         <tr>
-                            <td class="ps-4 fw-bold text-dark">#{{ vente.id }}</td>
+                            <td class="ps-4">
+                                <span class="fw-bold text-dark">#{{ vente.id }}</span>
+                                {% if vente.statut == 'PAYEE' %}
+                                    <span class="badge bg-success ms-2" style="font-size: 0.7em;">Payée</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark ms-2" style="font-size: 0.7em;">En attente</span>
+                                {% endif %}
+                            </td>
                             <td class="text-muted">{{ vente.dateVente ? vente.dateVente|date('d/m/Y H:i') : '' }}</td>
                             <td>
                                 {% if vente.patient %}

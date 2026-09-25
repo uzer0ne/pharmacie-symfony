@@ -1,0 +1,102 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Encaissement{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h3 class="mb-0">Encaissement Caisse</h3>
+                </div>
+                <div class="card-body p-4">
+                    
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Total Vente :</span>
+                        <span class="fw-bold">{{ vente.montantTotal }} €</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Part Sécu (RO) :</span>
+                        <span>- {{ vente.montantSecu }} €</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                        <span class="text-muted">Part Mutuelle (RC) :</span>
+                        <span>- {{ vente.montantMutuelle }} €</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="mb-0 text-dark">Reste à payer :</h4>
+                        <h2 class="mb-0 text-danger fw-bold" id="reste-a-payer" data-reste="{{ vente.resteAPayer }}">{{ vente.resteAPayer }} €</h2>
+                    </div>
+
+                    <form action="{{ path('app_vente_confirm_payment', {'id': vente.id}) }}" method="POST" id="form-encaissement">
+                        <input type="hidden" name="_token" value="{{ csrf_token('confirm_payment' ~ vente.id) }}">
+                        
+                        <div class="mb-4">
+                            <label for="montant_encaisse" class="form-label text-success fw-bold">Montant remis par le client (€)</label>
+                            <input type="number" step="0.01" min="{{ vente.resteAPayer }}" class="form-control form-control-lg text-center fw-bold text-success" id="montant_encaisse" name="montant_encaisse" required placeholder="0.00" style="font-size: 2rem;">
+                        </div>
+
+                        <div class="alert alert-secondary text-center mb-4">
+                            <span class="d-block text-muted mb-1">Monnaie à rendre :</span>
+                            <span class="display-4 fw-bold text-primary" id="affichage_monnaie">0.00 €</span>
+                            <input type="hidden" name="monnaie_rendue" id="monnaie_rendue" value="0.00">
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg py-3 fw-bold">
+                                <i class="bi bi-check-circle me-2"></i> VALIDER L'ENCAISSEMENT
+                            </button>
+                            <a href="{{ path('app_vente_edit', {'id': vente.id}) }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i> Modifier la vente
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const resteAPayer = parseFloat(document.getElementById('reste-a-payer').dataset.reste);
+    const inputEncaisse = document.getElementById('montant_encaisse');
+    const affichageMonnaie = document.getElementById('affichage_monnaie');
+    const inputMonnaieRendue = document.getElementById('monnaie_rendue');
+    const form = document.getElementById('form-encaissement');
+
+    // Auto-focus the input
+    inputEncaisse.focus();
+
+    inputEncaisse.addEventListener('input', function() {
+        let encaisse = parseFloat(this.value);
+        if (isNaN(encaisse)) encaisse = 0;
+        
+        let monnaie = encaisse - resteAPayer;
+        
+        if (monnaie >= 0) {
+            affichageMonnaie.textContent = monnaie.toFixed(2) + ' €';
+            inputMonnaieRendue.value = monnaie.toFixed(2);
+            affichageMonnaie.classList.remove('text-danger');
+            affichageMonnaie.classList.add('text-primary');
+        } else {
+            affichageMonnaie.textContent = "Montant insuffisant";
+            inputMonnaieRendue.value = "0.00";
+            affichageMonnaie.classList.remove('text-primary');
+            affichageMonnaie.classList.add('text-danger');
+        }
+    });
+
+    form.addEventListener('submit', function(e) {
+        let encaisse = parseFloat(inputEncaisse.value);
+        if (isNaN(encaisse) || encaisse < resteAPayer) {
+            e.preventDefault();
+            alert("Le montant encaissé doit être supérieur ou égal au reste à payer.");
+            inputEncaisse.focus();
+        }
+    });
+});
+</script>
+{% endblock %}

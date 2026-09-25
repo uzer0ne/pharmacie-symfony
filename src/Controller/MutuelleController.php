@@ -11,6 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/mutuelle')]
 class MutuelleController extends AbstractController
@@ -80,6 +81,7 @@ class MutuelleController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_mutuelle_delete', methods: ['POST'])]
+    #[IsGranted('ROLE_PHARMACIEN')]
     public function delete(Request $request, Mutuelle $mutuelle, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$mutuelle->getId(), $request->getPayload()->getString('_token'))) {
