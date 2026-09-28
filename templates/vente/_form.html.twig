@@ -45,6 +45,46 @@
     flex: 1; /* La quantité prend moins de place */
     margin-bottom: 0 !important;
 }
+
+/* ===== SMART LOCATOR GRID THEMES ===== */
+@keyframes bounce-pin { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-25%); } }
+.animate-bounce-pin { animation: bounce-pin 1s infinite ease-in-out; }
+@keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(var(--pulse-color), 0.7); } 70% { box-shadow: 0 0 0 10px rgba(var(--pulse-color), 0); } 100% { box-shadow: 0 0 0 0 rgba(var(--pulse-color), 0); } }
+.pos-highlight-active { position: relative; z-index: 10; border: 3px solid rgb(var(--pulse-color)) !important; animation: pulse-ring 1.5s infinite; }
+
+.pos-grid-cell { height: 35px !important; position: relative; transition: all 0.3s; }
+
+/* THEME RX / OTC (Tiroirs) */
+.pos-theme-rx .pos-grid-cell, .pos-theme-otc .pos-grid-cell { 
+    background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%); 
+    border: 1px solid #ced4da; border-bottom: 2px solid #adb5bd; border-radius: 3px; 
+    box-shadow: inset 0 1px 0 rgba(255,255,255,1), 0 1px 2px rgba(0,0,0,0.05); 
+}
+.pos-theme-rx .pos-cell-label-slot, .pos-theme-otc .pos-cell-label-slot { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); width: 50%; height: 6px; background-color: #e9ecef; border: 1px solid #dee2e6; border-radius: 1px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); }
+.pos-theme-rx .pos-cell-handle, .pos-theme-otc .pos-cell-handle { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 40%; height: 4px; background: linear-gradient(180deg, #e9ecef 0%, #ced4da 100%); border: 1px solid #adb5bd; border-bottom: 2px solid #868e96; border-radius: 2px; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
+
+/* THEME PARA / MAT / STOCK (Étagères bois/metal) */
+.pos-theme-para .pos-grid-cell, .pos-theme-mat .pos-grid-cell, .pos-theme-stock .pos-grid-cell {
+    background: #fdfbf7; border: none; border-bottom: 6px solid #d4c5b0; border-radius: 0; margin-bottom: 4px;
+}
+.pos-theme-para .pos-cell-label-slot, .pos-theme-para .pos-cell-handle, .pos-theme-mat .pos-cell-label-slot, .pos-theme-mat .pos-cell-handle, .pos-theme-stock .pos-cell-label-slot, .pos-theme-stock .pos-cell-handle { display: none; }
+
+/* THEME FRIDGE */
+.pos-theme-fridge .pos-grid-cell {
+    background: rgba(224, 247, 250, 0.4); border: 1px solid rgba(0, 188, 212, 0.3); border-bottom: 4px solid rgba(0, 188, 212, 0.6); border-radius: 2px;
+}
+.pos-theme-fridge .pos-cell-label-slot, .pos-theme-fridge .pos-cell-handle { display: none; }
+.pos-theme-fridge { background-color: #f0fbfe !important; border-color: #b2ebf2 !important; }
+
+/* THEME SAFE */
+.pos-theme-safe .pos-grid-cell {
+    background: #495057; border: 2px solid #343a40; border-bottom: 4px solid #212529; color: white;
+}
+.pos-theme-safe .pos-cell-label-slot, .pos-theme-safe .pos-cell-handle { display: none; }
+.pos-theme-safe { background-color: #e9ecef !important; border-color: #adb5bd !important; border-width: 4px !important; }
+
+.pos-pin-icon { position: absolute; top: -15px; right: -15px; background: rgb(var(--pulse-color)); color: white; border-radius: 50%; width: 26px !important; height: 26px !important; display: none; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); z-index: 20; }
+.pos-highlight-active .pos-pin-icon { display: flex !important; }
 </style>
 
 {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true}}) }}
@@ -115,33 +155,169 @@
                             Description du produit...
                         </p>
                         
-                        <!-- VISUAL LOCATOR -->
-                        <div id="pos-locator-container" class="mt-3 pt-3 border-top d-none">
-                            <h6 class="fw-bold mb-3 text-dark d-flex align-items-center" style="font-size: 0.9rem;">
-                                <i class="bi bi-geo-fill text-primary me-2" id="pos-zone-icon"></i>
-                                <span id="pos-zone-title">Zone Inconnue</span>
-                            </h6>
-                            
-                            <div id="pos-locator-grid-container" class="bg-white border rounded p-2 mb-2 shadow-sm">
-                                <div class="drawer-grid" style="display: grid; grid-template-columns: 20px repeat(8, 1fr); gap: 4px;">
-                                    <div></div>
-                                    {% for c in ['01','02','03','04','05','06','07','08'] %}
-                                        <div class="text-center fw-bold text-muted" style="font-size: 0.7rem;">{{ c }}</div>
-                                    {% endfor %}
+                        <!-- VISUAL LOCATOR & FEFO DRAWER -->
+                        <div id="pos-locator-container" class="mt-4 pt-3 border-top d-none">
+                            <div class="row align-items-stretch">
+                                <!-- GLOBAL GRID -->
+                                <div class="col-lg-7 border-end-lg mb-4 mb-lg-0">
+                                    <h6 class="fw-bold mb-3 text-dark d-flex align-items-center" style="font-size: 0.9rem;">
+                                        <i class="bi bi-geo-fill text-primary me-2" id="pos-zone-icon"></i>
+                                        <span id="pos-zone-title">Zone Inconnue</span>
+                                    </h6>
                                     
-                                    <div class="col-span-9 d-grid align-items-center" style="grid-column: span 9; grid-template-columns: 20px repeat(8, 1fr); gap: 4px;">
-                                        {% for r in ['F','E','D','C','B','A'] %}
-                                            <div class="text-center fw-bold text-muted" style="font-size: 0.7rem;">{{ r }}</div>
+                                    <div id="pos-locator-grid-container" class="bg-white border rounded p-2 shadow-sm h-100">
+                                        <div class="drawer-grid" style="display: grid; grid-template-columns: 20px repeat(8, 1fr); gap: 4px;">
+                                            <div></div>
                                             {% for c in ['01','02','03','04','05','06','07','08'] %}
-                                                <div class="pos-grid-cell" id="pos-drawer-{{ c }}-{{ r }}" style="height: 25px; position: relative; transition: all 0.3s;">
-                                                    <div class="pos-cell-label-slot"></div>
-                                                    <div class="pos-cell-handle"></div>
-                                                    <div class="pos-pin-icon" style="position: absolute; top: -10px; right: -10px; background: rgb(var(--pulse-color, 13, 110, 253)); color: white; border-radius: 50%; width: 20px; height: 20px; display: none; align-items: center; justify-content: center; font-size: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 20;">
-                                                        <i class="bi bi-geo-alt-fill"></i>
-                                                    </div>
-                                                </div>
+                                                <div class="text-center fw-bold text-muted" style="font-size: 0.7rem;">{{ c }}</div>
                                             {% endfor %}
-                                        {% endfor %}
+                                            
+                                            <div class="col-span-9 d-grid align-items-center" style="grid-column: span 9; grid-template-columns: 20px repeat(8, 1fr); gap: 4px;">
+                                                {% for r in ['F','E','D','C','B','A'] %}
+                                                    <div class="text-center fw-bold text-muted" style="font-size: 0.7rem;">{{ r }}</div>
+                                                    {% for c in ['01','02','03','04','05','06','07','08'] %}
+                                                        <div class="pos-grid-cell" id="pos-drawer-{{ c }}-{{ r }}" style="height: 25px; position: relative; transition: all 0.3s;">
+                                                            <div class="pos-cell-label-slot"></div>
+                                                            <div class="pos-cell-handle"></div>
+                                                            <div class="pos-pin-icon" style="position: absolute; top: -10px; right: -10px; background: rgb(var(--pulse-color, 13, 110, 253)); color: white; border-radius: 50%; width: 20px; height: 20px; display: none; align-items: center; justify-content: center; font-size: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 20;">
+                                                                <i class="bi bi-geo-alt-fill"></i>
+                                                            </div>
+                                                        </div>
+                                                    {% endfor %}
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- FEFO DRAWER ZOOM -->
+                                <div class="col-lg-5">
+                                    <h6 class="fw-bold mb-3 text-primary text-center" style="font-size: 0.9rem;">
+                                        <i class="bi bi-box-seam me-1"></i> Intérieur du Tiroir (FEFO)
+                                    </h6>
+                                    
+                                    <style>
+                                        .drawer-container-pos {
+                                            box-shadow: inset 0 10px 20px -10px rgba(0, 0, 0, 0.3), 0 15px 30px -10px rgba(0, 0, 0, 0.5);
+                                            background-color: #cbd5e1;
+                                            border-left: 8px solid #334155;
+                                            border-right: 8px solid #334155;
+                                            border-bottom: 12px solid #334155;
+                                            border-radius: 0 0 0.5rem 0.5rem;
+                                            display: flex;
+                                            height: 250px;
+                                            overflow: hidden;
+                                            position: relative;
+                                        }
+                                        .channel-pos {
+                                            flex: 1;
+                                            display: flex;
+                                            flex-direction: column;
+                                            justify-content: flex-end;
+                                            padding: 0.25rem;
+                                            position: relative;
+                                            background: linear-gradient(180deg, #94a3b8 0%, #f1f5f9 100%);
+                                            border-right: 1px solid #94a3b8;
+                                            box-shadow: inset -1px 0 2px rgba(255,255,255,0.8), inset 1px 0 3px rgba(0,0,0,0.1);
+                                            transition: all 0.3s ease;
+                                        }
+                                        .channel-pos:last-child {
+                                            border-right: none;
+                                        }
+                                        .channel-active-pos {
+                                            z-index: 50;
+                                        }
+                                        .drawer-overlay-pos {
+                                            position: absolute;
+                                            inset: 0;
+                                            background-color: #0f172a;
+                                            opacity: 0;
+                                            pointer-events: none;
+                                            z-index: 40;
+                                            transition: opacity 0.3s ease;
+                                        }
+                                        .drawer-overlay-pos.active {
+                                            opacity: 0.4;
+                                        }
+                                        .med-box-pos {
+                                            background-color: white;
+                                            border: 1px solid #cbd5e1;
+                                            border-radius: 3px;
+                                            box-shadow: inset 0 -2px 4px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.1);
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center;
+                                            font-size: 0.5rem;
+                                            color: #94a3b8;
+                                            font-weight: bold;
+                                            height: 40px;
+                                            z-index: 10;
+                                            margin-top: -1.2rem;
+                                        }
+                                        .front-box-pos {
+                                            border: 2px solid;
+                                            border-radius: 4px;
+                                            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+                                            display: flex;
+                                            flex-direction: column;
+                                            justify-content: space-between;
+                                            padding: 0.25rem;
+                                            height: 70px;
+                                            z-index: 30;
+                                            position: relative;
+                                            margin-top: -1.2rem;
+                                            transition: all 0.3s ease;
+                                            cursor: help;
+                                        }
+                                        .front-box-active-pos {
+                                            transform: translateY(-5px) scale(1.02);
+                                            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2), 0 4px 6px -2px rgba(0,0,0,0.1);
+                                        }
+                                        
+                                        .box-danger-pos { background-color: #fef2f2; border-color: #ef4444; }
+                                        .box-danger-pos .box-title { color: #991b1b; }
+                                        .box-danger-pos .box-badge { background-color: #ef4444; color: white; }
+                                        
+                                        .box-warning-pos { background-color: #fffbeb; border-color: #f59e0b; }
+                                        .box-warning-pos .box-title { color: #92400e; }
+                                        .box-warning-pos .box-badge { background-color: #f59e0b; color: white; }
+                                        
+                                        .box-success-pos { background-color: #f0fdf4; border-color: #22c55e; }
+                                        .box-success-pos .box-title { color: #166534; }
+                                        .box-success-pos .box-badge { background-color: #22c55e; color: white; }
+
+                                        .pioche-indicator-pos {
+                                            position: absolute;
+                                            bottom: -12px;
+                                            left: 50%;
+                                            transform: translateX(-50%);
+                                            color: white;
+                                            font-size: 0.55rem;
+                                            font-weight: bold;
+                                            padding: 0.15rem 0.4rem;
+                                            border-radius: 9999px;
+                                            white-space: nowrap;
+                                            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                                            animation: bounce-pos 1s infinite;
+                                            z-index: 50;
+                                        }
+                                        .pioche-danger-pos { background-color: #dc2626; }
+                                        .pioche-warning-pos { background-color: #d97706; }
+                                        .pioche-success-pos { background-color: #16a34a; }
+
+                                        @keyframes bounce-pos {
+                                            0%, 100% { transform: translate(-50%, 0); }
+                                            50% { transform: translate(-50%, -20%); }
+                                        }
+                                    </style>
+                                    
+                                    <div class="drawer-container-pos" id="pos-fefo-drawer">
+                                        <div id="drawer-overlay-pos" class="drawer-overlay-pos active"></div>
+                                        <!-- Channels will be injected here via JS -->
+                                    </div>
+                                    
+                                    <div class="text-center font-bold text-secondary mt-2" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                                        ↓ Avant du tiroir ↓
                                     </div>
                                 </div>
                             </div>
@@ -430,7 +606,7 @@
                         const niveau = optionEl.getAttribute('data-niveau') || '';
                         const position = optionEl.getAttribute('data-position') || '';
                         
-                        let stockBadgeClass = parseInt(stock) > 10 ? 'bg-success' : (parseInt(stock) > 0 ? 'bg-warning text-dark' : 'bg-danger');
+                        let stockBadgeClass = parseInt(stock) > 10 ? 'bg-success text-white' : (parseInt(stock) > 0 ? 'bg-warning text-dark' : 'bg-danger text-white');
                         
                         let locationBadge = '';
                         if (zone) {
@@ -516,7 +692,7 @@
                         
                         // Clear previous themes
                         const gridContainer = document.getElementById('pos-locator-grid-container');
-                        gridContainer.className = 'bg-white border rounded p-2 mb-2 shadow-sm';
+                        gridContainer.className = 'bg-white border rounded p-2 shadow-sm h-100';
                         
                         if (zone) {
                             document.getElementById('pos-locator-container').classList.remove('d-none');
@@ -549,6 +725,120 @@
                                     targetEl.style.setProperty('--pulse-color', pulseColor);
                                     targetEl.classList.add('pos-highlight-active');
                                 }
+                            }
+                            
+                            // Render FEFO Drawer (Multi-channel)
+                            const fefoContainer = document.getElementById('pos-fefo-drawer');
+                            
+                            let expDateStr = optionEl.getAttribute('data-expiration');
+                            let currentStock = parseInt(stock) || 0;
+                            let shortName = nom.length > 9 ? nom.substring(0, 9) + '.' : nom;
+                            let firstLetter = nom.charAt(0).toUpperCase();
+                            
+                            let formattedExp = '--/--/----';
+                            let statusFront = 'success';
+                            
+                            if(expDateStr) {
+                                let expDate = new Date(expDateStr);
+                                let today = new Date();
+                                let diffTime = expDate - today;
+                                let diffMonths = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 30));
+                                let isPast = expDate < today;
+                                
+                                if (isPast || diffMonths < 1) statusFront = 'danger';
+                                else if (diffMonths <= 6) statusFront = 'warning';
+                                
+                                formattedExp = expDate.toLocaleDateString('fr-FR');
+                            }
+                            
+                            function createChannel(id, isActive, name, boxCount, expDateStr, lotStr, status, stockCount) {
+                                let html = `<div class="channel-pos ${isActive ? 'channel-active-pos' : ''}">`;
+                                html += `<div class="position-absolute top-0 start-0 w-100 text-center text-secondary opacity-50 fw-bold" style="font-size: 0.5rem; margin-top: 2px;">C${id}</div>`;
+                                
+                                // Boîtes au fond
+                                for (let i = 0; i < boxCount - 1; i++) {
+                                    html += `<div class="med-box-pos">${name}</div>`;
+                                }
+                                
+                                // Boîte à l'avant
+                                html += `<div class="front-box-pos ${isActive ? 'front-box-active-pos' : ''} box-${status}-pos" ${isActive ? `data-bs-toggle="tooltip" data-bs-placement="left" data-bs-html="true" title="<div class='text-start'><strong>Péremption:</strong> <span class='text-${status}'>${expDateStr}</span><br><strong>En stock:</strong> ${stockCount}</div>"` : ''}>
+                                    <div class="text-center">
+                                        <div class="box-title fw-bold" style="font-size: 0.55rem; line-height: 1;">${name}</div>
+                                        <div class="text-secondary" style="font-size: 0.5rem; margin-top: 2px;">Lot: ${lotStr}</div>
+                                    </div>
+                                    <div class="box-badge text-center fw-bold rounded mt-1" style="font-size: 0.55rem; padding: 2px 0;">
+                                        ${expDateStr}
+                                    </div>`;
+                                    
+                                if (isActive) {
+                                    html += `<div class="pioche-indicator-pos pioche-${status}-pos">↓ PIOCHEZ ICI</div>`;
+                                }
+                                
+                                html += `</div></div>`;
+                                return html;
+                            }
+                            
+                            let html = '<div id="drawer-overlay-pos" class="drawer-overlay-pos active"></div>';
+                            
+                            // Get real siblings from the same drawer (zone, colonne, niveau)
+                            let siblingOptions = Array.from(el.querySelectorAll('option')).filter(opt => {
+                                return opt.value && 
+                                       opt.getAttribute('data-zone') === zone && 
+                                       opt.getAttribute('data-colonne') === colonne && 
+                                       opt.getAttribute('data-niveau') === niveau;
+                            });
+                            
+                            // Sort alphabetically (like in a real drawer)
+                            siblingOptions.sort((a, b) => a.text.localeCompare(b.text));
+                            
+                            // Limit to 5 channels max so UI doesn't break
+                            let activeIndex = siblingOptions.findIndex(opt => opt.value === value);
+                            if (siblingOptions.length > 5) {
+                                let start = Math.max(0, activeIndex - 2);
+                                let end = Math.min(siblingOptions.length, start + 5);
+                                if (end - start < 5) {
+                                    start = Math.max(0, end - 5);
+                                }
+                                siblingOptions = siblingOptions.slice(start, end);
+                            }
+                            
+                            // Generate channels
+                            siblingOptions.forEach((opt, idx) => {
+                                let isOptActive = (opt.value === value);
+                                let optNom = opt.text.split('-')[0].trim();
+                                let optShortName = optNom.length > 9 ? optNom.substring(0, 9) + '.' : optNom;
+                                let optStock = parseInt(opt.getAttribute('data-stock')) || 0;
+                                let optExpStr = opt.getAttribute('data-expiration');
+                                
+                                let optStatus = 'success';
+                                let optFormattedExp = '--/--/----';
+                                
+                                if(optExpStr) {
+                                    let expDate = new Date(optExpStr);
+                                    let today = new Date();
+                                    let diffTime = expDate - today;
+                                    let diffMonths = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 30));
+                                    
+                                    if (expDate < today || diffMonths < 1) optStatus = 'danger';
+                                    else if (diffMonths <= 6) optStatus = 'warning';
+                                    
+                                    optFormattedExp = expDate.toLocaleDateString('fr-FR');
+                                }
+                                
+                                let boxCount = optStock > 10 ? 3 : (optStock > 0 ? 2 : 1);
+                                let lotStr = isOptActive ? 'L-42' : '...';
+                                
+                                html += createChannel(idx + 1, isOptActive, optShortName, boxCount, optFormattedExp, lotStr, optStatus, optStock);
+                            });
+                            
+                            fefoContainer.innerHTML = html;
+                            
+                            // Initialize Tooltips dynamically
+                            if(typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+                                let tooltips = [].slice.call(fefoContainer.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                                tooltips.forEach(function (element) {
+                                    new bootstrap.Tooltip(element, { html: true, sanitize: false });
+                                });
                             }
                         } else {
                             document.getElementById('pos-locator-container').classList.add('d-none');

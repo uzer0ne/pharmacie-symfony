@@ -18,9 +18,11 @@
         <button onclick="window.print()" class="btn btn-light border shadow-sm text-dark">
             <i class="bi bi-printer me-1"></i> Imprimer
         </button>
+        {% if is_granted('ROLE_PHARMACIEN') %}
         <a href="{{ path('app_ordonnance_edit', {'id': ordonnance.id}) }}" class="btn btn-warning shadow-sm">
             <i class="bi bi-pencil-square me-1"></i> Modifier
         </a>
+        {% endif %}
     </div>
 </div>
 
@@ -110,6 +112,7 @@
                                 <tr>
                                     <th class="border-0 rounded-start">Date</th>
                                     <th class="border-0 text-center">N° Vente</th>
+                                    <th class="border-0">Vendeur</th>
                                     <th class="border-0 text-end">Total TTC</th>
                                     <th class="border-0 text-end text-info">Part Sécu</th>
                                     <th class="border-0 text-end text-info">Part Mutuelle</th>
@@ -122,6 +125,13 @@
                                         <td>{{ vente.dateVente|date('d/m/Y H:i') }}</td>
                                         <td class="text-center">
                                             <a href="{{ path('app_vente_show', {'id': vente.id}) }}" class="badge bg-primary text-decoration-none">#{{ vente.id }}</a>
+                                        </td>
+                                        <td>
+                                            {% if vente.vendeur %}
+                                                <span class="text-muted small"><i class="bi bi-person me-1"></i>{{ vente.vendeur.prenom|first|upper }}. {{ vente.vendeur.nom }}</span>
+                                            {% else %}
+                                                <span class="text-muted small fst-italic">Système</span>
+                                            {% endif %}
                                         </td>
                                         <td class="text-end fw-bold">{{ vente.montantTotal|number_format(2, ',', ' ') }} €</td>
                                         <td class="text-end text-info">- {{ vente.montantSecu|number_format(2, ',', ' ') }} €</td>
@@ -217,17 +227,6 @@
                 {% endif %}
             </div>
         </div>
-        
-        <!-- Zone danger -->
-        <div class="card border-danger border-opacity-25 bg-danger bg-opacity-10 shadow-sm">
-            <div class="card-body p-3">
-                <div class="d-flex justify-content-between align-items-center">
-                    <span class="text-danger fw-bold"><i class="bi bi-exclamation-triangle me-2"></i>Zone dangereuse</span>
-                    {{ include('ordonnance/_delete_form.html.twig') }}
-                </div>
-            </div>
-        </div>
-
     </div>
 </div>
 

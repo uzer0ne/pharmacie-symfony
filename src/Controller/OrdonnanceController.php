@@ -21,7 +21,7 @@ class OrdonnanceController extends AbstractController
     public function index(OrdonnanceRepository $repo, PaginatorInterface $paginator, Request $request): Response
     {
         $query = $repo->createQueryBuilder('o')
-            ->orderBy('o.dateOrdonnance', 'DESC')
+            ->orderBy('o.id', 'DESC')
             ->getQuery();
 
         $ordonnances = $paginator->paginate(
@@ -70,6 +70,7 @@ class OrdonnanceController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_ordonnance_edit', methods: ['GET','POST'])]
+    #[\Symfony\Component\Security\Http\Attribute\IsGranted('ROLE_PHARMACIEN')]
     public function edit(Request $request, Ordonnance $ordonnance, EntityManagerInterface $em): Response
     {
         $originalData = [];
@@ -96,18 +97,5 @@ class OrdonnanceController extends AbstractController
             'ordonnance' => $ordonnance,
             'form'       => $form,
         ]);
-    }
-
-    #[Route('/{id}', name: 'app_ordonnance_delete', methods: ['POST'])]
-    public function delete(Request $request, Ordonnance $ordonnance, EntityManagerInterface $em): Response
-    {
-        if ($this->isCsrfTokenValid('delete'.$ordonnance->getId(), $request->request->get('_token'))) {
-            // ✅ Ordonnance = prescription seulement. Aucun stock n'a été touché à la création,
-            // donc rien à rembourser à la suppression.
-            $em->remove($ordonnance);
-            $em->flush();
-            $this->addFlash('success', 'Ordonnance supprimée avec succès.');
-        }
-        return $this->redirectToRoute('app_ordonnance_index');
     }
 }

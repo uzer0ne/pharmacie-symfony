@@ -111,12 +111,23 @@
             {% endif %}
 
             {% if is_granted('ROLE_CAISSIER') %}
-            <li class="nav-item">
-                <a class="nav-link {% if app.request.get('_route') starts with 'app_ordonnance' %}active{% endif %}"
-                   href="{{ path('app_ordonnance_index') }}"
-                   data-action="click->sidebar#closeOnMobile">
+            <li class="nav-item sidebar-dropdown">
+                <a class="nav-link d-flex align-items-center {% if app.request.get('_route') starts with 'app_ordonnance' %}active{% endif %}" href="#" style="cursor: default;">
                     <i class="bi bi-file-text me-2"></i> Ordonnances
+                    <i class="bi bi-chevron-down ms-auto" style="font-size: 0.75rem;"></i>
                 </a>
+                <ul class="nav flex-column sidebar-submenu {% if app.request.get('_route') starts with 'app_ordonnance' %}d-block{% endif %}">
+                    <li class="nav-item">
+                        <a class="nav-link {% if app.request.get('_route') == 'app_ordonnance_new' %}active{% endif %}" href="{{ path('app_ordonnance_new') }}" data-action="click->sidebar#closeOnMobile">
+                            <i class="bi bi-plus-circle me-2"></i> Nouvelle ordonnance
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if app.request.get('_route') == 'app_ordonnance_index' or app.request.get('_route') == 'app_ordonnance_show' %}active{% endif %}" href="{{ path('app_ordonnance_index') }}" data-action="click->sidebar#closeOnMobile">
+                            <i class="bi bi-clock-history me-2"></i> Historique
+                        </a>
+                    </li>
+                </ul>
             </li>
             
             <li class="nav-item sidebar-dropdown">

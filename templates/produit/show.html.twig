@@ -175,27 +175,126 @@
                             <span><i class="bi bi-geo-fill me-2" style="color: rgb({{ pulse_color }})"></i> Zone {{ zone }} {% if col and row %}<span class="ms-2 badge bg-secondary">Baie {{ col }}</span> <span class="badge bg-secondary">Étagère {{ row }}</span> {% if pos %}<span class="badge bg-secondary">Pos {{ pos }}</span>{% endif %}{% endif %}</span>
                         </h6>
                         
-                        <div class="locator-grid mx-auto" style="max-width: 800px; grid-template-columns: 20px repeat(8, 1fr);">
-                            <div></div> {# Coin en haut à gauche vide #}
-                            {% for c in ['01','02','03','04','05','06','07','08'] %}
-                                <div class="col-label">{{ c }}</div>
-                            {% endfor %}
-                            
-                            <div class="col-span-9 d-grid gap-1 align-items-center" style="grid-column: span 9; grid-template-columns: 20px repeat(8, 1fr);">
-                                {% for r in ['F','E','D','C','B','A'] %}
-                                    <div class="text-center fw-bold text-muted" style="font-size: 0.8rem;">{{ r }}</div>
+                        <div class="row align-items-center">
+                            <div class="col-lg-7 border-end-lg">
+                                <div class="text-center mb-2 text-muted small"><i class="bi bi-grid-3x3-gap me-1"></i> Vue Globale (Façade)</div>
+                                <div class="locator-grid mx-auto mb-4 mb-lg-0" style="max-width: 100%; grid-template-columns: 20px repeat(8, 1fr);">
+                                    <div></div> {# Coin en haut à gauche vide #}
                                     {% for c in ['01','02','03','04','05','06','07','08'] %}
-                                        {% set isActive = (col == c and row == r) %}
-                                        <div class="grid-cell {% if isActive %}highlight-active{% endif %}" 
-                                             style="{% if isActive %}--pulse-color: {{ pulse_color }};{% endif %}">
-                                            <div class="cell-label-slot"></div>
-                                            <div class="cell-handle"></div>
-                                            <div class="pin-icon animate-bounce-pin">
-                                                <i class="bi bi-geo-alt-fill"></i>
-                                            </div>
-                                        </div>
+                                        <div class="col-label">{{ c }}</div>
                                     {% endfor %}
-                                {% endfor %}
+                                    
+                                    <div class="col-span-9 d-grid gap-1 align-items-center" style="grid-column: span 9; grid-template-columns: 20px repeat(8, 1fr);">
+                                        {% for r in ['F','E','D','C','B','A'] %}
+                                            <div class="text-center fw-bold text-muted" style="font-size: 0.8rem;">{{ r }}</div>
+                                            {% for c in ['01','02','03','04','05','06','07','08'] %}
+                                                {% set isActive = (col == c and row == r) %}
+                                                <div class="grid-cell {% if isActive %}highlight-active{% endif %}" 
+                                                     style="{% if isActive %}--pulse-color: {{ pulse_color }};{% endif %}">
+                                                    <div class="cell-label-slot"></div>
+                                                    <div class="cell-handle"></div>
+                                                    <div class="pin-icon animate-bounce-pin">
+                                                        <i class="bi bi-geo-alt-fill"></i>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-lg-5 pt-3 pt-lg-0 ps-lg-4">
+                                <div class="text-center mb-3 text-muted small fw-bold text-primary">
+                                    <i class="bi bi-box-seam me-1"></i> Vue Intérieur du Tiroir
+                                </div>
+                                
+                                {# Calcul de la péremption du produit actuel #}
+                                {% set today = date('now') %}
+                                {% set expDate = produit.dateExpiration %}
+                                {% set diff = expDate.diff(today) %}
+                                {% set diffMonths = (diff.days / 30)|round(0, 'floor') %}
+                                {% set isExpired = expDate < today %}
+                                
+                                {% set statusFront = 'success' %}
+                                {% if isExpired or diffMonths < 1 %}
+                                    {% set statusFront = 'danger' %}
+                                {% elseif diffMonths <= 6 %}
+                                    {% set statusFront = 'warning' %}
+                                {% endif %}
+
+                                <style>
+                                    .drawer-fefo-container {
+                                        background: #f1f3f5;
+                                        border: 4px solid #ced4da;
+                                        border-bottom: none;
+                                        border-radius: 8px 8px 0 0;
+                                        box-shadow: inset 0 10px 15px rgba(0,0,0,0.03);
+                                        height: 280px;
+                                        position: relative;
+                                        padding: 15px;
+                                        margin: 0 auto;
+                                        max-width: 250px;
+                                    }
+                                    .med-box {
+                                        width: 140px;
+                                        height: 55px;
+                                        border-radius: 4px;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        font-weight: bold;
+                                        font-size: 0.8rem;
+                                        color: white;
+                                        transition: transform 0.2s, box-shadow 0.2s;
+                                        cursor: pointer;
+                                        border: 1px solid rgba(255,255,255,0.4);
+                                        box-shadow: 0 4px 6px rgba(0,0,0,0.1), inset 0 2px 4px rgba(255,255,255,0.2);
+                                        margin: 0 auto;
+                                    }
+                                    .med-box:hover {
+                                        transform: scale(1.05) translateY(-2px);
+                                        box-shadow: 0 8px 12px rgba(0,0,0,0.2), inset 0 2px 4px rgba(255,255,255,0.4);
+                                        z-index: 10;
+                                    }
+                                    .box-danger { background: linear-gradient(145deg, #ef4444, #dc2626); border-color: #b91c1c; animation: blink-fefo 2s infinite; }
+                                    .box-warning { background: linear-gradient(145deg, #f59e0b, #d97706); border-color: #b45309; }
+                                    .box-success { background: linear-gradient(145deg, #10b981, #059669); border-color: #047857; }
+                                    .box-mock { opacity: 0.6; filter: grayscale(20%); }
+
+                                    @keyframes blink-fefo {
+                                        0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
+                                        70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+                                        100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+                                    }
+                                    @media (min-width: 992px) {
+                                        .border-end-lg { border-right: 1px dashed #dee2e6; }
+                                    }
+                                </style>
+
+                                <div class="drawer-fefo-container d-flex flex-column justify-content-end gap-3 pb-4">
+                                    
+                                    {# Lot Mock 3 (Plus récent) #}
+                                    <div class="med-box box-success box-mock">
+                                        {{ produit.nomProduit|slice(0, 10) }}...
+                                    </div>
+                                    
+                                    {# Lot Mock 2 (Intermédiaire) #}
+                                    <div class="med-box box-{% if statusFront == 'danger' %}warning{% else %}success{% endif %} box-mock">
+                                        {{ produit.nomProduit|slice(0, 10) }}...
+                                    </div>
+
+                                    {# Lot Actuel (Front / A distribuer) #}
+                                    <div class="med-box box-{{ statusFront }} position-relative" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-html="true" title="<div class='text-start'><strong>Péremption:</strong> <span class='text-{% if statusFront == 'danger' %}danger{% elseif statusFront == 'warning' %}warning{% else %}success{% endif %}'>{{ expDate|date('d/m/Y') }}</span><br><strong>En stock:</strong> {{ produit.stockActuel }}</div>">
+                                        {{ produit.nomProduit|slice(0, 12) }}...
+                                    </div>
+
+                                    <!-- Indicateur Pioche -->
+                                    <div class="position-absolute w-100 text-center" style="bottom: -18px; left: 0; z-index: 20;">
+                                        <div class="badge bg-primary fs-6 px-4 py-2 shadow border border-2 border-white rounded-pill text-uppercase" style="letter-spacing: 0.5px;">
+                                            <i class="bi bi-arrow-up-circle-fill me-1"></i> Piochez Ici
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -259,4 +358,25 @@
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl, {
+                html: true,
+                sanitize: false // Ensures custom HTML isn't stripped
+            });
+        });
+    });
+    // For Turbo/Hotwire if used
+    document.addEventListener('turbo:load', function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl, {
+                html: true,
+                sanitize: false
+            });
+        });
+    });
+</script>
 {% endblock %}

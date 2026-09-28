@@ -105,11 +105,13 @@
                                             <i class="bi bi-eye text-primary me-2"></i> Voir les détails
                                         </a>
                                     </li>
+                                    {% if is_granted('ROLE_PHARMACIEN') %}
                                     <li>
                                         <a class="dropdown-item py-2" href="{{ path('app_ordonnance_edit', {'id': ordonnance.id}) }}">
                                             <i class="bi bi-pencil text-warning me-2"></i> Modifier
                                         </a>
                                     </li>
+                                    {% endif %}
                                     {% if ordonnance.patient %}
                                         <li><hr class="dropdown-divider"></li>
                                         <li>

@@ -14,11 +14,22 @@ $kernel->boot();
 $container = $kernel->getContainer();
 $entityManager = $container->get('doctrine')->getManager();
 
-// Find 1000 random medicaments that have a price and a CIP code
+// Find 1000 common medicaments by picking popular generic labs and brands
 $query = $entityManager->createQuery(
-    'SELECT m FROM App\Entity\MedicamentBdpm m 
+    "SELECT m FROM App\Entity\MedicamentBdpm m 
      WHERE m.codeCip13 IS NOT NULL 
-     AND m.prixRemboursement IS NOT NULL'
+     AND m.prixRemboursement IS NOT NULL
+     AND (
+         m.titulaire LIKE '%BIOGARAN%' 
+         OR m.titulaire LIKE '%SANOFI%' 
+         OR m.titulaire LIKE '%MYLAN%' 
+         OR m.titulaire LIKE '%SANDOZ%' 
+         OR m.titulaire LIKE '%TEVA%' 
+         OR m.titulaire LIKE '%EG LABO%'
+         OR m.titulaire LIKE '%ARROW%'
+         OR m.titulaire LIKE '%UPSA%'
+         OR m.titulaire LIKE '%ZENTIVA%'
+     )"
 )->setMaxResults(1000);
 
 $medicaments = $query->getResult();

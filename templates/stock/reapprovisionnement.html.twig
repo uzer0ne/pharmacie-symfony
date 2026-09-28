@@ -7,15 +7,21 @@
 <div class="d-print-none">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="h2 page-title text-danger">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i> Alertes de Stock
-            </h1>
-            <p class="page-subtitle mb-0">Liste des produits à commander d'urgence.</p>
+            {% if produits|length > 0 %}
+                <h1 class="h2 page-title text-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> Alertes de Stock
+                </h1>
+                <p class="page-subtitle mb-0">Liste des produits à commander d'urgence.</p>
+            {% else %}
+                
+            {% endif %}
         </div>
         <div>
-            <button onclick="window.print()" class="btn btn-primary shadow-sm fw-bold">
-                <i class="bi bi-printer me-2"></i> Imprimer le Bon de Commande
-            </button>
+            {% if produits|length > 0 %}
+                <button onclick="window.print()" class="btn btn-primary shadow-sm fw-bold">
+                    <i class="bi bi-printer me-2"></i> Imprimer le Bon de Commande
+                </button>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -40,7 +46,7 @@
     </div>
 
     <!-- Le Tableau -->
-    <div class="card shadow-sm border-0 border-top border-danger border-4 print-no-border">
+    <div class="card shadow-sm border-0 border-top {% if produits|length > 0 %}border-danger{% else %}border-success{% endif %} border-4 print-no-border">
         <div class="card-header bg-white d-flex justify-content-between align-items-center py-4 d-print-none border-bottom">
             <h5 class="mb-0 text-dark fw-bold">
                 <i class="bi bi-cart-check text-primary me-2"></i> Proposition de Commande

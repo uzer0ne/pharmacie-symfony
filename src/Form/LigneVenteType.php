@@ -39,6 +39,8 @@ class LigneVenteType extends AbstractType
                         'data-colonne' => $produit->getEmpColonne() ?? '',
                         'data-niveau' => $produit->getEmpNiveau() ?? '',
                         'data-position' => $produit->getEmpPosition() ?? '',
+                        'data-expiration' => $produit->getDateExpiration() ? $produit->getDateExpiration()->format('Y-m-d') : '',
+                        'data-cip' => $produit->getCodeCip() ?? '',
                     ];
                 },
                 'label' => 'Produit',

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Locator V2 - Phase de Comptoir</title>
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Bootstrap Icons (CDN) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#eff6ff', 500: '#3b82f6', 600: '#2563eb' }
+                    },
+                    animation: {
+                        'bounce-pin': 'bounce-pin 1s infinite ease-in-out',
+                        'pulse-ring': 'pulse-ring 1.5s infinite',
+                        'blink-fefo': 'blink-fefo 2s infinite',
+                        'fade-in': 'fadeIn 0.3s ease-out'
+                    },
+                    keyframes: {
+                        'bounce-pin': {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-25%)' }
+                        },
+                        'pulse-ring': {
+                            '0%': { boxShadow: '0 0 0 0 rgba(59, 130, 246, 0.7)' },
+                            '70%': { boxShadow: '0 0 0 10px rgba(59, 130, 246, 0)' },
+                            '100%': { boxShadow: '0 0 0 0 rgba(59, 130, 246, 0)' }
+                        },
+                        'blink-fefo': {
+                            '0%': { boxShadow: '0 0 0 0 rgba(239, 68, 68, 0.6)' },
+                            '70%': { boxShadow: '0 0 0 10px rgba(239, 68, 68, 0)' },
+                            '100%': { boxShadow: '0 0 0 0 rgba(239, 68, 68, 0)' }
+                        },
+                        'fadeIn': {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .drawer-perspective { perspective: 1000px; }
+        .med-box-3d {
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+        .med-box-3d:hover {
+            transform: scale(1.05) translateY(-5px);
+            z-index: 20;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 font-sans p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <!-- Header & Search -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-800 flex items-center">
+                        <i class="bi bi-geo-alt-fill text-brand-500 mr-2"></i> Smart Locator <span class="text-sm bg-brand-50 text-brand-600 px-2 py-1 rounded-md ml-3">Comptoir V2</span>
+                    </h1>
+                    <p class="text-slate-500 text-sm mt-1">Simulez la recherche d'un médicament ou un scan code-barres.</p>
+                </div>
+            </div>
+
+            <!-- Search Input -->
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i class="bi bi-upc-scan text-slate-400 text-lg"></i>
+                </div>
+                <input type="text" id="searchInput" 
+                    class="block w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-lg text-lg focus:ring-4 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all shadow-inner"
+                    placeholder="Tapez 'Amoxicilline', 'Doliprane', 'Lantus'..." autocomplete="off">
+                
+                <!-- Autocomplete Dropdown -->
+                <div id="searchResults" class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-lg shadow-xl overflow-hidden hidden max-h-64 overflow-y-auto">
+                    <!-- Results injected via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Zones Navigator -->
+        <div class="flex flex-wrap justify-center gap-2 mb-6" id="zoneNavigator">
+            <!-- Badges injected via JS -->
+        </div>
+
+        <!-- Main Layout: Grid + FEFO Drawer -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col lg:flex-row min-h-[500px]">
+            
+            <!-- LEFT: Global Grid -->
+            <div class="flex-1 p-6 border-b lg:border-b-0 lg:border-r border-slate-200 bg-slate-50/50">
+                <div class="text-center mb-6">
+                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center justify-center">
+                        <i class="bi bi-grid-3x3-gap mr-2"></i> Vue Globale (Façade du meuble)
+                    </h3>
+                </div>
+
+                <div class="relative max-w-2xl mx-auto">
+                    <!-- Column Headers (01 to 08) -->
+                    <div class="grid grid-cols-9 gap-1 mb-1 px-4">
+                        <div></div> <!-- Corner -->
+                        <div class="text-center text-xs font-bold text-slate-400">01</div>
+                        <div class="text-center text-xs font-bold text-slate-400">02</div>
+                        <div class="text-center text-xs font-bold text-slate-400">03</div>
+                        <div class="text-center text-xs font-bold text-slate-400">04</div>
+                        <div class="text-center text-xs font-bold text-slate-400">05</div>
+                        <div class="text-center text-xs font-bold text-slate-400">06</div>
+                        <div class="text-center text-xs font-bold text-slate-400">07</div>
+                        <div class="text-center text-xs font-bold text-slate-400">08</div>
+                    </div>
+
+                    <!-- Grid Rows (F to A) -->
+                    <div class="grid grid-cols-9 gap-2 px-4" id="mainGrid">
+                        <!-- Generated via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: FEFO Drawer -->
+            <div class="w-full lg:w-96 p-6 flex flex-col">
+                <div class="text-center mb-6">
+                    <h3 class="text-sm font-bold text-brand-600 uppercase tracking-wider flex items-center justify-center">
+                        <i class="bi bi-box-seam mr-2"></i> Intérieur du Tiroir (FEFO)
+                    </h3>
+                </div>
+
+                <!-- Empty State -->
+                <div id="drawerEmptyState" class="flex-1 flex flex-col items-center justify-center text-slate-400 h-full">
+                    <i class="bi bi-inbox text-5xl mb-4 opacity-20"></i>
+                    <p class="text-sm text-center px-8">En attente de sélection ou de scan...</p>
+                </div>
+
+                <!-- Active State -->
+                <div id="drawerActiveState" class="hidden flex-1 flex flex-col drawer-perspective relative animate-fade-in">
+                    
+                    <!-- Header Info -->
+                    <div class="bg-slate-100 rounded-lg p-3 mb-4 text-center">
+                        <div class="text-xs text-slate-500 mb-1" id="selectedLocation">Zone RX - Baie 01 - Étagère A</div>
+                        <div class="font-bold text-sm text-slate-800 truncate" id="selectedProductName">...</div>
+                    </div>
+
+                    <!-- The Drawer -->
+                    <div class="flex-1 bg-slate-200 border-4 border-b-0 border-slate-300 rounded-t-xl shadow-inner relative flex flex-col justify-end p-4 pb-12 gap-3" id="fefoContainer">
+                        <!-- Boxes injected via JS -->
+                        
+                        <!-- PIOCHE Indicator -->
+                        <div class="absolute bottom-0 left-0 w-full text-center translate-y-1/2 z-30">
+                            <div class="inline-flex items-center bg-brand-600 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg border-2 border-white uppercase tracking-widest">
+                                <i class="bi bi-arrow-up-circle-fill mr-2"></i> Piochez Ici
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. JEU DE DONNÉES FICTIF (MOCKED JSON) ---
+        const ZONES = [
+            { id: 'RX', label: 'RX (Ordonnances)', icon: 'bi-prescription' },
+            { id: 'OTC', label: 'OTC (Comptoir)', icon: 'bi-bag-plus' },
+            { id: 'FRIDGE', label: 'FRIDGE (Frigo)', icon: 'bi-snow' },
+            { id: 'SAFE', label: 'SAFE (Coffre)', icon: 'bi-safe' },
+            { id: 'PARA', label: 'PARA (Libre accès)', icon: 'bi-shop' }
+        ];
+
+        // Format dates relative to today for accurate FEFO simulation
+        const today = new Date();
+        const addMonths = (m) => { const d = new Date(); d.setMonth(d.getMonth() + m); return d.toISOString().split('T')[0]; };
+
+        const products = [
+            {
+                id: 1,
+                nom: "AMOXICILLINE BIOGARAN 1g, comprimé dispersible",
+                cip: "3400930000001",
+                zone: "RX", baie: "01", etagere: "A", pos: "02",
+                lots: [
+                    { numero: "BX-12", expiration: addMonths(18), qte: 10 },
+                    { numero: "BX-10", expiration: addMonths(8), qte: 5 },
+                    { numero: "BX-09", expiration: addMonths(2), qte: 2 } // Orange
+                ]
+            },
+            {
+                id: 2,
+                nom: "DOLIPRANE 1000mg, gélule",
+                cip: "3400930000002",
+                zone: "OTC", baie: "02", etagere: "C", pos: "05",
+                lots: [
+                    { numero: "DL-01", expiration: addMonths(24), qte: 50 },
+                    { numero: "DL-00", expiration: addMonths(5), qte: 10 } // Orange
+                ]
+            },
+            {
+                id: 3,
+                nom: "LANTUS SoloStar 100 U/ml, stylo prérempli",
+                cip: "3400930000003",
+                zone: "FRIDGE", baie: "01", etagere: "D", pos: "01",
+                lots: [
+                    { numero: "SN-99", expiration: addMonths(0), qte: 3 } // Rouge/Périme ce mois-ci
+                ]
+            },
+            {
+                id: 4,
+                nom: "XANAX 0.50mg, comprimé sécable",
+                cip: "3400930000004",
+                zone: "SAFE", baie: "01", etagere: "B", pos: "03",
+                lots: [
+                    { numero: "XN-44", expiration: addMonths(12), qte: 15 } // Vert
+                ]
+            },
+            {
+                id: 5,
+                nom: "KARDEGIC 160mg, poudre",
+                cip: "3400930000005",
+                zone: "RX", baie: "05", etagere: "F", pos: "11",
+                lots: [
+                    { numero: "KD-11", expiration: addMonths(36), qte: 30 },
+                    { numero: "KD-08", expiration: addMonths(14), qte: 20 },
+                    { numero: "KD-02", expiration: addMonths(6), qte: 5 } // Orange limit
+                ]
+            }
+        ];
+
+        // --- 2. INITIALIZATION (DOM Elements) ---
+        const gridContainer = document.getElementById('mainGrid');
+        const zoneNavigator = document.getElementById('zoneNavigator');
+        const searchInput = document.getElementById('searchInput');
+        const searchResults = document.getElementById('searchResults');
+        
+        // --- 3. BUILD GRID & ZONES ---
+        function buildZones(activeZone = null) {
+            zoneNavigator.innerHTML = ZONES.map(z => `
+                <div class="px-4 py-2 rounded-full text-sm font-bold border transition-all duration-300 flex items-center ${activeZone === z.id ? 'bg-brand-500 text-white border-brand-500 shadow-md transform scale-105' : 'bg-white text-slate-500 border-slate-200'}">
+                    <i class="bi ${z.icon} mr-2"></i> ${z.label}
+                </div>
+            `).join('');
+        }
+
+        function buildGrid(activeBay = null, activeLevel = null) {
+            gridContainer.innerHTML = '';
+            const rows = ['F', 'E', 'D', 'C', 'B', 'A']; // Bottom to top logically, or Top to bottom
+            const cols = ['01', '02', '03', '04', '05', '06', '07', '08'];
+
+            rows.forEach(r => {
+                // Row Label
+                const label = document.createElement('div');
+                label.className = 'flex items-center justify-center text-xs font-bold text-slate-400';
+                label.innerText = r;
+                gridContainer.appendChild(label);
+
+                cols.forEach(c => {
+                    const isActive = (c === activeBay && r === activeLevel);
+                    const cell = document.createElement('div');
+                    cell.className = `relative h-10 md:h-12 rounded-sm border-b-2 transition-all duration-300 ${
+                        isActive 
+                        ? 'bg-brand-50 border-brand-500 animate-pulse-ring z-10 scale-105' 
+                        : 'bg-white border-slate-300 shadow-sm'
+                    }`;
+                    
+                    // The physical slot/handle mockup
+                    cell.innerHTML = `
+                        <div class="absolute top-1 left-1/2 -translate-x-1/2 w-1/2 h-1.5 bg-slate-100 border border-slate-200 rounded-sm"></div>
+                        <div class="absolute bottom-1 left-1/2 -translate-x-1/2 w-2/5 h-1 bg-slate-300 rounded-sm"></div>
+                        ${isActive ? `<div class="absolute -top-3 -right-3 w-6 h-6 bg-brand-500 text-white rounded-full flex items-center justify-center text-xs shadow-md animate-bounce-pin z-20"><i class="bi bi-geo-alt-fill"></i></div>` : ''}
+                    `;
+                    gridContainer.appendChild(cell);
+                });
+            });
+        }
+
+        // Initialize empty state
+        buildZones();
+        buildGrid();
+
+        // --- 4. SEARCH LOGIC ---
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            searchResults.innerHTML = '';
+            
+            if (query.length < 2) {
+                searchResults.classList.add('hidden');
+                resetView();
+                return;
+            }
+
+            const matches = products.filter(p => p.nom.toLowerCase().includes(query) || p.cip.includes(query));
+            
+            if (matches.length > 0) {
+                searchResults.classList.remove('hidden');
+                matches.forEach(p => {
+                    const item = document.createElement('div');
+                    item.className = 'px-4 py-3 hover:bg-slate-50 cursor-pointer border-b border-slate-100 flex justify-between items-center';
+                    item.innerHTML = `
+                        <div>
+                            <div class="font-bold text-slate-800 text-sm">${p.nom}</div>
+                            <div class="text-xs text-slate-500 mt-0.5">CIP: ${p.cip} • <span class="uppercase font-semibold">${p.zone}</span></div>
+                        </div>
+                        <i class="bi bi-chevron-right text-slate-400"></i>
+                    `;
+                    item.addEventListener('click', () => selectProduct(p));
+                    searchResults.appendChild(item);
+                });
+            } else {
+                searchResults.classList.remove('hidden');
+                searchResults.innerHTML = `<div class="px-4 py-3 text-sm text-slate-500 text-center">Aucun médicament trouvé.</div>`;
+            }
+        });
+
+        // Close search results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.classList.add('hidden');
+            }
+        });
+
+        // --- 5. INTERACTION DYNAMIQUE (SELECT PRODUCT) ---
+        function resetView() {
+            buildZones();
+            buildGrid();
+            document.getElementById('drawerEmptyState').classList.remove('hidden');
+            document.getElementById('drawerActiveState').classList.add('hidden');
+        }
+
+        function selectProduct(p) {
+            // Hide search results and update input
+            searchResults.classList.add('hidden');
+            searchInput.value = p.nom;
+
+            // 5a. Activer l'onglet de la zone
+            buildZones(p.zone);
+
+            // 5b. Allumer la case dans la grille
+            buildGrid(p.baie, p.etagere);
+
+            // 5c. Charger le tiroir FEFO
+            renderFefoDrawer(p);
+        }
+
+        function renderFefoDrawer(p) {
+            document.getElementById('drawerEmptyState').classList.add('hidden');
+            document.getElementById('drawerActiveState').classList.remove('hidden');
+            
+            document.getElementById('selectedLocation').innerText = `Zone ${p.zone} - Baie ${p.baie} - Étagère ${p.etagere}`;
+            document.getElementById('selectedProductName').innerText = p.nom;
+
+            const fefoContainer = document.getElementById('fefoContainer');
+            // Remove previous boxes, keep the Pioche indicator (which is at the bottom)
+            Array.from(fefoContainer.children).forEach(c => {
+                if(!c.classList.contains('absolute')) fefoContainer.removeChild(c);
+            });
+
+            // Sort lots by expiration (closest first -> which means it should be at the bottom physically, so rendered last in flex-col justify-end. Wait, flex-col with justify-end puts the last DOM element at the bottom! Perfect.)
+            // So we need to sort lots: furthest expiration first, closest last.
+            const sortedLots = [...p.lots].sort((a, b) => new Date(b.expiration) - new Date(a.expiration));
+
+            // Helper to determine FEFO color
+            const getFefoColor = (expDate) => {
+                const diffTime = Math.abs(new Date(expDate) - today);
+                const diffMonths = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 30));
+                const isPast = new Date(expDate) < today;
+
+                if (isPast || diffMonths < 1) return { bg: 'bg-red-500 border-red-700', anim: 'animate-blink-fefo', label: 'text-white' };
+                if (diffMonths <= 6) return { bg: 'bg-amber-500 border-amber-600', anim: '', label: 'text-white' };
+                return { bg: 'bg-emerald-500 border-emerald-600', anim: '', label: 'text-white' };
+            };
+
+            const formatDate = (ds) => {
+                const d = new Date(ds);
+                return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`;
+            };
+
+            sortedLots.forEach((lot, index) => {
+                const isFront = index === sortedLots.length - 1; // Last element is at the bottom (front of drawer)
+                const styling = getFefoColor(lot.expiration);
+                
+                const box = document.createElement('div');
+                // Apply 3D perspective and sizing
+                box.className = `med-box-3d mx-auto w-3/4 h-16 flex flex-col justify-center items-center rounded-sm border-2 shadow-md cursor-help relative group ${styling.bg} ${isFront ? styling.anim : 'opacity-75 scale-95'} ${styling.label}`;
+                
+                box.innerHTML = `
+                    <div class="font-bold text-xs px-2 truncate w-full text-center">${p.nom.substring(0, 15)}...</div>
+                    <div class="text-[0.65rem] opacity-90">EXP: ${formatDate(lot.expiration)}</div>
+                    
+                    <!-- Hover Tooltip -->
+                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-slate-800 text-white text-xs rounded shadow-xl p-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                        <div class="font-bold mb-1 border-b border-slate-600 pb-1">Métadonnées du Lot</div>
+                        <div class="grid grid-cols-2 gap-1 mt-1">
+                            <span class="text-slate-400">Lot:</span> <span class="font-mono">${lot.numero}</span>
+                            <span class="text-slate-400">Péremption:</span> <span class="${styling.bg === 'bg-red-500 border-red-700' ? 'text-red-400' : 'text-white'}">${formatDate(lot.expiration)}</span>
+                            <span class="text-slate-400">Quantité:</span> <span>${lot.qte} boîtes</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Insert before the PIOCHE indicator
+                fefoContainer.insertBefore(box, fefoContainer.lastElementChild);
+            });
+        }
+    </script>
+</body>
+</html>

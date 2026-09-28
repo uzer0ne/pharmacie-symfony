@@ -41,6 +41,7 @@ final class VenteController extends AbstractController
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $vente = new Vente();
+        $vente->setVendeur($this->getUser());
         $form = $this->createForm(VenteType::class, $vente);
         $form->handleRequest($request);
 

@@ -24,9 +24,17 @@ final class ProduitController extends AbstractController
     #[Route('/', name: 'app_produit_index', methods: ['GET'])]
     public function index(ProduitRepository $produitRepository, AlerteStockService $alerteStockService, PaginatorInterface $paginator, Request $request): Response
     {
-        $query = $produitRepository->createQueryBuilder('p')
-            ->orderBy('p.nom_produit', 'ASC')
-            ->getQuery();
+        $search = $request->query->get('q');
+        
+        $qb = $produitRepository->createQueryBuilder('p')
+            ->orderBy('p.nom_produit', 'ASC');
+
+        if ($search) {
+            $qb->andWhere('p.nom_produit LIKE :search OR p.code_cip LIKE :search')
+               ->setParameter('search', '%' . $search . '%');
+        }
+
+        $query = $qb->getQuery();
 
         $produits = $paginator->paginate(
             $query,

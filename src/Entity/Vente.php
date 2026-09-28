@@ -58,10 +58,9 @@ class Vente
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
     private ?string $monnaie_rendue = null;
 
-    // TODO: Ajouter la liaison vers l'Utilisateur (le vendeur) quand l'entité User existera
-    // #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'ventes')]
-    // #[ORM\JoinColumn(name: 'Id_User', referencedColumnName: 'Id_User', nullable: false)]
-    // private ?User $vendeur = null;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $vendeur = null;
 
     public function __construct()
     {
@@ -245,6 +244,17 @@ class Vente
     public function setMonnaieRendue(?string $monnaie_rendue): static
     {
         $this->monnaie_rendue = $monnaie_rendue;
+        return $this;
+    }
+
+    public function getVendeur(): ?User
+    {
+        return $this->vendeur;
+    }
+
+    public function setVendeur(?User $vendeur): static
+    {
+        $this->vendeur = $vendeur;
         return $this;
     }
 }
