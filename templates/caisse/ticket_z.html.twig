@@ -1,0 +1,146 @@
+{% extends 'base.html.twig' %}
+{% block title %}Ticket Z — Session #{{ session.id }}{% endblock %}
+
+{% block body %}
+{# ── Barre d'actions (non imprimée) ──────────────────────────────── #}
+<div class="d-flex justify-content-between align-items-center mb-4 d-print-none">
+    <a href="{{ path('app_caisse_index') }}" class="btn btn-light btn-sm">
+        <i class="bi bi-arrow-left me-1"></i> Retour aux postes
+    </a>
+    <div class="d-flex gap-2">
+        {% if is_granted('ROLE_GESTIONNAIRE_STOCK') %}
+        <a href="{{ path('app_caisse_historique') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-clock-history me-1"></i> Historique
+        </a>
+        {% endif %}
+        <button onclick="window.print()" class="btn btn-primary btn-sm">
+            <i class="bi bi-printer me-1"></i> Imprimer
+        </button>
+    </div>
+</div>
+
+{# ── TICKET Z ─────────────────────────────────────────────────────── #}
+{% set ecart = cloture.ecartCaisse|number_format(2, ',', ' ') %}
+{% set ecartFloat = cloture.ecartCaisse %}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card border-0 shadow-lg">
+
+            {# En-tête #}
+            <div class="card-header text-center py-4 {% if ecartFloat == 0 %}bg-success{% elseif ecartFloat > 0 %}bg-info{% else %}bg-warning{% endif %} text-white border-0">
+                <i class="bi bi-receipt fs-1 d-block mb-2"></i>
+                <h2 class="fw-bold mb-1">TICKET Z</h2>
+                <p class="mb-0 opacity-75">Rapport de clôture de caisse</p>
+            </div>
+
+            <div class="card-body p-4">
+                {# Identité de la session #}
+                <div class="row text-center mb-4 pb-4 border-bottom">
+                    <div class="col-6 border-end">
+                        <div class="small text-muted">Poste</div>
+                        <div class="fw-bold">{{ session.poste.nomPoste }}</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="small text-muted">Session</div>
+                        <div class="fw-bold">#{{ session.id }}</div>
+                    </div>
+                </div>
+
+                <div class="row text-center mb-4 pb-4 border-bottom">
+                    <div class="col-6 border-end">
+                        <div class="small text-muted">Ouverture</div>
+                        <div class="fw-bold small">{{ session.dateOuverture|date('d/m/Y H:i') }}</div>
+                        <div class="text-muted" style="font-size: 0.75rem;">{{ session.userOuverture.prenom }} {{ session.userOuverture.nom }}</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="small text-muted">Clôture</div>
+                        <div class="fw-bold small">{{ cloture.dateCloture|date('d/m/Y H:i') }}</div>
+                        <div class="text-muted" style="font-size: 0.75rem;">{{ cloture.userCloture.prenom }} {{ cloture.userCloture.nom }}</div>
+                    </div>
+                </div>
+
+                {# Détail recette #}
+                <h6 class="fw-bold text-uppercase text-muted mb-3" style="font-size: 0.7rem; letter-spacing: 0.08em;">
+                    <i class="bi bi-list-ul me-1"></i> Détail des encaissements
+                </h6>
+                <table class="table table-sm mb-4">
+                    <tbody>
+                        <tr>
+                            <td class="text-muted ps-0">
+                                <i class="bi bi-wallet2 me-1"></i> Fond de caisse initial
+                            </td>
+                            <td class="text-end fw-bold pe-0">{{ session.fondDeCaisse|number_format(2, ',', ' ') }} €</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted ps-0">
+                                <i class="bi bi-receipt me-1"></i> Nombre de ventes
+                            </td>
+                            <td class="text-end fw-bold pe-0">{{ session.ventes|length }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                {# Espèces théoriques vs réelles #}
+                <h6 class="fw-bold text-uppercase text-muted mb-3" style="font-size: 0.7rem; letter-spacing: 0.08em;">
+                    <i class="bi bi-cash me-1"></i> Comptage espèces
+                </h6>
+                <table class="table table-sm mb-4">
+                    <tbody>
+                        <tr>
+                            <td class="text-muted ps-0">Montant théorique (système)</td>
+                            <td class="text-end pe-0">{{ cloture.montantTheoriqueEspeces|number_format(2, ',', ' ') }} €</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted ps-0">Montant compté physiquement</td>
+                            <td class="text-end pe-0 fw-bold">{{ cloture.montantSaisiEspeces|number_format(2, ',', ' ') }} €</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                {# Écart final ─ mis en valeur #}
+                <div class="rounded p-3 text-center mb-4
+                    {% if ecartFloat == 0 %}bg-success bg-opacity-10 border border-success
+                    {% elseif ecartFloat > 0 %}bg-info bg-opacity-10 border border-info
+                    {% else %}bg-warning bg-opacity-10 border border-warning{% endif %}">
+                    <div class="small text-muted mb-1 text-uppercase fw-bold" style="font-size: 0.7rem;">Écart de caisse</div>
+                    <div class="display-6 fw-bold
+                        {% if ecartFloat == 0 %}text-success
+                        {% elseif ecartFloat > 0 %}text-info
+                        {% else %}text-warning{% endif %}">
+                        {% if ecartFloat > 0 %}+{% endif %}{{ cloture.ecartCaisse|number_format(2, ',', ' ') }} €
+                    </div>
+                    <div class="small mt-1
+                        {% if ecartFloat == 0 %}text-success
+                        {% elseif ecartFloat > 0 %}text-info
+                        {% else %}text-warning{% endif %}">
+                        {% if ecartFloat == 0 %}
+                            <i class="bi bi-check-circle me-1"></i> Parfait équilibre
+                        {% elseif ecartFloat > 0 %}
+                            <i class="bi bi-arrow-up-circle me-1"></i> Boni
+                        {% else %}
+                            <i class="bi bi-arrow-down-circle me-1"></i> Mali
+                        {% endif %}
+                    </div>
+                </div>
+
+                {# Pied du ticket #}
+                <div class="text-center text-muted" style="font-size: 0.7rem; border-top: 2px dashed #dee2e6; padding-top: 1rem;">
+                    <p class="mb-1">Jeffarma — Gestion de Pharmacie</p>
+                    <p class="mb-0">Imprimé le {{ 'now'|date('d/m/Y à H:i:s') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    .d-print-none { display: none !important; }
+    nav, aside, header, footer { display: none !important; }
+    .card { border: none !important; box-shadow: none !important; }
+    body { background: white !important; }
+    .col-md-8 { width: 100% !important; max-width: 100% !important; }
+}
+</style>
+{% endblock %}

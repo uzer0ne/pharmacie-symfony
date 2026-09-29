@@ -1,0 +1,159 @@
+{% extends 'base.html.twig' %}
+{% block title %}Clôturer la caisse — {{ session.poste.nomPoste }}{% endblock %}
+
+{% block body %}
+<div class="d-flex align-items-center mb-4">
+    <a href="{{ path('app_caisse_session', {id: session.id}) }}" class="btn btn-light btn-sm me-3">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+    <div>
+        <h1 class="h3 fw-bold text-dark mb-0">
+            <i class="bi bi-x-circle text-danger me-2"></i> Clôturer la caisse
+        </h1>
+        <p class="text-muted mb-0">{{ session.poste.nomPoste }} — Session ouverte le {{ session.dateOuverture|date('d/m/Y à H:i') }}</p>
+    </div>
+</div>
+
+{% for flash_type, flash_messages in app.flashes %}
+    {% for msg in flash_messages %}
+        <div class="alert alert-{{ flash_type }}">{{ msg }}</div>
+    {% endfor %}
+{% endfor %}
+
+<div class="row g-4 justify-content-center">
+
+    {# ── Résumé de la session ─────────────────────────────────────── #}
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-bottom py-3 px-4">
+                <h5 class="fw-bold mb-0"><i class="bi bi-receipt me-2 text-primary"></i> Résumé de la session</h5>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item px-4 py-3 d-flex justify-content-between">
+                        <span class="text-muted">Fond de caisse initial</span>
+                        <strong>{{ session.fondDeCaisse|number_format(2, ',', ' ') }} €</strong>
+                    </li>
+                    <li class="list-group-item px-4 py-3 d-flex justify-content-between">
+                        <span class="text-muted">Nombre de ventes</span>
+                        <strong>{{ resume.nb_ventes }}</strong>
+                    </li>
+                    {% set icons = {'CB': 'bi-credit-card', 'ESPECES': 'bi-cash', 'CHEQUE': 'bi-pen', 'MUTUELLE': 'bi-shield-plus', 'VIREMENT': 'bi-bank'} %}
+                    {% for mode, montant in resume.totaux_par_mode %}
+                    <li class="list-group-item px-4 py-2 d-flex justify-content-between align-items-center">
+                        <span class="text-muted small">
+                            <i class="bi {{ icons[mode]|default('bi-credit-card') }} me-1"></i>{{ mode }}
+                        </span>
+                        <span>{{ montant|number_format(2, ',', ' ') }} €</span>
+                    </li>
+                    {% endfor %}
+                    <li class="list-group-item px-4 py-3 d-flex justify-content-between bg-warning bg-opacity-10">
+                        <span class="fw-bold">
+                            <i class="bi bi-cash me-1 text-warning"></i>
+                            Espèces théoriques dans le tiroir
+                        </span>
+                        <strong class="text-warning fs-5">{{ resume.theorique_especes|number_format(2, ',', ' ') }} €</strong>
+                    </li>
+                    <li class="list-group-item px-4 py-3 d-flex justify-content-between bg-light">
+                        <strong>Total encaissé</strong>
+                        <strong class="fs-5">{{ resume.total_general|number_format(2, ',', ' ') }} €</strong>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    {# ── Formulaire de comptage physique ──────────────────────────── #}
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm border-top border-4 border-danger">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-1"><i class="bi bi-cash-coin text-danger me-2"></i> Comptage physique</h5>
+                <p class="text-muted small mb-4">
+                    Comptez les billets et pièces dans le tiroir, puis saisissez le total.
+                    Le système calculera automatiquement l'écart (boni/mali).
+                </p>
+
+                <form method="POST" action="{{ path('app_caisse_cloturer', {id: session.id}) }}"
+                      onsubmit="return confirm('Confirmer la clôture de la caisse ? Cette action est irréversible.')">
+
+                    <div class="mb-4">
+                        <label for="montant_saisi" class="form-label fw-bold fs-5">
+                            Montant compté dans le tiroir (€)
+                        </label>
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-danger text-white border-danger">€</span>
+                            <input
+                                type="number"
+                                id="montant_saisi"
+                                name="montant_saisi"
+                                class="form-control form-control-lg fw-bold"
+                                step="0.01"
+                                min="0"
+                                placeholder="0.00"
+                                value="{{ resume.theorique_especes|number_format(2, '.', '') }}"
+                                required
+                                autofocus
+                            >
+                        </div>
+                        <div class="form-text">
+                            Montant théorique attendu :
+                            <strong class="text-warning">{{ resume.theorique_especes|number_format(2, ',', ' ') }} €</strong>
+                        </div>
+                    </div>
+
+                    {# Aperçu en temps réel de l'écart #}
+                    <div class="alert alert-light border" id="ecart-preview">
+                        <span class="text-muted small">
+                            <i class="bi bi-calculator me-1"></i>
+                            Saisissez le montant pour voir l'écart calculé.
+                        </span>
+                    </div>
+
+                    <button type="submit" class="btn btn-danger w-100 py-3 fw-bold fs-5">
+                        <i class="bi bi-lock me-2"></i> Confirmer la clôture
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mt-3 bg-light">
+            <div class="card-body p-3 small text-muted">
+                <i class="bi bi-shield-check text-success me-1"></i>
+                <strong>Audit :</strong> La clôture sera enregistrée sous
+                <strong>{{ app.user.prenom }} {{ app.user.nom }}</strong> à {{ 'now'|date('H:i') }}.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('montant_saisi').addEventListener('input', function() {
+    const saisi     = parseFloat(this.value) || 0;
+    const theorique = {{ resume.theorique_especes }};
+    const ecart     = saisi - theorique;
+    const preview   = document.getElementById('ecart-preview');
+
+    if (this.value === '') {
+        preview.className = 'alert alert-light border';
+        preview.innerHTML = '<span class="text-muted small"><i class="bi bi-calculator me-1"></i> Saisissez le montant pour voir l\'écart calculé.</span>';
+        return;
+    }
+
+    if (Math.abs(ecart) < 0.01) {
+        preview.className = 'alert alert-success';
+        preview.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> <strong>Écart : 0,00 € — Parfait !</strong>';
+    } else if (ecart > 0) {
+        preview.className = 'alert alert-info';
+        preview.innerHTML = `<i class="bi bi-arrow-up-circle me-1"></i> <strong>Boni : +${ecart.toFixed(2).replace('.', ',')} €</strong> (il y a plus d'argent que prévu)`;
+    } else {
+        preview.className = 'alert alert-warning';
+        preview.innerHTML = `<i class="bi bi-arrow-down-circle me-1"></i> <strong>Mali : ${ecart.toFixed(2).replace('.', ',')} €</strong> (il manque de l'argent)`;
+    }
+});
+
+// Déclenche le calcul dès le chargement de la page pour le pré-remplissage
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('montant_saisi').dispatchEvent(new Event('input'));
+});
+</script>
+{% endblock %}

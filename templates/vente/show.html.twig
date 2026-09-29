@@ -12,11 +12,14 @@
     </div>
     <div class="d-flex gap-2">
         <a href="{{ path('app_vente_index') }}" class="btn btn-outline-secondary shadow-sm">
-            <i class="bi bi-arrow-left me-1"></i> Retour
+            <i class="bi bi-list me-1"></i> Historique
         </a>
         <button onclick="window.print()" class="btn btn-light border shadow-sm text-dark fw-bold">
-            <i class="bi bi-printer me-1"></i> Imprimer le Ticket
+            <i class="bi bi-printer me-1"></i> Imprimer
         </button>
+        <a href="{{ path('app_vente_new') }}" class="btn btn-primary shadow-sm fw-bold">
+            <i class="bi bi-cart-plus me-1"></i> Nouvelle Vente
+        </a>
     </div>
 </div>
 

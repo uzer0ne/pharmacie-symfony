@@ -18,18 +18,11 @@ class PatientType extends AbstractType
             ->add('prenom_patient')
             ->add('adresse_patient')
             ->add('date_naissance')
-            ->add('mutuelles', EntityType::class, [
-                'class' => Mutuelle::class,
-                'choice_label' => 'nomMutuelle',
-                'multiple' => true,
-                'expanded' => false,
-                'required' => false, // ⭐ OPTIONNEL
-                'attr' => [
-                    'class' => 'form-select',
-                ],
-                'label' => 'Mutuelles',
-                'help' => 'Optionnel - Sélectionnez une ou plusieurs mutuelles'
+            ->add('nir', null, [
+                'label' => 'Numéro de Sécurité Sociale (NIR)'
             ])
+            ->add('telephone')
+            ->add('email')
           
         ;
     }

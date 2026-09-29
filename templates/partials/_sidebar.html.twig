@@ -58,14 +58,19 @@
 
             {% if is_granted('ROLE_CAISSIER') %}
             <li class="nav-item sidebar-dropdown">
-                <a class="nav-link d-flex align-items-center {% if app.request.get('_route') starts with 'app_vente' %}active{% endif %}" href="#" style="cursor: default;">
+                <a class="nav-link d-flex align-items-center {% if app.request.get('_route') starts with 'app_vente' or app.request.get('_route') starts with 'app_caisse' or app.request.get('_route') == 'app_mes_ventes' %}active{% endif %}" href="#" style="cursor: default;">
                     <i class="bi bi-receipt me-2"></i> Ventes (POS)
                     <i class="bi bi-chevron-down ms-auto" style="font-size: 0.75rem;"></i>
                 </a>
-                <ul class="nav flex-column sidebar-submenu {% if app.request.get('_route') starts with 'app_vente' %}d-block{% endif %}">
+                <ul class="nav flex-column sidebar-submenu {% if app.request.get('_route') starts with 'app_vente' or app.request.get('_route') starts with 'app_caisse' or app.request.get('_route') == 'app_mes_ventes' %}d-block{% endif %}">
                     <li class="nav-item">
                         <a class="nav-link {% if app.request.get('_route') == 'app_vente_new' %}active{% endif %}" href="{{ path('app_vente_new') }}" data-action="click->sidebar#closeOnMobile">
                             <i class="bi bi-plus-circle me-2"></i> Nouvelle Vente
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if app.request.get('_route') == 'app_mes_ventes' %}active{% endif %}" href="{{ path('app_mes_ventes') }}" data-action="click->sidebar#closeOnMobile">
+                            <i class="bi bi-person-lines-fill me-2"></i> Mes ventes
                         </a>
                     </li>
                     <li class="nav-item">
@@ -73,6 +78,18 @@
                             <i class="bi bi-clock-history me-2"></i> Historique des ventes
                         </a>
                     </li>
+                    {% if is_granted('ROLE_PHARMACIEN') %}
+                    <li class="nav-item mt-1 border-top border-secondary pt-1">
+                        <a class="nav-link {% if app.request.get('_route') == 'app_caisse_index' %}active{% endif %}" href="{{ path('app_caisse_index') }}" data-action="click->sidebar#closeOnMobile">
+                            <i class="bi bi-grid me-2"></i> Postes de caisse
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if app.request.get('_route') == 'app_caisse_historique' %}active{% endif %}" href="{{ path('app_caisse_historique') }}" data-action="click->sidebar#closeOnMobile">
+                            <i class="bi bi-receipt-cutoff me-2"></i> Tickets Z
+                        </a>
+                    </li>
+                    {% endif %}
                 </ul>
             </li>
             {% endif %}
@@ -106,6 +123,13 @@
                    href="{{ path('app_mouvement_stock_index') }}"
                    data-action="click->sidebar#closeOnMobile">
                     <i class="bi bi-clock-history me-2"></i> Historique Stocks
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if app.request.get('_route') starts with 'app_reassort' %}active{% endif %}"
+                   href="{{ path('app_reassort_index') }}"
+                   data-action="click->sidebar#closeOnMobile">
+                    <i class="bi bi-arrow-repeat me-2 text-warning"></i> Réassort fournisseur
                 </a>
             </li>
             {% endif %}
@@ -153,10 +177,6 @@
                     </li>
                 </ul>
             </li>
-            {% endif %}
-
-            {% if is_granted('ROLE_GESTIONNAIRE_STOCK') %}
-                {{ render(controller('App\\Controller\\StockController::alertWidget')) }}
             {% endif %}
 
             {% if is_granted('ROLE_PHARMACIEN') %}

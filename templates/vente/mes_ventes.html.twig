@@ -1,0 +1,97 @@
+{% extends 'base.html.twig' %}
+{% block title %}Mes Ventes du jour{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 fw-bold text-dark mb-0">
+        <i class="bi bi-person-lines-fill text-primary me-2"></i> Mes ventes du jour
+    </h1>
+    <a href="{{ path('app_vente_new') }}" class="btn btn-primary fw-bold shadow-sm">
+        <i class="bi bi-plus-circle me-1"></i> Nouvelle Vente
+    </a>
+</div>
+
+<div class="row g-4">
+    {# ── Détail par mode de paiement (Mon activité) ── #}
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-bottom py-3 px-4">
+                <h5 class="fw-bold mb-0"><i class="bi bi-pie-chart me-2 text-primary"></i> Ma recette par mode</h5>
+            </div>
+            <div class="card-body p-0">
+                {% if totauxParMode is empty %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-receipt fs-2 opacity-25 d-block mb-2"></i>
+                        Aucun encaissement pour l'instant.
+                    </div>
+                {% else %}
+                    {% set icons = {'CB': 'bi-credit-card', 'ESPECES': 'bi-cash', 'CHEQUE': 'bi-pen', 'MUTUELLE': 'bi-shield-plus', 'VIREMENT': 'bi-bank'} %}
+                    {% set colors = {'CB': 'primary', 'ESPECES': 'success', 'CHEQUE': 'warning', 'MUTUELLE': 'info', 'VIREMENT': 'secondary'} %}
+                    <ul class="list-group list-group-flush">
+                        {% for mode, montant in totauxParMode %}
+                        <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi {{ icons[mode]|default('bi-credit-card') }} me-2 text-{{ colors[mode]|default('secondary') }}"></i>
+                                <span class="fw-medium">{{ mode }}</span>
+                            </div>
+                            <span class="badge bg-{{ colors[mode]|default('secondary') }} fs-6 px-3 py-2">
+                                {{ montant|number_format(2, ',', ' ') }} €
+                            </span>
+                        </li>
+                        {% endfor %}
+                        <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center bg-light">
+                            <strong>Mon Total</strong>
+                            <strong class="fs-5 text-dark">{{ totalGeneral|number_format(2, ',', ' ') }} €</strong>
+                        </li>
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {# ── Liste de MES ventes ── #}
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-bottom py-3 px-4 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0"><i class="bi bi-list-ul me-2 text-primary"></i> Historique de mes tickets</h5>
+                <span class="badge bg-primary rounded-pill">{{ mesVentes|length }}</span>
+            </div>
+            <div class="card-body p-0" style="max-height: 500px; overflow-y: auto;">
+                {% if mesVentes is empty %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-cart-x fs-2 opacity-25 d-block mb-2"></i>
+                        Vous n'avez pas encore passé de vente aujourd'hui.
+                    </div>
+                {% else %}
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th class="px-4">N° Ticket</th>
+                                <th>Heure</th>
+                                <th>Statut</th>
+                                <th class="text-end px-4">Montant</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for vente in mesVentes %}
+                            <tr>
+                                <td class="px-4">
+                                    <a href="{{ path('app_vente_show', {id: vente.id}) }}" class="badge bg-primary text-decoration-none px-3 py-2 fs-6">
+                                        #{{ vente.id }}
+                                    </a>
+                                </td>
+                                <td class="text-muted"><i class="bi bi-clock me-1 small"></i> {{ vente.dateVente|date('H:i') }}</td>
+                                <td>
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success"><i class="bi bi-check-circle me-1"></i> Payée</span>
+                                </td>
+                                <td class="text-end px-4 fw-bold fs-5 text-dark">{{ vente.montantTotal|number_format(2, ',', ' ') }} €</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

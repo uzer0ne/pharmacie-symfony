@@ -28,9 +28,9 @@
                     <tr>
                         <th class="ps-4 border-0">N°</th>
                         <th class="border-0">Mutuelle</th>
-                        <th class="border-0">Taux de couverture</th>
+                        <th class="border-0">Code AMC</th>
                         <th class="border-0">Contact</th>
-                        <th class="border-0 text-center">Patients</th>
+                        <th class="border-0 text-center">Contrats Patients</th>
                         <th class="border-0 text-center pe-4">Actions</th>
                     </tr>
                 </thead>
@@ -48,8 +48,8 @@
                         </td>
                         <td>
                             <div class="d-flex align-items-center">
-                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 me-2 px-2 py-1 fs-6">
-                                    {{ mutuelle.tauxRemboursement }}%
+                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 me-2 px-2 py-1 fs-6 fw-bold">
+                                    {{ mutuelle.codeAmc }}
                                 </span>
                             </div>
                         </td>
@@ -58,7 +58,7 @@
                         </td>
                         <td class="text-center">
                             <span class="badge bg-light text-dark border px-3 py-2 rounded-pill">
-                                <i class="bi bi-people-fill text-muted me-1"></i> {{ mutuelle.patients|length }}
+                                <i class="bi bi-file-earmark-medical text-muted me-1"></i> {{ mutuelle.patientMutuelles|length }}
                             </span>
                         </td>
                         <td class="text-center pe-4">

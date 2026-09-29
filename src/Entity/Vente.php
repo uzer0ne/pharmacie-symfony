@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+
 #[ORM\Entity(repositoryClass: VenteRepository::class)]
 class Vente
 {
@@ -62,11 +63,28 @@ class Vente
     #[ORM\JoinColumn(nullable: true)]
     private ?User $vendeur = null;
 
+    /**
+     * Session de caisse durant laquelle cette vente a été enregistrée.
+     * Nullable pour rétrocompatibilité avec les anciennes ventes sans session.
+     */
+    #[ORM\ManyToOne(targetEntity: SessionCaisse::class, inversedBy: 'ventes')]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?SessionCaisse $session_caisse = null;
+
+    /**
+     * Paiements associés à ce ticket (CB, Espèces, Chèque, Mutuelle...).
+     * Remplace le champ monolithique montant_encaisse pour les nouvelles ventes.
+     */
+    #[ORM\OneToMany(mappedBy: 'vente', targetEntity: PaiementVente::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $paiements;
+
     public function __construct()
     {
         $this->ligneVentes = new ArrayCollection();
+        $this->paiements   = new ArrayCollection();
         $this->date_vente = new \DateTime(); // La date de vente est 'maintenant' par défaut
     }
+
 
     public function getId(): ?int
     {
@@ -257,4 +275,57 @@ class Vente
         $this->vendeur = $vendeur;
         return $this;
     }
-}
+
+    // ── SessionCaisse ────────────────────────────────────────────────────────
+
+    public function getSessionCaisse(): ?SessionCaisse
+    {
+        return $this->session_caisse;
+    }
+
+    public function setSessionCaisse(?SessionCaisse $session_caisse): static
+    {
+        $this->session_caisse = $session_caisse;
+        return $this;
+    }
+
+    // ── PaiementVente ────────────────────────────────────────────────────────
+
+    /** @return Collection<int, PaiementVente> */
+    public function getPaiements(): Collection
+    {
+        return $this->paiements;
+    }
+
+    public function addPaiement(PaiementVente $paiement): static
+    {
+        if (!$this->paiements->contains($paiement)) {
+            $this->paiements->add($paiement);
+            $paiement->setVente($this);
+        }
+        return $this;
+    }
+
+    public function removePaiement(PaiementVente $paiement): static
+    {
+        if ($this->paiements->removeElement($paiement)) {
+            if ($paiement->getVente() === $this) {
+                $paiement->setVente(null);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * Calcule le total réellement encaissé via les PaiementVente.
+     * Utile pour vérifier que le ticket est soldé.
+     */
+    public function getTotalPaiements(): float
+    {
+        $total = 0.0;
+        foreach ($this->paiements as $paiement) {
+            $total += (float) $paiement->getMontant();
+        }
+        return $total;
+    }
+}

@@ -89,58 +89,58 @@
 
 {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true}}) }}
 
-<div class="row g-4">
+<div class="row g-2">
     <!-- Section principale: POS & Scanner -->
-    <div class="col-md-7 col-lg-8">
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0 text-dark fw-bold">
+    <div class="col-md-6 col-lg-7">
+        <div class="card border-0 shadow-sm mb-2">
+            <div class="card-header bg-white border-bottom pt-2 pb-2 px-3 d-flex justify-content-between align-items-center">
+                <h6 class="card-title mb-0 text-dark fw-bold">
                     <i class="bi bi-cart text-primary me-2"></i> Produits du Panier
-                </h5>
-                <div class="input-group" style="width: 250px;">
+                </h6>
+                <div class="input-group input-group-sm" style="width: 200px;">
                     <span class="input-group-text bg-light border-end-0"><i class="bi bi-upc-scan text-muted"></i></span>
                     <input type="text" id="scanner-input" class="form-control border-start-0 bg-light" placeholder="Scanner CIP..." autocomplete="off">
                 </div>
             </div>
             
-            <div class="card-body p-4 bg-white">
+            <div class="card-body p-2 bg-white">
                 
                 <!-- Zone d'ajout rapide (Le "vrai" formulaire vu par l'utilisateur) -->
-                <div class="row align-items-end mb-4 p-3 bg-light rounded border border-2 border-primary border-opacity-25 shadow-sm">
-                    <div class="col-md-8">
-                        <label class="form-label fw-bold text-primary"><i class="bi bi-search me-1"></i> Rechercher un produit</label>
-                        <select id="quick-add-produit" class="form-select produit-select-quick"></select>
+                <div class="row align-items-end mb-2 p-2 bg-light rounded border border-2 border-primary border-opacity-25 shadow-sm mx-0">
+                    <div class="col-md-8 px-1">
+                        <label class="form-label fw-bold text-primary small mb-1"><i class="bi bi-search me-1"></i> Rechercher un produit</label>
+                        <select id="quick-add-produit" class="form-select form-select-sm produit-select-quick"></select>
                     </div>
-                    <div class="col-md-2">
-                        <label class="form-label fw-bold">Quantité</label>
-                        <input type="number" id="quick-add-qty" class="form-control fw-bold text-center" value="1" min="1">
+                    <div class="col-md-2 px-1">
+                        <label class="form-label fw-bold small mb-1">Quantité</label>
+                        <input type="number" id="quick-add-qty" class="form-control form-control-sm fw-bold text-center" value="1" min="1">
                     </div>
-                    <div class="col-md-2">
-                        <button type="button" id="quick-add-btn" class="btn btn-primary w-100 fw-bold">
+                    <div class="col-md-2 px-1">
+                        <button type="button" id="quick-add-btn" class="btn btn-primary btn-sm w-100 fw-bold">
                             <i class="bi bi-plus-lg"></i> Ajouter
                         </button>
                     </div>
                 </div>
 
                 <!-- Carte d'identité du produit (Affichée dynamiquement lors de la sélection) -->
-                <div class="card border-0 shadow-sm d-none border-primary" id="produit-identity-card">
-                    <div class="card-header bg-primary bg-opacity-10 text-primary border-bottom-0 pt-3 pb-2 px-4">
-                        <h6 class="card-title mb-0 fw-bold">
-                            <i class="bi bi-info-circle me-2"></i> Détails du produit sélectionné
+                <div class="card border-0 shadow-sm d-none border-primary mb-2" id="produit-identity-card">
+                    <div class="card-header bg-primary bg-opacity-10 text-primary border-bottom-0 pt-2 pb-1 px-3">
+                        <h6 class="card-title mb-0 fw-bold small">
+                            <i class="bi bi-info-circle me-1"></i> Détails du produit sélectionné
                         </h6>
                     </div>
-                    <div class="card-body p-4 bg-light rounded-bottom">
-                        <h5 id="id-card-nom" class="fw-bold text-dark mb-1">Nom du produit</h5>
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <p id="id-card-famille" class="text-muted small mb-0 text-uppercase fw-semibold" style="letter-spacing: 0.5px;">Famille</p>
-                            <span class="badge bg-secondary rounded-pill px-3 py-2"><i class="bi bi-geo-alt-fill me-1"></i> <span id="id-card-location-text">Emplacement</span></span>
+                    <div class="card-body p-2 bg-light rounded-bottom">
+                        <h6 id="id-card-nom" class="fw-bold text-dark mb-1">Nom du produit</h6>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <p id="id-card-famille" class="text-muted small mb-0 text-uppercase fw-semibold" style="letter-spacing: 0.5px; font-size: 0.7rem;">Famille</p>
+                            <span class="badge bg-secondary rounded-pill px-2 py-1" style="font-size: 0.7rem;"><i class="bi bi-geo-alt-fill me-1"></i> <span id="id-card-location-text">Emplacement</span></span>
                         </div>
                         
-                        <div class="row mb-3 g-3">
+                        <div class="row mb-2 g-2">
                             <div class="col-md-6">
-                                <div class="p-3 bg-white rounded border border-2 text-center h-100 d-flex flex-column justify-content-center">
-                                    <small class="text-muted d-block text-uppercase fw-bold mb-1" style="font-size:0.75rem">Dosage</small>
-                                    <strong id="id-card-dosage" class="text-dark fs-5">--</strong>
+                                <div class="p-2 bg-white rounded border border-2 text-center h-100 d-flex flex-column justify-content-center">
+                                    <small class="text-muted d-block text-uppercase fw-bold mb-0" style="font-size:0.65rem">Dosage</small>
+                                    <strong id="id-card-dosage" class="text-dark fs-6">--</strong>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -156,30 +156,30 @@
                         </p>
                         
                         <!-- VISUAL LOCATOR & FEFO DRAWER -->
-                        <div id="pos-locator-container" class="mt-4 pt-3 border-top d-none">
+                        <div id="pos-locator-container" class="mt-2 pt-2 border-top d-none">
                             <div class="row align-items-stretch">
                                 <!-- GLOBAL GRID -->
-                                <div class="col-lg-7 border-end-lg mb-4 mb-lg-0">
-                                    <h6 class="fw-bold mb-3 text-dark d-flex align-items-center" style="font-size: 0.9rem;">
+                                <div class="col-lg-12 mb-2 mb-lg-0">
+                                    <h6 class="fw-bold mb-2 text-dark d-flex align-items-center" style="font-size: 0.85rem;">
                                         <i class="bi bi-geo-fill text-primary me-2" id="pos-zone-icon"></i>
                                         <span id="pos-zone-title">Zone Inconnue</span>
                                     </h6>
                                     
-                                    <div id="pos-locator-grid-container" class="bg-white border rounded p-2 shadow-sm h-100">
-                                        <div class="drawer-grid" style="display: grid; grid-template-columns: 20px repeat(8, 1fr); gap: 4px;">
+                                    <div id="pos-locator-grid-container" class="bg-white border rounded p-1 shadow-sm h-100">
+                                        <div class="drawer-grid" style="display: grid; grid-template-columns: 20px repeat(8, 1fr); gap: 2px;">
                                             <div></div>
                                             {% for c in ['01','02','03','04','05','06','07','08'] %}
-                                                <div class="text-center fw-bold text-muted" style="font-size: 0.7rem;">{{ c }}</div>
+                                                <div class="text-center fw-bold text-muted" style="font-size: 0.65rem;">{{ c }}</div>
                                             {% endfor %}
                                             
-                                            <div class="col-span-9 d-grid align-items-center" style="grid-column: span 9; grid-template-columns: 20px repeat(8, 1fr); gap: 4px;">
+                                            <div class="col-span-9 d-grid align-items-center" style="grid-column: span 9; grid-template-columns: 20px repeat(8, 1fr); gap: 2px;">
                                                 {% for r in ['F','E','D','C','B','A'] %}
-                                                    <div class="text-center fw-bold text-muted" style="font-size: 0.7rem;">{{ r }}</div>
+                                                    <div class="text-center fw-bold text-muted" style="font-size: 0.65rem;">{{ r }}</div>
                                                     {% for c in ['01','02','03','04','05','06','07','08'] %}
-                                                        <div class="pos-grid-cell" id="pos-drawer-{{ c }}-{{ r }}" style="height: 25px; position: relative; transition: all 0.3s;">
+                                                        <div class="pos-grid-cell" id="pos-drawer-{{ c }}-{{ r }}" style="height: 20px; position: relative; transition: all 0.3s;">
                                                             <div class="pos-cell-label-slot"></div>
                                                             <div class="pos-cell-handle"></div>
-                                                            <div class="pos-pin-icon" style="position: absolute; top: -10px; right: -10px; background: rgb(var(--pulse-color, 13, 110, 253)); color: white; border-radius: 50%; width: 20px; height: 20px; display: none; align-items: center; justify-content: center; font-size: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 20;">
+                                                            <div class="pos-pin-icon" style="position: absolute; top: -8px; right: -8px; background: rgb(var(--pulse-color, 13, 110, 253)); color: white; border-radius: 50%; width: 16px; height: 16px; display: none; align-items: center; justify-content: center; font-size: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 20;">
                                                                 <i class="bi bi-geo-alt-fill"></i>
                                                             </div>
                                                         </div>
@@ -190,136 +190,7 @@
                                     </div>
                                 </div>
                                 
-                                <!-- FEFO DRAWER ZOOM -->
-                                <div class="col-lg-5">
-                                    <h6 class="fw-bold mb-3 text-primary text-center" style="font-size: 0.9rem;">
-                                        <i class="bi bi-box-seam me-1"></i> Intérieur du Tiroir (FEFO)
-                                    </h6>
-                                    
-                                    <style>
-                                        .drawer-container-pos {
-                                            box-shadow: inset 0 10px 20px -10px rgba(0, 0, 0, 0.3), 0 15px 30px -10px rgba(0, 0, 0, 0.5);
-                                            background-color: #cbd5e1;
-                                            border-left: 8px solid #334155;
-                                            border-right: 8px solid #334155;
-                                            border-bottom: 12px solid #334155;
-                                            border-radius: 0 0 0.5rem 0.5rem;
-                                            display: flex;
-                                            height: 250px;
-                                            overflow: hidden;
-                                            position: relative;
-                                        }
-                                        .channel-pos {
-                                            flex: 1;
-                                            display: flex;
-                                            flex-direction: column;
-                                            justify-content: flex-end;
-                                            padding: 0.25rem;
-                                            position: relative;
-                                            background: linear-gradient(180deg, #94a3b8 0%, #f1f5f9 100%);
-                                            border-right: 1px solid #94a3b8;
-                                            box-shadow: inset -1px 0 2px rgba(255,255,255,0.8), inset 1px 0 3px rgba(0,0,0,0.1);
-                                            transition: all 0.3s ease;
-                                        }
-                                        .channel-pos:last-child {
-                                            border-right: none;
-                                        }
-                                        .channel-active-pos {
-                                            z-index: 50;
-                                        }
-                                        .drawer-overlay-pos {
-                                            position: absolute;
-                                            inset: 0;
-                                            background-color: #0f172a;
-                                            opacity: 0;
-                                            pointer-events: none;
-                                            z-index: 40;
-                                            transition: opacity 0.3s ease;
-                                        }
-                                        .drawer-overlay-pos.active {
-                                            opacity: 0.4;
-                                        }
-                                        .med-box-pos {
-                                            background-color: white;
-                                            border: 1px solid #cbd5e1;
-                                            border-radius: 3px;
-                                            box-shadow: inset 0 -2px 4px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.1);
-                                            display: flex;
-                                            align-items: center;
-                                            justify-content: center;
-                                            font-size: 0.5rem;
-                                            color: #94a3b8;
-                                            font-weight: bold;
-                                            height: 40px;
-                                            z-index: 10;
-                                            margin-top: -1.2rem;
-                                        }
-                                        .front-box-pos {
-                                            border: 2px solid;
-                                            border-radius: 4px;
-                                            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-                                            display: flex;
-                                            flex-direction: column;
-                                            justify-content: space-between;
-                                            padding: 0.25rem;
-                                            height: 70px;
-                                            z-index: 30;
-                                            position: relative;
-                                            margin-top: -1.2rem;
-                                            transition: all 0.3s ease;
-                                            cursor: help;
-                                        }
-                                        .front-box-active-pos {
-                                            transform: translateY(-5px) scale(1.02);
-                                            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2), 0 4px 6px -2px rgba(0,0,0,0.1);
-                                        }
-                                        
-                                        .box-danger-pos { background-color: #fef2f2; border-color: #ef4444; }
-                                        .box-danger-pos .box-title { color: #991b1b; }
-                                        .box-danger-pos .box-badge { background-color: #ef4444; color: white; }
-                                        
-                                        .box-warning-pos { background-color: #fffbeb; border-color: #f59e0b; }
-                                        .box-warning-pos .box-title { color: #92400e; }
-                                        .box-warning-pos .box-badge { background-color: #f59e0b; color: white; }
-                                        
-                                        .box-success-pos { background-color: #f0fdf4; border-color: #22c55e; }
-                                        .box-success-pos .box-title { color: #166534; }
-                                        .box-success-pos .box-badge { background-color: #22c55e; color: white; }
-
-                                        .pioche-indicator-pos {
-                                            position: absolute;
-                                            bottom: -12px;
-                                            left: 50%;
-                                            transform: translateX(-50%);
-                                            color: white;
-                                            font-size: 0.55rem;
-                                            font-weight: bold;
-                                            padding: 0.15rem 0.4rem;
-                                            border-radius: 9999px;
-                                            white-space: nowrap;
-                                            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-                                            animation: bounce-pos 1s infinite;
-                                            z-index: 50;
-                                        }
-                                        .pioche-danger-pos { background-color: #dc2626; }
-                                        .pioche-warning-pos { background-color: #d97706; }
-                                        .pioche-success-pos { background-color: #16a34a; }
-
-                                        @keyframes bounce-pos {
-                                            0%, 100% { transform: translate(-50%, 0); }
-                                            50% { transform: translate(-50%, -20%); }
-                                        }
-                                    </style>
-                                    
-                                    <div class="drawer-container-pos" id="pos-fefo-drawer">
-                                        <div id="drawer-overlay-pos" class="drawer-overlay-pos active"></div>
-                                        <!-- Channels will be injected here via JS -->
-                                    </div>
-                                    
-                                    <div class="text-center font-bold text-secondary mt-2" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                                        ↓ Avant du tiroir ↓
-                                    </div>
-                                </div>
+                                <!-- FEFO DRAWER REMOVED -->
                             </div>
                         </div>
 
@@ -373,72 +244,78 @@
     </div>
 
     <!-- Section latérale: Client & Résumé -->
-    <div class="col-md-5 col-lg-4">
+    <div class="col-md-6 col-lg-5">
         <!-- Rendre la colonne collante pour ne pas la perdre de vue au scroll -->
         <div class="sticky-top" style="top: 1.5rem; z-index: 1020;">
             
             <!-- 1. RÉSUMÉ DE LA COMMANDE (Toujours visible en haut) -->
-            <div class="card bg-primary text-white border-0 shadow-sm mb-4">
-                <div class="card-body p-4">
-                    <h6 class="text-white-50 text-uppercase fw-bold mb-3">Résumé de la commande</h6>
+            <div class="card bg-primary text-white border-0 shadow-sm mb-2">
+                <div class="card-body p-2">
+                    <h6 class="text-white-50 text-uppercase fw-bold mb-2 small" style="font-size: 0.75rem;">Résumé de la commande</h6>
                     
                     <!-- Conteneur pour la liste dynamique des produits -->
-                    <ul id="order-summary-list" class="list-unstyled mb-3 border-bottom border-light pb-3">
+                    <ul id="order-summary-list" class="list-unstyled mb-2 border-bottom border-light pb-2" style="max-height: 250px; overflow-y: auto;">
                         <li class="text-white-50 small fst-italic" id="empty-summary-msg">Aucun produit sélectionné</li>
                     </ul>
 
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <span class="fs-5">Montant Total</span>
-                        <span class="fs-2 fw-bold text-white" id="total-amount-display">0,00 €</span>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fs-6">Montant Total</span>
+                        <span class="fs-3 fw-bold text-white" id="total-amount-display">0,00 €</span>
                     </div>
                     
                     {{ form_errors(form) }}
                     {{ form_errors(form.ligneVentes) }}
                     
-                    <button type="submit" class="btn btn-light w-100 py-3 fw-bold fs-5 text-primary">
-                        <i class="bi bi-check-circle-fill me-2"></i> {{ button_label|default('Validé') }}
+                    <button type="submit" class="btn btn-light w-100 py-2 fw-bold text-primary">
+                        <i class="bi bi-check-circle-fill me-1"></i> {{ button_label|default('Validé') }}
                     </button>
                 </div>
             </div>
 
             <!-- 2. CLIENT & ORDONNANCE -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
-                    <h5 class="card-title mb-0 text-dark fw-bold">
+            <div class="card border-0 shadow-sm mb-2">
+                <div class="card-header bg-white border-bottom pt-2 pb-2 px-3">
+                    <h6 class="card-title mb-0 text-dark fw-bold">
                         <i class="bi bi-person text-primary me-2"></i> Client & Ordonnance
-                    </h5>
+                    </h6>
                 </div>
-                <div class="card-body p-4">
-                    <div class="mb-4">
-                        {{ form_label(form.patient, 'Sélectionner un patient', {'label_attr': {'class': 'fw-medium mb-2'}}) }}
-                        {{ form_widget(form.patient, {'attr': {'class': 'form-select form-select-lg'}}) }}
-                        <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Laissez vide pour une vente libre</small>
-                    </div>
-                    
-                    <div class="mb-2">
-                        <div class="form-check form-switch fs-6 mt-3 p-3 bg-light rounded border border-info border-opacity-25">
-                            {{ form_widget(form.creer_ordonnance, {'attr': {'class': 'form-check-input ms-0 me-3'}}) }}
-                            {{ form_label(form.creer_ordonnance, null, {'label_attr': {'class': 'form-check-label fw-bold text-dark'}}) }}
-                            <div class="form-text mt-1 text-muted ms-5">
-                                <i class="bi bi-info-circle me-1"></i>Créera automatiquement l'historique d'ordonnance pour ce patient.
+                <div class="card-body p-2">
+                    <div class="row g-2">
+                        <!-- Colonne Patient -->
+                        <div class="col-12 transition-all" id="patient-col">
+                            <div class="mb-2">
+                                {{ form_label(form.patient, 'Sélectionner un patient', {'label_attr': {'class': 'fw-medium small mb-1'}}) }}
+                                {{ form_widget(form.patient, {'attr': {'class': 'form-select form-select-sm'}}) }}
+                                <small class="text-muted d-block mt-1" style="font-size: 0.7rem;"><i class="bi bi-info-circle me-1"></i>Laissez vide pour une vente libre</small>
+                            </div>
+                            
+                            <div class="form-check form-switch mt-1 p-2 bg-light rounded border border-info border-opacity-25" style="font-size: 0.85rem;">
+                                {{ form_widget(form.creer_ordonnance, {'attr': {'class': 'form-check-input ms-0 me-2'}}) }}
+                                {{ form_label(form.creer_ordonnance, null, {'label_attr': {'class': 'form-check-label fw-bold text-dark', 'style': 'padding-top: 2px;'}}) }}
+                                <div class="form-text mt-0 text-muted ms-4" style="font-size: 0.7rem;">
+                                    <i class="bi bi-info-circle me-1"></i>Délivrance sur ordonnance.
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div id="medecin-container" class="mt-3 p-3 border border-warning border-opacity-50 rounded bg-warning bg-opacity-10 d-none">
-                        <div class="mb-3">
-                            {{ form_label(form.medecin, 'Sélectionner le Médecin Prescripteur', {'label_attr': {'class': 'fw-bold text-dark mb-2'}}) }}
-                            {{ form_widget(form.medecin, {'attr': {'class': 'form-select'}}) }}
-                            {{ form_errors(form.medecin) }}
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                {{ form_label(form.date_ordonnance, null, {'label_attr': {'class': 'fw-bold text-dark mb-1'}}) }}
-                                {{ form_widget(form.date_ordonnance, {'attr': {'class': 'form-control'}}) }}
-                            </div>
-                            <div class="col-md-6">
-                                {{ form_label(form.date_fin_ordonnance, null, {'label_attr': {'class': 'fw-bold text-dark mb-1'}}) }}
-                                {{ form_widget(form.date_fin_ordonnance, {'attr': {'class': 'form-control'}}) }}
+                        
+                        <!-- Colonne Médecin -->
+                        <div class="col-12 d-none transition-all" id="medecin-container">
+                            <div class="p-2 border border-warning border-opacity-50 rounded bg-warning bg-opacity-10 h-100">
+                                <div class="mb-1">
+                                    {{ form_label(form.medecin, 'Médecin Prescripteur', {'label_attr': {'class': 'fw-bold text-dark small mb-1'}}) }}
+                                    {{ form_widget(form.medecin, {'attr': {'class': 'form-select form-select-sm'}}) }}
+                                    {{ form_errors(form.medecin) }}
+                                </div>
+                                <div class="row g-1 mt-2">
+                                    <div class="col-12 col-xl-6">
+                                        {{ form_label(form.date_ordonnance, 'Date ord.', {'label_attr': {'class': 'fw-bold text-dark mb-0' , 'style': 'font-size: 0.7rem;'}}) }}
+                                        {{ form_widget(form.date_ordonnance, {'attr': {'class': 'form-control form-control-sm'}}) }}
+                                    </div>
+                                    <div class="col-12 col-xl-6">
+                                        {{ form_label(form.date_fin_ordonnance, 'Fin validité', {'label_attr': {'class': 'fw-bold text-dark mb-0', 'style': 'font-size: 0.7rem;'}}) }}
+                                        {{ form_widget(form.date_fin_ordonnance, {'attr': {'class': 'form-control form-control-sm'}}) }}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -460,13 +337,20 @@
     document.addEventListener('DOMContentLoaded', function() {
         const ordonnanceCheckbox = document.querySelector('input[type="checkbox"][id$="_creer_ordonnance"]');
         const medecinContainer = document.getElementById('medecin-container');
+        const patientCol = document.getElementById('patient-col');
         
-        if (ordonnanceCheckbox && medecinContainer) {
+        if (ordonnanceCheckbox && medecinContainer && patientCol) {
             function toggleMedecin() {
                 if (ordonnanceCheckbox.checked) {
                     medecinContainer.classList.remove('d-none');
+                    medecinContainer.classList.add('col-md-6');
+                    patientCol.classList.remove('col-12');
+                    patientCol.classList.add('col-md-6');
                 } else {
                     medecinContainer.classList.add('d-none');
+                    medecinContainer.classList.remove('col-md-6');
+                    patientCol.classList.remove('col-md-6');
+                    patientCol.classList.add('col-12');
                 }
             }
             ordonnanceCheckbox.addEventListener('change', toggleMedecin);

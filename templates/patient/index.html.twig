@@ -61,14 +61,14 @@
                             {% endif %}
                         </td>
                         <td>
-                            {% if patient.mutuelles|length > 0 %}
+                            {% if patient.patientMutuelles|length > 0 %}
                                 <div class="d-flex flex-wrap gap-1">
-                                    {% for mutuelle in patient.mutuelles %}
-                                        <a href="{{ path('app_mutuelle_show', {'id': mutuelle.id}) }}" 
-                                           class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 text-decoration-none" 
+                                    {% for pm in patient.patientMutuelles %}
+                                        <a href="{{ path('app_mutuelle_show', {'id': pm.mutuelle.id}) }}" 
+                                           class="badge {% if pm.actif %}bg-info text-info{% else %}bg-secondary text-secondary{% endif %} bg-opacity-10 border border-info border-opacity-25 text-decoration-none" 
                                            data-bs-toggle="tooltip" 
-                                           title="Voir {{ mutuelle.nomMutuelle }} - Taux: {{ mutuelle.tauxRemboursement }}%">
-                                            <i class="bi bi-shield-check me-1"></i>{{ mutuelle.nomMutuelle }} ({{ mutuelle.tauxRemboursement }}%)
+                                           title="Voir {{ pm.mutuelle.nomMutuelle }} - Couverture: {{ pm.tauxCouverture }}%">
+                                            <i class="bi bi-shield-check me-1"></i>{{ pm.mutuelle.nomMutuelle }} ({{ pm.tauxCouverture }}%)
                                         </a>
                                     {% endfor %}
                                 </div>

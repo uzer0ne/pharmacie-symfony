@@ -54,4 +54,25 @@ class ProduitRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    /**
+     * Retourne les produits actifs dont le stock_actuel est <= stock_alerte.
+     * Le tri place en premier les produits en situation critique (stock négatif ou nul).
+     *
+     * @return Produit[]
+     */
+    public function findProduitsEnAlerte(): array
+    {
+        return $this->createQueryBuilder('p')
+            // Seulement les produits actifs
+            ->andWhere('p.actif = :actif')
+            ->setParameter('actif', true)
+            // Sous ou à la limite du seuil d'alerte (inclut les stocks négatifs)
+            ->andWhere('p.stock_actuel <= p.stock_alerte')
+            // Les plus critiques en premier
+            ->orderBy('p.stock_actuel', 'ASC')
+            ->addOrderBy('p.nom_produit', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

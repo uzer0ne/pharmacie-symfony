@@ -1,0 +1,217 @@
+{% extends 'base.html.twig' %}
+{% block title %}Réassort — Propositions{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <div>
+        <h4 class="h4 page-title mb-0">
+            <i class="bi bi-arrow-repeat text-warning me-2"></i> Réassort automatique
+        </h4>
+        <p class="page-subtitle mb-0 small text-muted">Produits dont le stock est en dessous du seuil d'alerte</p>
+    </div>
+    <a href="{{ path('app_reassort_commandes') }}" class="btn btn-outline-secondary btn-sm shadow-sm">
+        <i class="bi bi-clock-history me-1"></i> Historique des commandes
+    </a>
+</div>
+
+{% for type, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="alert alert-{{ type == 'danger' ? 'danger' : (type == 'warning' ? 'warning' : 'success') }} alert-dismissible fade show" role="alert">
+            {{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+{% endfor %}
+
+{% if propositions is empty %}
+    <div class="card border-0 shadow-sm">
+        <div class="card-body py-5 text-center text-muted">
+            <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+            <h5 class="mt-3 mb-1">Tous les stocks sont suffisants</h5>
+            <p class="mb-0">Aucun produit n'a dépassé son seuil d'alerte.</p>
+        </div>
+    </div>
+{% else %}
+<form action="{{ path('app_reassort_generer') }}" method="POST" id="reassort-form">
+
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-warning bg-opacity-10 border-bottom pt-3 pb-3 px-4 d-flex justify-content-between align-items-center">
+            <div>
+                <h6 class="card-title mb-0 fw-bold text-dark">
+                    <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                    {{ propositions|length }} produit{{ propositions|length > 1 ? 's' : '' }} en alerte de stock
+                </h6>
+                <small class="text-muted">Ajustez les quantités puis cochez les produits à commander</small>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-tout-cocher">
+                    <i class="bi bi-check-all me-1"></i> Tout sélectionner
+                </button>
+                <select name="fournisseur_id" class="form-select form-select-sm" style="width: auto;">
+                    <option value="">-- Choisir un fournisseur --</option>
+                    {% for f in fournisseurs %}
+                        <option value="{{ f.id }}">{{ f.nom }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-warning btn-sm fw-bold shadow-sm">
+                    <i class="bi bi-cart-plus me-1"></i> Créer le brouillon
+                </button>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 40px;">
+                            <input type="checkbox" class="form-check-input" id="cb-all" checked>
+                        </th>
+                        <th>Produit</th>
+                        <th class="text-center">Stock actuel</th>
+                        <th class="text-center">Seuil alerte</th>
+                        <th class="text-center">Stock min.</th>
+                        <th class="text-center" style="width: 130px;">
+                            Qté à commander
+                            <i class="bi bi-pencil-fill text-primary ms-1" style="font-size: 0.7rem;" title="Modifiable"></i>
+                        </th>
+                        <th class="text-end">PU achat</th>
+                        <th class="text-end" id="col-total">Total estimé</th>
+                        <th class="text-center">Emplacement</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% set totalEstime = 0 %}
+                {% for p in propositions %}
+                    {% set totalEstime = totalEstime + p.montantEstime %}
+                    <tr class="{% if p.stockActuel <= 0 %}table-danger{% elseif p.stockActuel <= (p.stockAlerte / 2) %}table-warning{% endif %}">
+                        <td>
+                            <input type="checkbox"
+                                   class="form-check-input produit-cb"
+                                   name="produits_selectionnes[]"
+                                   value="{{ p.produit.id }}"
+                                   checked>
+                        </td>
+                        <td>
+                            <a href="{{ path('app_produit_show', {idProduit: p.produit.id}) }}"
+                               class="fw-bold text-dark text-decoration-none">
+                                {{ p.produit.nomProduit }}
+                            </a>
+                            {% if p.produit.famille %}
+                                <br><span class="badge bg-secondary bg-opacity-50 text-dark" style="font-size: 0.6rem;">{{ p.produit.famille }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <span class="badge fs-6 {% if p.stockActuel <= 0 %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                                {{ p.stockActuel }}
+                            </span>
+                        </td>
+                        <td class="text-center text-muted small">{{ p.stockAlerte }}</td>
+                        <td class="text-center text-muted small">{{ p.stockMinimum }}</td>
+                        <td class="text-center">
+                            {# ▶ Champ quantité modifiable ◀ #}
+                            <input type="number"
+                                   name="quantites[{{ p.produit.id }}]"
+                                   value="{{ p.quantiteACommander }}"
+                                   min="1"
+                                   class="form-control form-control-sm text-center fw-bold qte-input"
+                                   data-prix="{{ p.prixAchatUnitaire }}"
+                                   style="width: 80px; margin: auto;">
+                            <small class="text-muted d-block mt-1" style="font-size: 0.65rem;">
+                                suggéré : {{ p.quantiteACommander }}
+                            </small>
+                        </td>
+                        <td class="text-end text-muted small">
+                            {% if p.prixAchatUnitaire > 0 %}
+                                {{ p.prixAchatUnitaire|number_format(2, ',', ' ') }} €
+                            {% else %}
+                                <span class="fst-italic">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end fw-bold sous-total">
+                            {% if p.montantEstime > 0 %}
+                                {{ p.montantEstime|number_format(2, ',', ' ') }} €
+                            {% else %}—{% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if p.produit.empZone %}
+                                <span class="badge bg-primary bg-opacity-10 text-primary" style="font-size: 0.68rem;">
+                                    <i class="bi bi-geo-alt me-1"></i>{{ p.produit.empZone }}
+                                    {% if p.produit.empColonne %} {{ p.produit.empColonne }}{% endif %}
+                                    {% if p.produit.empNiveau %}-{{ p.produit.empNiveau }}{% endif %}
+                                </span>
+                            {% else %}
+                                <span class="text-muted small">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+                <tfoot class="table-light fw-bold">
+                    <tr>
+                        <td colspan="7" class="text-end">Montant total estimé :</td>
+                        <td class="text-end text-success fs-5" id="total-footer">
+                            {{ totalEstime|number_format(2, ',', ' ') }} €
+                        </td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <div class="text-end">
+        <button type="submit" class="btn btn-warning fw-bold px-4 shadow">
+            <i class="bi bi-cart-plus me-2"></i> Créer le brouillon de commande
+        </button>
+    </div>
+</form>
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // ── Sélection/désélection globale
+    const cbAll  = document.getElementById('cb-all');
+    const cbs    = document.querySelectorAll('.produit-cb');
+    const btnTout = document.getElementById('btn-tout-cocher');
+
+    if (cbAll) {
+        cbAll.addEventListener('change', () => cbs.forEach(cb => cb.checked = cbAll.checked));
+    }
+    let allChecked = true;
+    if (btnTout) {
+        btnTout.addEventListener('click', () => {
+            allChecked = !allChecked;
+            cbs.forEach(cb => cb.checked = allChecked);
+            cbAll.checked = allChecked;
+            btnTout.innerHTML = allChecked
+                ? '<i class="bi bi-check-all me-1"></i> Tout sélectionner'
+                : '<i class="bi bi-x-circle me-1"></i> Tout désélectionner';
+        });
+    }
+
+    // ── Recalcul dynamique du sous-total et du total quand on change la qté
+    function recalcuterTotaux() {
+        let grandTotal = 0;
+        document.querySelectorAll('tbody tr').forEach(row => {
+            const input     = row.querySelector('.qte-input');
+            const sousTotal = row.querySelector('.sous-total');
+            if (!input || !sousTotal) return;
+
+            const prix = parseFloat(input.dataset.prix || 0);
+            const qte  = parseInt(input.value || 0);
+            const st   = prix * qte;
+            grandTotal += st;
+
+            sousTotal.textContent = (st > 0) ? st.toFixed(2).replace('.', ',') + ' €' : '—';
+        });
+        const footer = document.getElementById('total-footer');
+        if (footer) {
+            footer.textContent = grandTotal.toFixed(2).replace('.', ',') + ' €';
+        }
+    }
+
+    document.querySelectorAll('.qte-input').forEach(input => {
+        input.addEventListener('input', recalcuterTotaux);
+    });
+});
+</script>
+{% endblock %}

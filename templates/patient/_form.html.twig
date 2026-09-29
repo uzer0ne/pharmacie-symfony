@@ -37,6 +37,24 @@
                 <hr class="my-4">
                 
                 <h6 class="text-dark fw-bold mb-3"><i class="bi bi-geo-alt text-primary me-2"></i>Coordonnées</h6>
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            {{ form_widget(form.telephone, {'attr': {'class': 'form-control', 'placeholder': 'Téléphone'}}) }}
+                            {{ form_label(form.telephone, 'Téléphone') }}
+                            {{ form_errors(form.telephone) }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            {{ form_widget(form.email, {'attr': {'class': 'form-control', 'placeholder': 'Email'}}) }}
+                            {{ form_label(form.email, 'Email') }}
+                            {{ form_errors(form.email) }}
+                        </div>
+                    </div>
+                </div>
+
                 <div class="form-floating mb-3">
                     {{ form_widget(form.adresse_patient, {'attr': {'class': 'form-control', 'placeholder': 'Adresse complète', 'style': 'height: 100px'}}) }}
                     {{ form_label(form.adresse_patient, 'Adresse complète *') }}
@@ -51,26 +69,21 @@
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
                 <h5 class="card-title mb-0 text-dark fw-bold">
-                    <i class="bi bi-shield-check text-primary me-2"></i> Assurance & Mutuelle
+                    <i class="bi bi-shield-check text-primary me-2"></i> Assurance Maladie
                 </h5>
             </div>
             <div class="card-body p-4">
-                {% if form.mutuelles is defined %}
-                    <div class="mb-4">
-                        {{ form_label(form.mutuelles, 'Mutuelles associées', {'label_attr': {'class': 'fw-medium mb-2 text-dark'}}) }}
-                        {{ form_widget(form.mutuelles, {'attr': {'class': 'form-select', 'size': 5}}) }}
-                        <div class="form-text mt-2"><i class="bi bi-info-circle me-1"></i>Maintenez Ctrl (ou Cmd) pour sélectionner plusieurs mutuelles.</div>
-                    </div>
-                {% else %}
-                    <div class="alert alert-light text-muted">
-                        <i class="bi bi-shield-slash me-2"></i> Aucune mutuelle disponible.
-                    </div>
-                {% endif %}
-
-                <div class="d-grid mt-4">
-                    <a href="{{ path('app_mutuelle_new') }}" target="_blank" class="btn btn-outline-primary btn-sm border-dashed">
-                        <i class="bi bi-plus-lg me-1"></i> Créer une mutuelle
-                    </a>
+                <div class="form-floating mb-3">
+                    {{ form_widget(form.nir, {'attr': {'class': 'form-control', 'placeholder': 'NIR'}}) }}
+                    {{ form_label(form.nir, 'N° de Sécurité Sociale') }}
+                    {{ form_errors(form.nir) }}
+                </div>
+                <div class="form-text text-muted mb-4">
+                    <i class="bi bi-info-circle me-1"></i> Le numéro de sécurité sociale (NIR) comporte 15 chiffres.
+                </div>
+                
+                <div class="alert alert-info bg-info bg-opacity-10 border-info border-opacity-25 small mb-0">
+                    <i class="bi bi-info-circle-fill me-1"></i> Les contrats de mutuelle pourront être ajoutés sur la fiche du patient une fois celle-ci créée.
                 </div>
             </div>
         </div>

@@ -1,0 +1,92 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Pointage réception — Commande #{{ commande.id }}{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <div>
+        <h4 class="h4 page-title mb-0">
+            <i class="bi bi-box-seam text-success me-2"></i> Pointage réception
+        </h4>
+        <p class="page-subtitle mb-0 small text-muted">Saisissez les quantités réellement reçues et les péremptions</p>
+    </div>
+    <a href="{{ path('app_reassort_show', {id: commande.id}) }}" class="btn btn-outline-secondary btn-sm shadow-sm">
+        <i class="bi bi-arrow-left me-1"></i> Retour à la commande
+    </a>
+</div>
+
+{% for type, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="alert alert-{{ type == 'danger' ? 'danger' : (type == 'warning' ? 'warning' : 'success') }} alert-dismissible fade show">
+            {{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+{% endfor %}
+
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-header bg-success bg-opacity-10 border-bottom pt-3 pb-3 px-4">
+        <h6 class="card-title mb-0 fw-bold text-dark">
+            <i class="bi bi-truck text-success me-2"></i> Commande #{{ commande.id }} — {{ commande.lignes|length }} ligne(s)
+        </h6>
+    </div>
+
+    <form action="{{ path('app_reassort_receptionner', {id: commande.id}) }}" method="POST">
+        <input type="hidden" name="_token" value="{{ csrf_token('receptionner_commande_' ~ commande.id) }}">
+        
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Produit</th>
+                        <th class="text-center">Qté commandée</th>
+                        <th class="text-center bg-success bg-opacity-10" style="width: 140px;">Qté reçue</th>
+                        <th class="text-center bg-warning bg-opacity-10" style="width: 160px;">Date péremption (FEFO)</th>
+                        <th class="text-center bg-info bg-opacity-10" style="width: 140px;">Nouveau Prix Achat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for ligne in commande.lignes %}
+                    <tr>
+                        <td>
+                            <span class="fw-bold text-dark">{{ ligne.produit.nomProduit }}</span>
+                            <br><small class="text-muted">{{ ligne.produit.dosageProduit }}</small>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-secondary fs-6">{{ ligne.quantiteCommandee }}</span>
+                        </td>
+                        <td class="text-center bg-success bg-opacity-10">
+                            <input type="number"
+                                   name="quantites[{{ ligne.id }}]"
+                                   value="{{ ligne.quantiteCommandee }}"
+                                   min="0"
+                                   max="{{ ligne.quantiteCommandee }}"
+                                   class="form-control form-control-sm text-center fw-bold border-success">
+                            <small class="text-muted d-block mt-1" style="font-size: 0.65rem;">Modifiez si reliquat</small>
+                        </td>
+                        <td class="text-center bg-warning bg-opacity-10">
+                            <input type="date"
+                                   name="dates_peremption[{{ ligne.id }}]"
+                                   class="form-control form-control-sm text-center border-warning">
+                            <small class="text-muted d-block mt-1" style="font-size: 0.65rem;">Requis pour FEFO</small>
+                        </td>
+                        <td class="text-center bg-info bg-opacity-10">
+                            <input type="text"
+                                   name="prix_achat[{{ ligne.id }}]"
+                                   placeholder="{{ ligne.produit.prixAchat }}"
+                                   class="form-control form-control-sm text-center border-info">
+                            <small class="text-muted d-block mt-1" style="font-size: 0.65rem;">Si différent du catalogue</small>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="card-footer bg-white text-end p-3">
+            <button type="submit" class="btn btn-success fw-bold px-4 shadow-sm" onclick="return confirm('Valider la réception ? Les stocks seront incrémentés immédiatement.')">
+                <i class="bi bi-check2-all me-2"></i> Valider définitivement la réception
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,125 @@
+{% extends 'base.html.twig' %}
+{% block title %}Ajouter une Mutuelle - {{ patient.nomPatient }} {{ patient.prenomPatient }}{% endblock %}
+
+{% block body %}
+<div class="d-flex align-items-center mb-4">
+    <a href="{{ path('app_patient_show', {'idPatient': patient.idPatient}) }}" class="btn btn-light btn-sm me-3">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+    <div>
+        <h1 class="h3 fw-bold text-dark mb-0">
+            <i class="bi bi-shield-plus text-info me-2"></i> Ajouter une mutuelle
+        </h1>
+        <p class="text-muted mb-0">Pour le patient : <strong>{{ patient.nomPatient }} {{ patient.prenomPatient }}</strong></p>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm col-lg-8 mx-auto">
+    <div class="card-body p-4">
+        {{ form_start(form) }}
+            <div class="row g-3">
+                <div class="col-md-12">
+                    {{ form_row(form.mutuelle) }}
+                </div>
+                <div class="col-md-6">
+                    {{ form_row(form.numero_adherent) }}
+                </div>
+                <div class="col-md-6">
+                    {{ form_row(form.taux_couverture) }}
+                </div>
+                <div class="col-md-12">
+                    {{ form_row(form.type_convention) }}
+                </div>
+                <div class="col-md-6">
+                    {{ form_row(form.date_debut_validite) }}
+                </div>
+                <div class="col-md-6">
+                    {{ form_row(form.date_fin_validite) }}
+                </div>
+                <div class="col-md-12">
+                    {{ form_row(form.actif) }}
+                </div>
+            </div>
+            
+            <div class="mt-4 d-flex justify-content-between">
+                <button type="button" class="btn btn-outline-info" id="btn-scan">
+                    <i class="bi bi-qr-code-scan me-2"></i> Attente de scan (Datamatrix)
+                </button>
+                <div>
+                    <a href="{{ path('app_patient_show', {'idPatient': patient.idPatient}) }}" class="btn btn-light me-2">Annuler</a>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i> Enregistrer le contrat</button>
+                </div>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnScan = document.getElementById('btn-scan');
+        let pollingInterval = null;
+
+        // Fonction pour interroger l'API
+        function checkLastScan() {
+            fetch('/api/get-last-scan')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success' && data.data) {
+                        // On a reçu un scan !
+                        clearInterval(pollingInterval);
+                        btnScan.classList.remove('btn-warning');
+                        btnScan.classList.add('btn-success');
+                        btnScan.innerHTML = '<i class="bi bi-check-circle me-2"></i> Scan détecté !';
+                        
+                        const scanData = data.data;
+
+                        // Remplir le numéro d'adhérent
+                        const inputAdherent = document.querySelector('input[id$="_numero_adherent"]');
+                        if (inputAdherent) inputAdherent.value = scanData.numero_adherent;
+
+                        // Remplir la convention
+                        const inputConvention = document.querySelector('input[id$="_type_convention"]');
+                        if (inputConvention) inputConvention.value = scanData.convention;
+
+                        // Sélectionner la mutuelle si elle existe dans la liste
+                        const selectMutuelle = document.querySelector('select[id$="_mutuelle"]');
+                        if (selectMutuelle) {
+                            let optionExists = Array.from(selectMutuelle.options).some(opt => opt.value == scanData.mutuelle_id);
+                            
+                            // Si la mutuelle vient d'être créée en BDD, elle n'est pas dans le menu déroulant
+                            if (!optionExists && scanData.mutuelle_id) {
+                                const newOption = new Option(scanData.nom_mutuelle, scanData.mutuelle_id, true, true);
+                                selectMutuelle.add(newOption);
+                            } else {
+                                selectMutuelle.value = scanData.mutuelle_id;
+                            }
+                            
+                            if (scanData.nouvelle_mutuelle) {
+                                alert("Nouvelle Mutuelle détectée ! Elle a été créée sous le nom provisoire : '" + scanData.nom_mutuelle + "'. Pensez à corriger son nom plus tard.");
+                            }
+                        }
+
+                        // Alerte de doublon
+                        if (scanData.alerte_doublon) {
+                            alert("⚠️ ATTENTION : " + scanData.alerte_doublon + "\nSi c'est un ayant-droit (enfant, conjoint), vous pouvez ignorer.");
+                        }
+
+                        // Remettre le bouton à la normale après 3 secondes
+                        setTimeout(() => {
+                            btnScan.classList.remove('btn-success');
+                            btnScan.classList.add('btn-outline-info');
+                            btnScan.innerHTML = '<i class="bi bi-qr-code-scan me-2"></i> Prêt pour un nouveau scan';
+                            pollingInterval = setInterval(checkLastScan, 1500); // Reprendre l'écoute
+                        }, 3000);
+                    }
+                })
+                .catch(err => console.error('Erreur scan:', err));
+        }
+
+        // Démarrer le polling automatiquement (toutes les 1.5s)
+        pollingInterval = setInterval(checkLastScan, 1500);
+        btnScan.innerHTML = '<span class="spinner-grow spinner-grow-sm me-2"></span> Écoute du scanneur...';
+        btnScan.classList.replace('btn-outline-info', 'btn-warning');
+    });
+</script>
+{% endblock %}

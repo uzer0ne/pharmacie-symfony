@@ -179,7 +179,7 @@
                         </td>
                         <td class="text-end">
                             <div class="fw-bold">{{ produit.prixProduit|number_format(2, ',', ' ') }} €</div>
-                            {% if produit.prixAchat %}
+                            {% if produit.prixAchat and is_granted('ROLE_GESTIONNAIRE_STOCK') %}
                                 <small class="text-success" style="font-size: 0.75rem;" data-bs-toggle="tooltip" title="Marge: {{ produit.marge }}€">
                                     {{ produit.tauxMarge }}% marge
                                 </small>

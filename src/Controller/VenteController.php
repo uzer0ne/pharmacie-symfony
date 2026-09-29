@@ -4,9 +4,11 @@ namespace App\Controller;
 
 use App\Entity\Vente;
 use App\Entity\LigneVente;
+use App\Entity\PaiementVente;
 use App\Form\VenteType;
 use App\Repository\VenteRepository;
 use App\Repository\ProduitRepository;
+use App\Repository\SessionCaisseRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Knp\Component\Pager\PaginatorInterface;
@@ -15,6 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Form\FormError;
+
 
 #[Route('/vente')]
 final class VenteController extends AbstractController
@@ -37,15 +40,93 @@ final class VenteController extends AbstractController
         ]);
     }
 
+    #[Route('/mes-ventes', name: 'app_mes_ventes', methods: ['GET'])]
+    public function mesVentes(SessionCaisseRepository $sessionRepo): Response
+    {
+        $sessions = $sessionRepo->findSessionsOuvertes();
+        $session = !empty($sessions) ? $sessions[0] : null;
+
+        if (!$session) {
+            $this->addFlash('warning', 'Aucune caisse n\'est actuellement ouverte.');
+            return $this->redirectToRoute('app_vente_index');
+        }
+
+        $mesVentes = [];
+        $totauxParMode = [];
+        $totalGeneral = 0.0;
+
+        foreach ($session->getVentes() as $vente) {
+            if ($vente->getVendeur() === $this->getUser()) {
+                $mesVentes[] = $vente;
+                foreach ($vente->getPaiements() as $paiement) {
+                    $mode = $paiement->getModePaiement();
+                    $montant = (float) $paiement->getMontant();
+                    
+                    if (!isset($totauxParMode[$mode])) {
+                        $totauxParMode[$mode] = 0.0;
+                    }
+                    $totauxParMode[$mode] += $montant;
+                    $totalGeneral += $montant;
+                }
+            }
+        }
+
+        // Tri des ventes : de la plus récente à la plus ancienne
+        usort($mesVentes, function($a, $b) {
+            return $b->getDateVente() <=> $a->getDateVente();
+        });
+
+        return $this->render('vente/mes_ventes.html.twig', [
+            'mesVentes' => $mesVentes,
+            'totauxParMode' => $totauxParMode,
+            'totalGeneral' => $totalGeneral,
+            'session' => $session
+        ]);
+    }
+
     #[Route('/new', name: 'app_vente_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, SessionCaisseRepository $sessionRepo): Response
     {
         $vente = new Vente();
         $vente->setVendeur($this->getUser());
+
+        // 🔗 Lier automatiquement la vente à la caisse sur laquelle le vendeur travaille
+        $activeSessionId = $request->getSession()->get('active_session_caisse_id');
+        $sessionTrouvee = false;
+
+        if ($activeSessionId) {
+            $sessionCaisse = $sessionRepo->find($activeSessionId);
+            if ($sessionCaisse && $sessionCaisse->getStatut() === 'OUVERTE') {
+                $vente->setSessionCaisse($sessionCaisse);
+                $sessionTrouvee = true;
+            }
+        }
+
+        if (!$sessionTrouvee) {
+            $sessionsOuvertes = $sessionRepo->findSessionsOuvertes();
+            
+            // S'il y a exactement 1 seule caisse ouverte dans toute la pharmacie, on l'assigne automatiquement
+            if (count($sessionsOuvertes) === 1) {
+                $vente->setSessionCaisse($sessionsOuvertes[0]);
+                $request->getSession()->set('active_session_caisse_id', $sessionsOuvertes[0]->getId());
+            } 
+            // S'il y a plusieurs caisses ouvertes, on force l'utilisateur à en choisir une
+            elseif (count($sessionsOuvertes) > 1) {
+                $this->addFlash('warning', 'Plusieurs caisses sont ouvertes. Veuillez cliquer sur "Vendre sur ce poste" pour choisir votre caisse.');
+                return $this->redirectToRoute('app_caisse_index');
+            }
+            // S'il n'y a aucune caisse ouverte
+            else {
+                $this->addFlash('danger', 'Aucune caisse n\'est ouverte. Veuillez ouvrir un poste de caisse avant de pouvoir vendre.');
+                return $this->redirectToRoute('app_caisse_index');
+            }
+        }
+
         $form = $this->createForm(VenteType::class, $vente);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
 
             try {
                 // --- Logique métier (Stock et Prix) ---
@@ -185,7 +266,16 @@ final class VenteController extends AbstractController
 
                 $ordonnance = $vente->getOrdonnance();
 
-                $hasMutuelle = ($patient && $patient->getMutuelles()->count() > 0);
+                $hasMutuelle = false;
+                $tauxCouvertureMutuelle = 0.0; // Taux réel du contrat (ex: 70.00)
+                if ($patient) {
+                    $activeMutuelle = $entityManager->getRepository(\App\Entity\PatientMutuelle::class)
+                                                    ->findValidMutuelleForPatient($patient->getIdPatient());
+                    if ($activeMutuelle) {
+                        $hasMutuelle = true;
+                        $tauxCouvertureMutuelle = (float) $activeMutuelle->getTauxCouverture();
+                    }
+                }
 
                 foreach ($vente->getLigneVentes() as $ligne) {
                     $produit = $ligne->getProduit();
@@ -210,11 +300,11 @@ final class VenteController extends AbstractController
                         $partSecu = round($prixLigne * ($tauxSecu / 100), 2);
                         $resteLigne = $prixLigne - $partSecu;
 
-                        // Si le patient a une mutuelle et que le médicament est remboursable, 
-                        // on simule que la mutuelle prend en charge le ticket modérateur
+                        // La mutuelle prend en charge son % du ticket modérateur (resteLigne)
+                        // Ex: taux_couverture=70% => mutuelle couvre 70% du reste après sécu
                         if ($hasMutuelle && $tauxSecu > 0) {
-                            $partMut = $resteLigne;
-                            $resteLigne = 0.0;
+                            $partMut = round($resteLigne * ($tauxCouvertureMutuelle / 100), 2);
+                            $resteLigne = round($resteLigne - $partMut, 2);
                         }
                     }
 
@@ -227,7 +317,6 @@ final class VenteController extends AbstractController
                 if ($ordonnance && is_array($vente->getDetailsHonoraires())) {
                     foreach ($vente->getDetailsHonoraires() as $honoraire) {
                         $prixHonoraire = (float) $honoraire['montant'];
-                        // On extrait le taux (ex: '65%' -> 65)
                         $tauxSecuHonoraire = (float) str_replace('%', '', $honoraire['txR']);
                         
                         $partSecu = round($prixHonoraire * ($tauxSecuHonoraire / 100), 2);
@@ -235,8 +324,8 @@ final class VenteController extends AbstractController
                         $partMut = 0.0;
                         
                         if ($hasMutuelle && $tauxSecuHonoraire > 0) {
-                            $partMut = $resteLigne;
-                            $resteLigne = 0.0;
+                            $partMut = round($resteLigne * ($tauxCouvertureMutuelle / 100), 2);
+                            $resteLigne = round($resteLigne - $partMut, 2);
                         }
                         
                         $montantSecu += $partSecu;
@@ -293,12 +382,18 @@ final class VenteController extends AbstractController
             
             // Si la vente était déjà payée (ex: double clic ou retour arrière)
             if ($vente->getStatut() === 'PAYEE') {
-                return $this->redirectToRoute('app_vente_new');
+                return $this->redirectToRoute('app_vente_show', ['id' => $vente->getId()]);
             }
 
             $montantEncaisse = (float) $request->request->get('montant_encaisse');
-            $monnaieRendue = (float) $request->request->get('monnaie_rendue');
-            
+            $monnaieRendue   = (float) $request->request->get('monnaie_rendue');
+            $modePaiement    = $request->request->get('mode_paiement', PaiementVente::MODE_ESPECES);
+
+            // Validation du mode
+            if (!in_array($modePaiement, array_values(PaiementVente::MODES_DISPONIBLES))) {
+                $modePaiement = PaiementVente::MODE_ESPECES;
+            }
+
             $resteAPayer = (float) $vente->getResteAPayer();
             
             if ($montantEncaisse < $resteAPayer) {
@@ -306,11 +401,21 @@ final class VenteController extends AbstractController
                 return $this->redirectToRoute('app_vente_checkout', ['id' => $vente->getId()]);
             }
 
+            // 1. Champs legacy (rétrocompatibilité affichage ticket)
             $vente->setMontantEncaisse((string) $montantEncaisse);
             $vente->setMonnaieRendue((string) $monnaieRendue);
             $vente->setStatut('PAYEE');
 
-            // 1. Décrémentation effective des stocks
+            // 2. ✅ Créer l'entité PaiementVente (nouvelle architecture)
+            //    On enregistre le montant RÉELLEMENT dû (reste à payer), pas le montant remis
+            //    (la monnaie rendue n'est pas un "paiement")
+            $paiement = new PaiementVente();
+            $paiement->setVente($vente);
+            $paiement->setModePaiement($modePaiement);
+            $paiement->setMontant((string) $resteAPayer);
+            $entityManager->persist($paiement);
+
+            // 3. Décrémentation effective des stocks
             foreach ($vente->getLigneVentes() as $ligneVente) {
                 $produit = $ligneVente->getProduit();
                 $quantiteDemandee = $ligneVente->getQuantite();
@@ -330,12 +435,13 @@ final class VenteController extends AbstractController
 
             $this->addFlash('success', 'Encaissement validé avec succès !');
 
-            // Retour au comptoir pour le prochain client
-            return $this->redirectToRoute('app_vente_new');
+            // Redirection vers le reçu (détail de la vente) au lieu du comptoir direct
+            return $this->redirectToRoute('app_vente_show', ['id' => $vente->getId()]);
         }
 
         return $this->redirectToRoute('app_vente_checkout', ['id' => $vente->getId()]);
     }
+
 
     #[Route('/{id}', name: 'app_vente_show', methods: ['GET'])]
     public function show(Vente $vente): Response
@@ -361,12 +467,58 @@ final class VenteController extends AbstractController
             }
         }
 
+        $ordonnance = $vente->getOrdonnance();
+        $isOrdonnance = ($ordonnance !== null);
+
         $form = $this->createForm(VenteType::class, $vente);
+
+        // Pré-remplir les champs non-mappés de l'ordonnance
+        if ($isOrdonnance && !$request->isMethod('POST')) {
+            $form->get('creer_ordonnance')->setData(true);
+            if ($ordonnance->getDateOrdonnance()) {
+                $form->get('date_ordonnance')->setData(\DateTime::createFromImmutable($ordonnance->getDateOrdonnance()));
+            }
+            if ($ordonnance->getDateFin()) {
+                $form->get('date_fin_ordonnance')->setData(\DateTime::createFromImmutable($ordonnance->getDateFin()));
+            }
+            $form->get('medecin')->setData($ordonnance->getMedecin());
+        }
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             
             try {
+                // --- Gestion de l'Ordonnance ---
+                if ($form->get('creer_ordonnance')->getData()) {
+                    if (!$ordonnance) {
+                        $ordonnance = new \App\Entity\Ordonnance();
+                        $vente->setOrdonnance($ordonnance);
+                        $entityManager->persist($ordonnance);
+                    }
+                    
+                    $datePrescription = $form->get('date_ordonnance')->getData();
+                    if ($datePrescription) {
+                        $ordonnance->setDateOrdonnance(\DateTimeImmutable::createFromMutable($datePrescription));
+                    }
+                    
+                    $dateFin = $form->get('date_fin_ordonnance')->getData();
+                    if ($dateFin) {
+                        $ordonnance->setDateFin(\DateTimeImmutable::createFromMutable($dateFin));
+                    }
+                    
+                    $ordonnance->setMedecin($form->get('medecin')->getData());
+                    $ordonnance->setPatient($vente->getPatient());
+                } else {
+                    // L'utilisateur a décoché l'ordonnance
+                    if ($ordonnance) {
+                        $vente->setOrdonnance(null);
+                        $entityManager->remove($ordonnance);
+                        $ordonnance = null;
+                        $vente->setDetailsHonoraires(null); // On annule les honoraires
+                    }
+                }
+
                 // STRATÉGIE FIABLE : 
                 // 1. Pour les lignes existantes : On remet TOUT l'ancien stock (comme si on annulait la ligne).
                 // 2. Ensuite, on recalcule le retrait de stock pour la nouvelle version de la ligne.
@@ -422,7 +574,16 @@ final class VenteController extends AbstractController
                 $montantSecu = 0.0;
                 $montantMutuelle = 0.0;
                 $resteAPayer = 0.0;
-                $hasMutuelle = $vente->getPatient() && $vente->getPatient()->getMutuelle();
+                $hasMutuelle = false;
+                $tauxCouvertureMutuelle = 0.0;
+                if ($vente->getPatient()) {
+                    $activeMutuelle = $entityManager->getRepository(\App\Entity\PatientMutuelle::class)
+                                                    ->findValidMutuelleForPatient($vente->getPatient()->getIdPatient());
+                    if ($activeMutuelle) {
+                        $hasMutuelle = true;
+                        $tauxCouvertureMutuelle = (float) $activeMutuelle->getTauxCouverture();
+                    }
+                }
                 $ordonnance = $vente->getOrdonnance();
 
                 foreach ($vente->getLigneVentes() as $ligne) {
@@ -448,8 +609,8 @@ final class VenteController extends AbstractController
                         $resteLigne = $prixLigne - $partSecu;
 
                         if ($hasMutuelle && $tauxSecu > 0) {
-                            $partMut = $resteLigne;
-                            $resteLigne = 0.0;
+                            $partMut = round($resteLigne * ($tauxCouvertureMutuelle / 100), 2);
+                            $resteLigne = round($resteLigne - $partMut, 2);
                         }
                     }
 
@@ -468,8 +629,8 @@ final class VenteController extends AbstractController
                         $partMut = 0.0;
                         
                         if ($hasMutuelle && $tauxSecuHonoraire > 0) {
-                            $partMut = $resteLigne;
-                            $resteLigne = 0.0;
+                            $partMut = round($resteLigne * ($tauxCouvertureMutuelle / 100), 2);
+                            $resteLigne = round($resteLigne - $partMut, 2);
                         }
                         
                         $montantSecu += $partSecu;

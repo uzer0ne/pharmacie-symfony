@@ -1,0 +1,244 @@
+{% extends 'base.html.twig' %}
+{% block title %}Session #{{ session.id }} — {{ session.poste.nomPoste }}{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center">
+        <a href="{{ path('app_caisse_index') }}" class="btn btn-light btn-sm me-3">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <h1 class="h3 fw-bold text-dark mb-0">
+                <i class="bi bi-cash-stack text-success me-2"></i>
+                Session — {{ session.poste.nomPoste }}
+            </h1>
+            <p class="text-muted mb-0 small">
+                Ouverte le {{ session.dateOuverture|date('d/m/Y à H:i') }}
+                par {{ session.userOuverture.prenom }} {{ session.userOuverture.nom }}
+            </p>
+        </div>
+    </div>
+    <a href="{{ path('app_caisse_cloturer', {id: session.id}) }}"
+       class="btn btn-danger fw-bold">
+        <i class="bi bi-x-circle me-1"></i> Clôturer (Ticket Z)
+    </a>
+</div>
+
+{% for flash_type, flash_messages in app.flashes %}
+    {% for msg in flash_messages %}
+        <div class="alert alert-{{ flash_type }} alert-dismissible fade show">
+            {{ msg }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+{% endfor %}
+
+{# ── KPIs ───────────────────────────────────────────────────────── #}
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm border-start border-4 border-success">
+            <div class="card-body">
+                <div class="text-xs fw-bold text-success text-uppercase mb-1">Fond initial</div>
+                <div class="h4 fw-bold mb-0">{{ session.fondDeCaisse|number_format(2, ',', ' ') }} €</div>
+                <div class="small text-muted">Fond de caisse ouverture</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm border-start border-4 border-primary">
+            <div class="card-body">
+                <div class="text-xs fw-bold text-primary text-uppercase mb-1">Recette totale</div>
+                <div class="h4 fw-bold mb-0">{{ resume.total_general|number_format(2, ',', ' ') }} €</div>
+                <div class="small text-muted">Toutes modes confondus</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm border-start border-4 border-warning">
+            <div class="card-body">
+                <div class="text-xs fw-bold text-warning text-uppercase mb-1">Espèces théoriques</div>
+                <div class="h4 fw-bold mb-0">{{ resume.theorique_especes|number_format(2, ',', ' ') }} €</div>
+                <div class="small text-muted">Fond + recette espèces</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm border-start border-4 border-info">
+            <div class="card-body">
+                <div class="text-xs fw-bold text-info text-uppercase mb-1">Nombre de ventes</div>
+                <div class="h4 fw-bold mb-0">{{ resume.nb_ventes }}</div>
+                <div class="small text-muted">Tickets enregistrés</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    {# ── Détail par mode de paiement ──────────────────────────────── #}
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-bottom py-3 px-4">
+                <h5 class="fw-bold mb-0"><i class="bi bi-pie-chart me-2 text-primary"></i> Recette par mode</h5>
+            </div>
+            <div class="card-body p-0">
+                {% if resume.totaux_par_mode is empty %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-receipt fs-2 opacity-25 d-block mb-2"></i>
+                        Aucun paiement enregistré dans cette session.
+                    </div>
+                {% else %}
+                    {% set icons = {'CB': 'bi-credit-card', 'ESPECES': 'bi-cash', 'CHEQUE': 'bi-pen', 'MUTUELLE': 'bi-shield-plus', 'VIREMENT': 'bi-bank'} %}
+                    {% set colors = {'CB': 'primary', 'ESPECES': 'success', 'CHEQUE': 'warning', 'MUTUELLE': 'info', 'VIREMENT': 'secondary'} %}
+                    <ul class="list-group list-group-flush">
+                        {% for mode, montant in resume.totaux_par_mode %}
+                        <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi {{ icons[mode]|default('bi-credit-card') }} me-2 text-{{ colors[mode]|default('secondary') }}"></i>
+                                <span class="fw-medium">{{ mode }}</span>
+                            </div>
+                            <span class="badge bg-{{ colors[mode]|default('secondary') }} fs-6 px-3 py-2">
+                                {{ montant|number_format(2, ',', ' ') }} €
+                            </span>
+                        </li>
+                        {% endfor %}
+                        <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center bg-light">
+                            <strong>Total général</strong>
+                            <strong class="fs-5">{{ resume.total_general|number_format(2, ',', ' ') }} €</strong>
+                        </li>
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {# ── Liste des ventes de la session ──────────────────────────── #}
+    <div class="col-lg-7">
+        {% set mesVentes = session.ventes|filter(v => v.vendeur and v.vendeur.id == app.user.id)|sort((a, b) => b.dateVente <=> a.dateVente) %}
+        {% set toutesVentes = session.ventes|sort((a, b) => b.dateVente <=> a.dateVente) %}
+
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-bottom p-0">
+                <ul class="nav nav-tabs border-bottom-0 pt-2 px-3" id="ventesTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-bold text-primary" id="mes-ventes-tab" data-bs-toggle="tab" data-bs-target="#mes-ventes" type="button" role="tab" style="border-top-width: 3px;">
+                            <i class="bi bi-person me-1"></i> Mes ventes
+                            <span class="badge bg-primary rounded-pill ms-1">{{ mesVentes|length }}</span>
+                        </button>
+                    </li>
+                    {% if is_granted('ROLE_PHARMACIEN') %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link text-muted" id="toutes-ventes-tab" data-bs-toggle="tab" data-bs-target="#toutes-ventes" type="button" role="tab" style="border-top-width: 3px; border-top-color: transparent;">
+                            <i class="bi bi-people me-1"></i> Toute la caisse (Superviseur)
+                            <span class="badge bg-secondary rounded-pill ms-1">{{ session.ventes|length }}</span>
+                        </button>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+            
+            <div class="card-body p-0 tab-content" style="max-height: 420px; overflow-y: auto;">
+                
+                {# ── ONGLET : MES VENTES ── #}
+                <div class="tab-pane fade show active" id="mes-ventes" role="tabpanel">
+                    {% if mesVentes is empty %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-person-dash fs-2 opacity-25 d-block mb-2"></i>
+                            Vous n'avez enregistré aucune vente.
+                        </div>
+                    {% else %}
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th class="px-4">N°</th>
+                                    <th>Heure</th>
+                                    <th>Statut</th>
+                                    <th class="text-end px-4">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for vente in mesVentes %}
+                                <tr>
+                                    <td class="px-4">
+                                        <a href="{{ path('app_vente_show', {id: vente.id}) }}" class="badge bg-primary text-decoration-none">#{{ vente.id }}</a>
+                                    </td>
+                                    <td class="text-muted small">{{ vente.dateVente|date('H:i') }}</td>
+                                    <td><span class="badge bg-success">Payée</span></td>
+                                    <td class="text-end px-4 fw-bold">{{ vente.montantTotal|number_format(2, ',', ' ') }} €</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+                </div>
+
+                {% if is_granted('ROLE_PHARMACIEN') %}
+                {# ── ONGLET : TOUTES LES VENTES ── #}
+                <div class="tab-pane fade" id="toutes-ventes" role="tabpanel">
+                    {% if toutesVentes is empty %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-cart fs-2 opacity-25 d-block mb-2"></i>
+                            Aucune vente sur ce poste pour l'instant.
+                        </div>
+                    {% else %}
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th class="px-4">N°</th>
+                                    <th>Heure</th>
+                                    <th>Vendeur</th>
+                                    <th class="text-end px-4">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for vente in toutesVentes %}
+                                <tr>
+                                    <td class="px-4">
+                                        <a href="{{ path('app_vente_show', {id: vente.id}) }}" class="badge bg-secondary text-decoration-none">#{{ vente.id }}</a>
+                                    </td>
+                                    <td class="text-muted small">{{ vente.dateVente|date('H:i') }}</td>
+                                    <td class="small">
+                                        {% if vente.vendeur %}
+                                            {% if vente.vendeur.id == app.user.id %}
+                                                <span class="text-primary fw-bold">Moi</span>
+                                            {% else %}
+                                                {{ vente.vendeur.prenom|first|upper }}. {{ vente.vendeur.nom }}
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-muted fst-italic">—</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end px-4 fw-bold">{{ vente.montantTotal|number_format(2, ',', ' ') }} €</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Gestion du style visuel des onglets Bootstrap
+    const tabEls = document.querySelectorAll('button[data-bs-toggle="tab"]');
+    tabEls.forEach(tab => {
+        tab.addEventListener('show.bs.tab', function (event) {
+            // Remettre tous les onglets en gris/muted
+            tabEls.forEach(t => {
+                t.classList.remove('text-primary', 'active', 'fw-bold');
+                t.classList.add('text-muted');
+                t.style.borderTopColor = 'transparent';
+            });
+            // Activer l'onglet cliqué
+            event.target.classList.remove('text-muted');
+            event.target.classList.add('text-primary', 'active', 'fw-bold');
+            event.target.style.borderTopColor = ''; // Revient à la couleur CSS par défaut (primaire)
+        });
+    });
+});
+</script>
+{% endblock %}

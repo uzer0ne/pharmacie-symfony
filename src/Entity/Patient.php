@@ -7,9 +7,11 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: PatientRepository::class)]
+#[UniqueEntity(fields: ['nir'], message: 'Ce numéro de sécurité sociale est déjà enregistré.', ignoreNull: true)]
 class Patient
 {
     #[ORM\Id]
@@ -18,9 +20,11 @@ class Patient
     private ?int $idPatient = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Le nom du patient est obligatoire.')]
     private ?string $nom_patient = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Le prénom du patient est obligatoire.')]
     private ?string $prenom_patient = null;
 
     #[ORM\Column(length: 255)]
@@ -29,11 +33,25 @@ class Patient
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTime $date_naissance = null;
 
-    #[ORM\ManyToMany(targetEntity: Mutuelle::class, inversedBy: 'patients')]
-    #[ORM\JoinTable(name: 'Posseder')]
-    #[ORM\JoinColumn(name: 'Id_Patient', referencedColumnName: 'Id_Patient')]
-    #[ORM\InverseJoinColumn(name: 'Id_Mutuelle', referencedColumnName: 'Id_Mutuelle')]
-    private Collection $mutuelles;
+    #[ORM\Column(length: 15, unique: true, nullable: true)]
+    #[Assert\Length(
+        exactly: 15,
+        exactMessage: 'Le numéro de sécurité sociale doit comporter exactement {{ limit }} chiffres.'
+    )]
+    #[Assert\Regex(
+        pattern: '/^\d{15}$/',
+        message: 'Le numéro de sécurité sociale ne doit contenir que des chiffres (15 au total).'
+    )]
+    private ?string $nir = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $telephone = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $email = null;
+
+    #[ORM\OneToMany(mappedBy: 'patient', targetEntity: PatientMutuelle::class)]
+    private Collection $patientMutuelles;
 
     // ▼▼▼ AJOUTEZ CETTE PROPRIÉTÉ ▼▼▼
     #[ORM\OneToMany(mappedBy: "patient", targetEntity: Vente::class)]
@@ -41,30 +59,37 @@ class Patient
 
     public function __construct()
     {
-        $this->mutuelles = new ArrayCollection();
+        $this->patientMutuelles = new ArrayCollection();
         $this->ordonnances = new ArrayCollection();
         $this->ventes = new ArrayCollection();
-
     }
    
-
-    public function getMutuelles(): Collection
+    /**
+     * @return Collection<int, PatientMutuelle>
+     */
+    public function getPatientMutuelles(): Collection
     {
-        return $this->mutuelles;
+        return $this->patientMutuelles;
     }
 
-    public function addMutuelle(Mutuelle $mutuelle): self
+    public function addPatientMutuelle(PatientMutuelle $patientMutuelle): static
     {
-        if (!$this->mutuelles->contains($mutuelle)) {
-            $this->mutuelles->add($mutuelle);
+        if (!$this->patientMutuelles->contains($patientMutuelle)) {
+            $this->patientMutuelles->add($patientMutuelle);
+            $patientMutuelle->setPatient($this);
         }
 
         return $this;
     }
 
-    public function removeMutuelle(Mutuelle $mutuelle): self
+    public function removePatientMutuelle(PatientMutuelle $patientMutuelle): static
     {
-        $this->mutuelles->removeElement($mutuelle);
+        if ($this->patientMutuelles->removeElement($patientMutuelle)) {
+            if ($patientMutuelle->getPatient() === $this) {
+                $patientMutuelle->setPatient(null);
+            }
+        }
+
         return $this;
     }
 
@@ -78,6 +103,11 @@ class Patient
 
 
     public function getIdPatient(): ?int
+    {
+        return $this->idPatient;
+    }
+
+    public function getId(): ?int
     {
         return $this->idPatient;
     }
@@ -129,6 +159,43 @@ class Patient
 
         return $this;
     }
+
+    public function getNir(): ?string
+    {
+        return $this->nir;
+    }
+
+    public function setNir(?string $nir): static
+    {
+        $this->nir = $nir;
+
+        return $this;
+    }
+
+    public function getTelephone(): ?string
+    {
+        return $this->telephone;
+    }
+
+    public function setTelephone(?string $telephone): static
+    {
+        $this->telephone = $telephone;
+
+        return $this;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(?string $email): static
+    {
+        $this->email = $email;
+
+        return $this;
+    }
+
     /**
      * @return Collection<int, Vente>
      */

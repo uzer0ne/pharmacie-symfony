@@ -23,22 +23,23 @@ class Mutuelle
     #[ORM\Column(length: 255)]
     private ?string $contact_mutuelle = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
-    private ?string $taux_remboursement = null;
+    #[ORM\Column(length: 255, unique: true)]
+    private ?string $code_amc = null;
 
-     #[ORM\ManyToMany(targetEntity: Patient::class, mappedBy: 'mutuelles')]
-    private Collection $patients;
-    public function getId(): ?int
+    #[ORM\OneToMany(mappedBy: 'mutuelle', targetEntity: PatientMutuelle::class)]
+    private Collection $patientMutuelles;
+
+    public function __construct()
+    {
+        $this->patientMutuelles = new ArrayCollection();
+    }
+
+    public function getIdMutuelle(): ?int
     {
         return $this->idMutuelle;
     }
 
-    public function __construct()
-    {
-        $this->patients = new ArrayCollection();
-    }
-
-    public function getIdMutuelle(): ?int
+    public function getId(): ?int
     {
         return $this->idMutuelle;
     }
@@ -67,22 +68,44 @@ class Mutuelle
         return $this;
     }
 
-    public function getTauxRemboursement(): ?string
+    public function getCodeAmc(): ?string
     {
-        return $this->taux_remboursement;
+        return $this->code_amc;
     }
 
-    public function setTauxRemboursement(string $taux_remboursement): static
+    public function setCodeAmc(string $code_amc): static
     {
-        $this->taux_remboursement = $taux_remboursement;
+        $this->code_amc = $code_amc;
 
         return $this;
     }
 
-   
-    public function getPatients(): Collection
+    /**
+     * @return Collection<int, PatientMutuelle>
+     */
+    public function getPatientMutuelles(): Collection
     {
-        return $this->patients;
+        return $this->patientMutuelles;
     }
 
+    public function addPatientMutuelle(PatientMutuelle $patientMutuelle): static
+    {
+        if (!$this->patientMutuelles->contains($patientMutuelle)) {
+            $this->patientMutuelles->add($patientMutuelle);
+            $patientMutuelle->setMutuelle($this);
+        }
+
+        return $this;
+    }
+
+    public function removePatientMutuelle(PatientMutuelle $patientMutuelle): static
+    {
+        if ($this->patientMutuelles->removeElement($patientMutuelle)) {
+            if ($patientMutuelle->getMutuelle() === $this) {
+                $patientMutuelle->setMutuelle(null);
+            }
+        }
+
+        return $this;
+    }
 }

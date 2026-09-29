@@ -14,7 +14,9 @@ class MutuelleType extends AbstractType
         $builder
             ->add('nom_mutuelle')
             ->add('contact_mutuelle')
-            ->add('taux_remboursement')
+            ->add('code_amc', null, [
+                'label' => 'Code AMC (Identification Nationale)'
+            ])
         ;
     }
 

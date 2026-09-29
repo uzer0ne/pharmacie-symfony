@@ -56,6 +56,47 @@ class PatientController extends AbstractController
         ]);  
          
     }
+    #[Route('/{idPatient}/mutuelle/add', name: 'app_patient_add_mutuelle', methods: ['GET', 'POST'])]
+    public function addMutuelle(
+        #[MapEntity(mapping: ['idPatient' => 'idPatient'])] Patient $patient, 
+        Request $request, 
+        EntityManagerInterface $entityManager
+    ): Response {
+        $patientMutuelle = new \App\Entity\PatientMutuelle();
+        $patientMutuelle->setPatient($patient);
+
+        $form = $this->createForm(\App\Form\PatientMutuelleType::class, $patientMutuelle);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->persist($patientMutuelle);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'La carte mutuelle a été ajoutée au dossier du patient.');
+            return $this->redirectToRoute('app_patient_show', ['idPatient' => $patient->getIdPatient()]);
+        }
+
+        return $this->render('patient/add_mutuelle.html.twig', [
+            'patient' => $patient,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/{idPatient}/mutuelle/{id}/toggle', name: 'app_patient_toggle_mutuelle', methods: ['POST'])]
+    public function toggleMutuelle(
+        #[MapEntity(mapping: ['idPatient' => 'idPatient'])] Patient $patient,
+        \App\Entity\PatientMutuelle $patientMutuelle,
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): Response {
+        if ($this->isCsrfTokenValid('toggle_mutuelle_' . $patientMutuelle->getId(), $request->request->get('_token'))) {
+            $patientMutuelle->setActif(!$patientMutuelle->isActif());
+            $entityManager->flush();
+            $status = $patientMutuelle->isActif() ? 'activé' : 'désactivé';
+            $this->addFlash('info', 'Contrat mutuelle ' . $status . ' avec succès.');
+        }
+        return $this->redirectToRoute('app_patient_show', ['idPatient' => $patient->getIdPatient()]);
+    }
 
    #[Route('/{idPatient}', name: 'app_patient_show', methods: ['GET'])]
     public function show(#[MapEntity(mapping: ['idPatient' => 'idPatient'])] Patient $patient): Response

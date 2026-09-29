@@ -1,0 +1,69 @@
+{% extends 'base.html.twig' %}
+{% block title %}Historique des clôtures{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 fw-bold text-dark mb-0">
+        <i class="bi bi-clock-history text-primary me-2"></i> Historique des Tickets Z
+    </h1>
+    <a href="{{ path('app_caisse_index') }}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i> Retour aux postes
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        {% if clotures is empty %}
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-receipt fs-1 opacity-25 d-block mb-3"></i>
+                Aucune clôture enregistrée.
+            </div>
+        {% else %}
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="px-4">Session</th>
+                    <th>Poste</th>
+                    <th>Ouverture</th>
+                    <th>Clôture</th>
+                    <th>Employé</th>
+                    <th class="text-end">Th. Espèces</th>
+                    <th class="text-end">Compté</th>
+                    <th class="text-end px-4">Écart</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cloture in clotures %}
+                {% set ecart = cloture.ecartCaisse %}
+                <tr>
+                    <td class="px-4">
+                        <a href="{{ path('app_caisse_ticket_z', {id: cloture.id}) }}"
+                           class="badge bg-primary text-decoration-none">#{{ cloture.session.id }}</a>
+                    </td>
+                    <td class="fw-medium">{{ cloture.session.poste.nomPoste }}</td>
+                    <td class="text-muted small">{{ cloture.session.dateOuverture|date('d/m H:i') }}</td>
+                    <td class="text-muted small">{{ cloture.dateCloture|date('d/m H:i') }}</td>
+                    <td class="small">{{ cloture.userCloture.prenom|first|upper }}. {{ cloture.userCloture.nom }}</td>
+                    <td class="text-end">{{ cloture.montantTheoriqueEspeces|number_format(2, ',', ' ') }} €</td>
+                    <td class="text-end">{{ cloture.montantSaisiEspeces|number_format(2, ',', ' ') }} €</td>
+                    <td class="text-end px-4 fw-bold
+                        {% if ecart == 0 %}text-success
+                        {% elseif ecart > 0 %}text-info
+                        {% else %}text-warning{% endif %}">
+                        {% if ecart > 0 %}+{% endif %}{{ ecart|number_format(2, ',', ' ') }} €
+                    </td>
+                    <td>
+                        <a href="{{ path('app_caisse_ticket_z', {id: cloture.id}) }}"
+                           class="btn btn-sm btn-outline-secondary" title="Voir le Ticket Z">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

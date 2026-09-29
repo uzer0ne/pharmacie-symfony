@@ -1,0 +1,114 @@
+{% extends 'base.html.twig' %}
+{% block title %}Gestion Caisse{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 fw-bold text-dark mb-1">
+            <i class="bi bi-cash-coin text-success me-2"></i> Gestion de Caisse
+        </h1>
+        <p class="text-muted mb-0">Sélectionnez un poste pour ouvrir ou consulter une session.</p>
+    </div>
+    {% if is_granted('ROLE_PHARMACIEN') %}
+    <a href="{{ path('app_caisse_poste_new') }}" class="btn btn-outline-primary">
+        <i class="bi bi-plus-circle me-1"></i> Nouveau poste
+    </a>
+    {% endif %}
+</div>
+
+{% for flash_type, flash_messages in app.flashes %}
+    {% for msg in flash_messages %}
+        <div class="alert alert-{{ flash_type }} alert-dismissible fade show" role="alert">
+            {{ msg }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+{% endfor %}
+
+{% if postes is empty %}
+<div class="card border-0 shadow-sm">
+    <div class="card-body text-center py-5 text-muted">
+        <i class="bi bi-cash-coin fs-1 opacity-25 d-block mb-3"></i>
+        <p class="mb-0">Aucun poste de caisse configuré.</p>
+        {% if is_granted('ROLE_PHARMACIEN') %}
+            <a href="{{ path('app_caisse_poste_new') }}" class="btn btn-primary mt-3">Créer le premier poste</a>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<div class="row g-4">
+    {% for poste in postes %}
+        {% set sessionEnCours = sessions_ouvertes[poste.id] %}
+        <div class="col-md-6 col-xl-4">
+            <div class="card border-0 shadow-sm h-100 {% if sessionEnCours %}border-start border-4 border-success{% else %}border-start border-4 border-secondary{% endif %}">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h5 class="fw-bold mb-1">{{ poste.nomPoste }}</h5>
+                            {% if sessionEnCours %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-circle-fill me-1" style="font-size:0.5rem;"></i> Ouverte
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary">
+                                    <i class="bi bi-circle me-1" style="font-size:0.5rem;"></i> Fermée
+                                </span>
+                            {% endif %}
+                        </div>
+                        <div class="bg-light rounded p-2">
+                            <i class="bi bi-cash-coin fs-4 text-secondary"></i>
+                        </div>
+                    </div>
+
+                    {% if sessionEnCours %}
+                        <div class="small text-muted mb-1">
+                            <i class="bi bi-person me-1"></i>
+                            {{ sessionEnCours.userOuverture.prenom }} {{ sessionEnCours.userOuverture.nom }}
+                        </div>
+                        <div class="small text-muted mb-1">
+                            <i class="bi bi-clock me-1"></i>
+                            Ouverte le {{ sessionEnCours.dateOuverture|date('d/m/Y à H:i') }}
+                        </div>
+                        <div class="small text-success fw-bold mb-3">
+                            <i class="bi bi-wallet2 me-1"></i>
+                            Fond : {{ sessionEnCours.fondDeCaisse|number_format(2, ',', ' ') }} €
+                            &mdash; {{ sessionEnCours.ventes|length }} vente(s)
+                        </div>
+                        <div class="d-flex flex-column gap-2 mt-3">
+                            <a href="{{ path('app_caisse_assigner', {id: sessionEnCours.id}) }}"
+                               class="btn btn-primary btn-sm w-100 fw-bold">
+                                <i class="bi bi-shop me-1"></i> Vendre sur ce poste
+                            </a>
+                            <div class="d-flex gap-2">
+                                <a href="{{ path('app_caisse_session', {id: sessionEnCours.id}) }}"
+                                   class="btn btn-outline-secondary btn-sm flex-grow-1">
+                                    <i class="bi bi-eye me-1"></i> Consulter
+                                </a>
+                                <a href="{{ path('app_caisse_cloturer', {id: sessionEnCours.id}) }}"
+                                   class="btn btn-outline-danger btn-sm">
+                                    <i class="bi bi-x-circle me-1"></i> Clôturer
+                                </a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <p class="text-muted small mb-3">Aucune session active sur ce poste.</p>
+                        <a href="{{ path('app_caisse_ouvrir', {id: poste.id}) }}"
+                           class="btn btn-primary btn-sm w-100">
+                            <i class="bi bi-unlock me-1"></i> Ouvrir la caisse
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if is_granted('ROLE_GESTIONNAIRE_STOCK') %}
+<div class="mt-4 text-end">
+    <a href="{{ path('app_caisse_historique') }}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-clock-history me-1"></i> Historique des clôtures
+    </a>
+</div>
+{% endif %}
+{% endblock %}
