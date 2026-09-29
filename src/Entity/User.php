@@ -42,6 +42,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $qualification = null; // TITULAIRE, ADJOINT, PREPARATEUR, ETUDIANT, RAYONNISTE
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $tempsTravailHebdo = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $numeroRpps = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -154,5 +163,38 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function eraseCredentials(): void
     {
         // @deprecated, to be removed when upgrading to Symfony 8
+    }
+
+    public function getQualification(): ?string
+    {
+        return $this->qualification;
+    }
+
+    public function setQualification(?string $qualification): static
+    {
+        $this->qualification = $qualification;
+        return $this;
+    }
+
+    public function getTempsTravailHebdo(): ?float
+    {
+        return $this->tempsTravailHebdo;
+    }
+
+    public function setTempsTravailHebdo(?float $tempsTravailHebdo): static
+    {
+        $this->tempsTravailHebdo = $tempsTravailHebdo;
+        return $this;
+    }
+
+    public function getNumeroRpps(): ?string
+    {
+        return $this->numeroRpps;
+    }
+
+    public function setNumeroRpps(?string $numeroRpps): static
+    {
+        $this->numeroRpps = $numeroRpps;
+        return $this;
     }
 }

@@ -78,7 +78,11 @@ security:
         - { path: ^/medecin, roles: ROLE_CAISSIER }
 
 
-        # 5. Dashboard et tout le reste : Pharmacien
+        # 5. Planning
+        - { path: ^/planning, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/planning, roles: IS_AUTHENTICATED_FULLY }
+
+        # 6. Dashboard et tout le reste : Pharmacien
         - { path: ^/, roles: ROLE_PHARMACIEN }
 
 when@test:

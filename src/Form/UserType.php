@@ -28,7 +28,7 @@ class UserType extends AbstractType
                 'label' => 'Adresse email'
             ])
             ->add('roles', ChoiceType::class, [
-                'label' => 'Rôle (Profil)',
+                'label' => 'Rôle système (Droits)',
                 'choices' => [
                     'Pharmacien (Accès Total)' => 'ROLE_PHARMACIEN',
                     'Logisticien (Gestion Stock)' => 'ROLE_GESTIONNAIRE_STOCK',
@@ -36,6 +36,28 @@ class UserType extends AbstractType
                 ],
                 'multiple' => true,
                 'expanded' => true,
+            ])
+            ->add('qualification', ChoiceType::class, [
+                'label' => 'Qualification (Planning)',
+                'choices' => [
+                    'Pharmacien Titulaire' => 'TITULAIRE',
+                    'Pharmacien Adjoint' => 'ADJOINT',
+                    'Préparateur en pharmacie' => 'PREPARATEUR',
+                    'Étudiant en pharmacie' => 'ETUDIANT',
+                    'Logisticien' => 'LOGISTICIEN',
+                    'Vendeur' => 'VENDEUR',
+                ],
+                'placeholder' => 'Choisir une qualification',
+                'required' => false,
+            ])
+            ->add('tempsTravailHebdo', \Symfony\Component\Form\Extension\Core\Type\NumberType::class, [
+                'label' => 'Temps de travail hebdo (Heures)',
+                'required' => false,
+                'attr' => ['placeholder' => 'ex: 35']
+            ])
+            ->add('numeroRpps', TextType::class, [
+                'label' => 'Numéro RPPS (Pharmaciens)',
+                'required' => false,
             ])
             ->add('plainPassword', PasswordType::class, [
                 'label' => 'Mot de passe',

@@ -134,6 +134,16 @@
             </li>
             {% endif %}
 
+            
+            <li class="nav-item border-top border-secondary pt-2 mt-2">
+                <a class="nav-link {% if app.request.get('_route') starts with 'app_planning' %}active{% endif %}"
+                   href="{{ path('app_planning_index') }}"
+                   data-action="click->sidebar#closeOnMobile">
+                    <i class="bi bi-calendar-week me-2 text-primary"></i> Planning 
+                </a>
+            </li>
+            
+
             {% if is_granted('ROLE_CAISSIER') %}
             <li class="nav-item sidebar-dropdown">
                 <a class="nav-link d-flex align-items-center {% if app.request.get('_route') starts with 'app_ordonnance' %}active{% endif %}" href="#" style="cursor: default;">
@@ -211,3 +221,4 @@
 
 {# Overlay transparent pour fermer la sidebar sur mobile #}
 <div id="sidebarBackdrop" class="sidebar-backdrop" data-action="click->sidebar#close"></div>
+

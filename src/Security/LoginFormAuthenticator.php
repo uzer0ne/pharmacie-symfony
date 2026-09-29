@@ -56,7 +56,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 
         if (in_array('ROLE_GESTIONNAIRE_STOCK', $roles, true)) {
             $this->removeTargetPath($request->getSession(), $firewallName);
-            return new RedirectResponse($this->urlGenerator->generate('app_stock_reapprovisionnement'));
+            return new RedirectResponse($this->urlGenerator->generate('app_reassort_index'));
         }
 
         // Pour les rôles PHARMACIEN / ADMIN : on respecte le target path

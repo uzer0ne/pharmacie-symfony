@@ -152,34 +152,21 @@
 
                 {# A_VALIDER → Valider (pharmacien uniquement) #}
                 {% elseif s == 'A_VALIDER' %}
-                    {% if is_granted('ROLE_PHARMACIEN') %}
-                        <form action="{{ path('app_reassort_valider', {id: commande.id}) }}" method="POST">
+                    <form action="{{ path('app_reassort_valider', {id: commande.id}) }}" method="POST">
                             <input type="hidden" name="_token" value="{{ csrf_token('valider_' ~ commande.id) }}">
                             <button type="submit" class="btn btn-primary w-100 fw-bold">
                                 <i class="bi bi-check2-circle me-2"></i> Valider la commande
                             </button>
                         </form>
-                    {% else %}
-                        <div class="alert alert-info py-2 mb-0 text-center small">
-                            <i class="bi bi-hourglass-split me-1"></i>
-                            En attente de validation par le pharmacien titulaire.
-                        </div>
-                    {% endif %}
 
                 {# VALIDEE → Envoyer (pharmacien uniquement) #}
                 {% elseif s == 'VALIDEE' %}
-                    {% if is_granted('ROLE_PHARMACIEN') %}
-                        <form action="{{ path('app_reassort_envoyer', {id: commande.id}) }}" method="POST">
+                    <form action="{{ path('app_reassort_envoyer', {id: commande.id}) }}" method="POST">
                             <input type="hidden" name="_token" value="{{ csrf_token('envoyer_commande_' ~ commande.id) }}">
                             <button type="submit" class="btn btn-warning w-100 fw-bold">
                                 <i class="bi bi-send-fill me-2"></i> Envoyer au grossiste-répartiteur
                             </button>
                         </form>
-                    {% else %}
-                        <div class="alert alert-success py-2 mb-0 text-center small">
-                            <i class="bi bi-check2-circle me-1"></i> Validée — en attente d'envoi par le pharmacien.
-                        </div>
-                    {% endif %}
 
                 {# ENVOYEE → Réceptionner (gestionnaire) #}
                 {% elseif s == 'ENVOYEE' %}

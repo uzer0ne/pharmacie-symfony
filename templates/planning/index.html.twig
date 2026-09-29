@@ -1,0 +1,337 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Planning de l'officine{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <!-- FullCalendar Scheduler CSS/JS via CDN (requis pour la vue avec ressources/équipe) -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@6.1.15/index.global.min.js'></script>
+    <style>
+        .fc-timeline-slot, .fc-timegrid-slot { height: 2.5em !important; }
+        .external-events { padding: 10px; border: 1px solid #ccc; background: #eee; }
+        .external-event { 
+            margin: 10px 0; 
+            padding: 5px; 
+            cursor: pointer; 
+            border-radius: 3px; 
+            color: #212529 !important; /* Force text dark for readability */
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <h1 class="h3"><i class="bi bi-calendar-week"></i> Planning </h1>
+            <div>
+            {% if is_granted('ROLE_PHARMACIEN') %}
+            <button class="btn btn-warning shadow-sm" id="btn-valider">
+                    <i class="bi bi-shield-check"></i> Vérifier la conformité
+                </button>
+            <button class="btn btn-primary shadow-sm ms-2" id="btn-publier">
+                    <i class="bi bi-check2-circle"></i> Publier
+                </button>
+            {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Zone des alertes de validation -->
+    <div id="validation-alerts" class="mb-3"></div>
+
+    <div class="row">
+        <!-- ... code existant conservé pour la structure ... -->
+        {% if is_granted('ROLE_PHARMACIEN') %}
+        <div class="col-md-2">
+            <div id='external-events' class="card shadow-sm p-3">
+                <p><strong><i class="bi bi-arrows-move"></i> Glisser pour assigner</strong></p>
+                <div class='fc-event external-event bg-light border-secondary mb-2' data-type="COMPTOIR">
+                    <div class='fc-event-main' style="color: #212529 !important;"><i class="bi bi-shop"></i> Comptoir</div>
+                </div>
+                <div class='fc-event external-event bg-light border-secondary mb-2' data-type="BACK_OFFICE">
+                    <div class='fc-event-main' style="color: #212529 !important;"><i class="bi bi-box"></i> Back-Office</div>
+                </div>
+                <div class='fc-event external-event bg-light border-secondary mb-2' data-type="GARDE_JOURNEE">
+                    <div class='fc-event-main' style="color: #212529 !important;"><i class="bi bi-sun"></i> Garde (Jour)</div>
+                </div>
+                <div class='fc-event external-event bg-light border-secondary mb-2' data-type="GARDE_NUIT">
+                    <div class='fc-event-main' style="color: #212529 !important;"><i class="bi bi-moon-stars"></i> Garde (Nuit)</div>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm p-3 mt-3">
+                <h6>Équipe :</h6>
+                <ul id="team-list" class="list-unstyled mb-0 small">
+                    <!-- Rempli par AJAX -->
+                </ul>
+            </div>
+        </div>
+        
+        {% else %}
+        <div class="col-md-12">
+        {% endif %}
+        <div class="col-md-10">
+            <div class="card shadow-sm">
+                <div class="card-body p-1">
+                    <div id='calendar'></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de gestion d'un créneau -->
+<div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="eventModalLabel">Gestion du créneau</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p id="eventModalDetails" class="mb-3"></p>
+        <input type="hidden" id="eventModalId">
+      </div>
+      <div class="modal-footer d-flex justify-content-between">
+        {% if is_granted('ROLE_PHARMACIEN') %}
+        <button type="button" class="btn btn-outline-danger" id="btn-delete-event"><i class="bi bi-trash"></i> Supprimer</button>
+        {% endif %}
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Déplacer la modale à la racine du body pour éviter les bugs de superposition (z-index)
+    document.body.appendChild(document.getElementById('eventModal'));
+
+    var calendarEl = document.getElementById('calendar');
+    {% if is_granted('ROLE_PHARMACIEN') %}
+    var containerEl = document.getElementById('external-events');
+
+    // Init draggable
+    new FullCalendar.Draggable(containerEl, {
+        itemSelector: '.external-event',
+        eventData: function(eventEl) {
+            return {
+                title: eventEl.getAttribute('data-type')
+            };
+        }
+    });
+    {% endif %}
+
+    // Load resources (users)
+    fetch('/api/planning/resources')
+        .then(response => response.json())
+        .then(resources => {
+            
+            // Populate team list
+            {% if is_granted('ROLE_PHARMACIEN') %}
+            const teamUl = document.getElementById('team-list');
+            resources.forEach(r => {
+                teamUl.innerHTML += `<li><i class="bi bi-person-fill text-secondary"></i> ${r.title} <br><span class="text-muted" style="font-size:0.75rem">${r.qualification}</span></li>`;
+            });
+            {% endif %}
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                schedulerLicenseKey: 'CC-BY-NC-ND',
+                timeZone: 'Europe/Paris',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'resourceTimelineWeek,resourceTimeGridDay,timeGridWeek'
+                },
+                buttonText: {
+                    resourceTimelineWeek: 'Planning',
+                    resourceTimeGridDay: 'Journée',
+                    timeGridWeek: 'Semaine (Global)'
+                },
+                initialView: 'resourceTimelineWeek',
+                locale: 'fr',
+                slotMinTime: '07:00:00',
+                slotMaxTime: '21:00:00',
+                slotDuration: '01:00:00',
+                resourceAreaWidth: '150px',
+                resourceAreaHeaderContent: 'Collaborateurs',
+                editable: {{ is_granted('ROLE_PHARMACIEN') ? 'true' : 'false' }},
+                droppable: {{ is_granted('ROLE_PHARMACIEN') ? 'true' : 'false' }}, // this allows things to be dropped onto the calendar
+                resources: resources,
+                events: function(info, successCallback, failureCallback) {
+                    fetch(`/api/planning?start=${info.startStr}&end=${info.endStr}`)
+                        .then(r => r.json())
+                        .then(events => successCallback(events));
+                },
+                
+                // Evènement déplacé (Drag & drop d'un élément existant)
+                eventDrop: function(info) {
+                    updateCreneau(info.event);
+                },
+                // Evènement redimensionné (tirer le bas)
+                eventResize: function(info) {
+                    updateCreneau(info.event);
+                },
+                // Nouvel évènement lâché (depuis le panneau de gauche)
+                eventReceive: function(info) {
+                    let event = info.event;
+                    
+                    if (!event.getResources().length) {
+                        alert("Veuillez glisser l'évènement sur la colonne d'un employé.");
+                        info.revert();
+                        return;
+                    }
+                    
+                    fetch('/api/planning/creneau', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            resourceId: event.getResources()[0].id,
+                            start: event.startStr,
+                            end: event.endStr,
+                            title: event.title
+                        })
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if(data.id) {
+                            // On retire l'événement temporaire bleu créé par le Drag&Drop
+                            event.remove();
+                            // On rafraîchit pour afficher l'événement officiel venant de la BDD (Gris avec le Prénom)
+                            calendar.refetchEvents();
+                        }
+                    });
+                },
+                // Ouverture de la modale au clic
+                eventClick: function(info) {
+                    const modal = new bootstrap.Modal(document.getElementById('eventModal'));
+                    document.getElementById('eventModalId').value = info.event.id;
+                    
+                    const startStr = calendar.formatDate(info.event.start, { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' });
+                    const endStr = info.event.end ? calendar.formatDate(info.event.end, { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' }) : '';
+                    
+                    document.getElementById('eventModalDetails').innerHTML = `
+                        <strong>Tâche :</strong> ${info.event.title}<br>
+                        <strong>Horaire :</strong> ${startStr} - ${endStr}
+                    `;
+                    modal.show();
+                    
+                    // Gestion de la suppression depuis la modale
+                    const btnDelete = document.getElementById('btn-delete-event');
+                    if (btnDelete) {
+                        btnDelete.onclick = function() {
+                            const eventId = document.getElementById('eventModalId').value;
+                            if(eventId === info.event.id) {
+                                fetch('/api/planning/creneau/' + eventId, {
+                                    method: 'DELETE'
+                                }).then(() => {
+                                    info.event.remove();
+                                    modal.hide();
+                                });
+                            }
+                        };
+                    }
+                }
+            });
+
+            calendar.render();
+
+            // Bouton de validation
+            document.getElementById('btn-valider').addEventListener('click', function() {
+                const start = calendar.view.activeStart.toISOString();
+                const end = calendar.view.activeEnd.toISOString();
+
+                fetch('/api/planning/valider-semaine', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({start, end})
+                })
+                .then(r => r.json())
+                .then(result => {
+                    const alertDiv = document.getElementById('validation-alerts');
+                    alertDiv.innerHTML = '';
+                    
+                    if (result.erreurs.length === 0 && result.avertissements.length === 0) {
+                        alertDiv.innerHTML = `<div class="alert alert-success"><i class="bi bi-check-circle"></i> Le planning est conforme à la législation et à la convention collective !</div>`;
+                        return;
+                    }
+
+                    if (result.erreurs.length > 0) {
+                        let html = '<div class="alert alert-danger mb-2"><strong><i class="bi bi-exclamation-triangle"></i> Erreurs bloquantes :</strong><ul>';
+                        result.erreurs.forEach(e => html += `<li>${e}</li>`);
+                        html += '</ul></div>';
+                        alertDiv.innerHTML += html;
+                    }
+
+                    if (result.avertissements.length > 0) {
+                        let html = '<div class="alert alert-warning"><strong><i class="bi bi-info-circle"></i> Avertissements :</strong><ul>';
+                        result.avertissements.forEach(a => html += `<li>${a}</li>`);
+                        html += '</ul></div>';
+                        alertDiv.innerHTML += html;
+                    }
+                });
+            });
+
+            // Bouton de publication
+            document.getElementById('btn-publier').addEventListener('click', function() {
+                if(!confirm("Voulez-vous publier la semaine ? Les collaborateurs seront notifiés.")) return;
+                
+                const start = calendar.view.activeStart.toISOString();
+                const end = calendar.view.activeEnd.toISOString();
+
+                fetch('/api/planning/publier-semaine', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({start, end})
+                })
+                .then(r => r.json())
+                .then(result => {
+                    alert('Planning publié avec succès !');
+                    calendar.refetchEvents();
+                });
+            });
+        });
+
+    function updateCreneau(event) {
+        fetch('/api/planning/creneau/' + event.id, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                start: event.startStr,
+                end: event.endStr,
+                resourceId: event.getResources()[0]?.id
+            })
+        });
+    }
+});
+
+// Implémentation du Drag-to-Scroll (déplacement horizontal à la souris)
+document.addEventListener('mousedown', function(e) {
+    // Si l'utilisateur clique sur le fond du calendrier (scroller)
+    const scroller = e.target.closest('.fc-scroller');
+    if (!scroller || e.target.closest('.fc-event')) return; // Ne pas bloquer le drag d'événements
+    
+    let isDown = true;
+    let startX = e.pageX - scroller.offsetLeft;
+    let scrollLeft = scroller.scrollLeft;
+
+    const mouseMoveHandler = function(e) {
+        if(!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - scroller.offsetLeft;
+        const walk = (x - startX) * 1.5; // Vitesse de défilement
+        scroller.scrollLeft = scrollLeft - walk;
+    };
+
+    const mouseUpHandler = function() {
+        isDown = false;
+        document.removeEventListener('mousemove', mouseMoveHandler);
+        document.removeEventListener('mouseup', mouseUpHandler);
+    };
+
+    document.addEventListener('mousemove', mouseMoveHandler);
+    document.addEventListener('mouseup', mouseUpHandler);
+});
+</script>
+{% endblock %}
